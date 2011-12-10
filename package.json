@@ -1,0 +1,8 @@
+{
+  "name": "newleafdigital-apps-hq",
+  "version": "0.0.1",
+  "author": "Ben Buckman - NewLeafDigital.com",
+  "dependencies": {
+  },
+  "engine": "node 0.6.5"
+}
