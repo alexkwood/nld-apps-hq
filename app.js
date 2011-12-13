@@ -1,10 +1,10 @@
 
 var express = require('express')
   , routes = require('./routes')
+  , mongooseAuth = require('mongoose-auth'),
   , everyauth = require('everyauth')
-   // NOT using mongoose-auth yet, try to simplify
   , util = require('util')
-  , Seq = require('seq')
+  //, Seq = require('seq')
   ;
 
 var app = module.exports = express.createServer();
@@ -24,9 +24,9 @@ app.configure(function(){
 // (we need the db for the session store)
 var db = require('./lib/db')(app)  // global connection
   , MongoStore = require('connect-mongodb')
-  , sessionStore = new MongoStore({db: db.connection.db, reapInterval: 3000, collection: 'sessions'})  
+  , sessionStore = new MongoStore({db: db.connection.db, reapInterval: 3000, /* collection: 'sessions'*/ })  
   ;
-console.log('db:', db);
+//console.log('db:', db);
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -46,11 +46,13 @@ app.configure(function(){
   app.use(app.router);
 
   // this fills in the routes for each auth...? (should run after app.router)
-  app.use(everyauth.middleware());  
+  //app.use(everyauth.middleware()); 
+  app.use(mongooseAuth.middleware());  // wraps everyauth middleware
 
   app.use(express.static(__dirname + '/public'));
 
-  everyauth.helpExpress(app);
+  //everyauth.helpExpress(app);
+  mongooseAuth.helpExpress(app);
 });
 
 app.configure('development', function(){
@@ -65,81 +67,124 @@ app.configure('production', function(){
 
 // load users after DB connection
 // what's the right way to export the model and helpers?
-var Users = require('./models/users')
-  , User = Users.User    // ???
-  , LoginTokens = require('./models/logintoken')
-  , LoginToken = LoginTokens.LoginToken
+var UserSchema = require('./models/users').UserSchema
+  //, User = Users.User    // ???
+  , LoginTokenSchema = require('./models/logintoken').LoginTokenSchema
+  //, LoginToken = LoginTokens.LoginToken
+  , LoginToken = mongoose.model('LoginToken')
   ;
+
+
 
 
 // db test
-Users.findUser({}, function(err, users) { if (err) throw(err); console.log('users from Db:', users); });
+//Users.findUser({}, function(err, users) { if (err) throw(err); console.log('users from Db:', users); });
 
 
 // EVERYAUTH
-// note: could also plug mongoose-auth layer in here, but not doing that yet
-//
+// wrapping all this in mongoose-auth plugins
+
 // show all configurable options
 //console.log('all fb options:', everyauth.facebook.configurable());
 
-everyauth.facebook
-  .appId( app.set('fbAppId') )
-  .appSecret( app.set('fbAppSecret') )
-  .scope('email')  // ?
+UserSchema.plugin(mongooseAuth, {
+  everymodule: {
+    everyauth: {
+      User:function () { return User; }  // not sure what this is for
+    }
+  },
   
-  //.handleAuthCallbackError( function (req, res) {})
+  facebook: {
+    everyauth: {
 
-  // this runs w/existing session or w/oauth popup
-  .findOrCreateUser( function (session, accessToken, accessTokExtra, fbUser) {
-    console.log("findOrCreateUser:", util.inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser}));
+      // [refactoring all this as keys in everyauth obj, rather than chained functions]
+      //
+      appId: app.set('fbAppId'),
+      appSecret: app.set('fbAppSecret'),
+      scope: 'email',  // ?
+      
+      //handleAuthCallbackError: function (req, res) {},
 
-    var promise = this.Promise();
+      // this runs w/existing session or w/oauth popup
+      findOrCreateUser: function (session, accessToken, accessTokExtra, fbUser) {
+        console.log("findOrCreateUser:", 
+          util.inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser})
+        );
 
-    // NONE OF THIS IS RUNNING!!
+        var promise = this.Promise()
+          , User = this.User()();  // ???
 
-    // find a user matching returned metadata
-    // this function expects a PROMISE returned
-    Users.findUser({ method: 'facebook', remoteUserId: fbUser.id }, function(err, user) {
-      console.log('results of finding user:', err, user);
+        console.log('weird User obj: ', User);
 
-      if (err) return promise.fail(err);
+        User.where('fb.email', fbUser.email).findOne(function (err, user) {
+          if (!user) {
+            console.log('no match on fb.email to %s', fbUser.email);
+            User.findOne({'fb.id': fbUser.id}, function (err, foundUser) {
+              if (foundUser) {
+                console.log('match on fb.id %s', fbUser.id);
+                return promise.fulfill(foundUser);
+              }
 
-      // user not yet in DB, create
-      if (user.length == 0) {
-        console.log('user not yet in DB');
-
-        var newUser = {
-          method: 'facebook',
-          remoteUserId: fbUser.id,
-          displayName: fbUser.name,
-          fbMeta: fbUser
-        };
-        Users.addUser(newUser, function(err, user) {
-          if (err) {
-            console.log("error adding user: ", err);
-            return promise.fail(err);
+              console.log("CREATING FB USER");
+              User.createWithFB(fbUser, accessTok, accessTokExtra.expires, function (err, createdUser) {
+                if (err) {
+                  console.log("ERROR creating fb User');
+                  return promise.fail(err);
+                }
+                
+                console.log('created user:', createdUser);
+                return promise.fulfill(createdUser);
+              });
+            });
           }
-          
-          console.log('added new user:', user);
-          return promise.fulfill(user);
+          // (matched by email)
+          else {
+            console.log('found user by email %s', fbUser.email);
+            console.dir(user);
+
+            assignFbDataToUser(user, accessTok, accessTokExtra, fbUser);
+            user.save(function (err, user) {
+              if (err) return promise.fail(err);
+              promise.fulfill(user);
+            });
+          }
         });
 
-      }
-      // user exists, return
-      else {
-        console.log('found user:', user);
-        return promise.fulfill(user);
-      }
-    });
+        return promise;
+      }, //findOrCreateUser
 
-    return promise;
-  })
-  .redirectPath('/')  // does this have to be an absolute url?
-  .entryPath('/auth/facebook')
-  .callbackPath('/auth/facebook/callback')
-  ;
+      redirectPath: '/',  // does this have to be an absolute url?
+      entryPath: '/auth/facebook',
+      callbackPath: '/auth/facebook/callback'
+
+    } //everyauth
+  } //facebook
+}); //mongooseAuth plugins
 
 
+function assignFbDataToUser(user, accessTok, accessTokExtra, fbUser) {
+  console.log('in assignFbDataToUser');
+
+  user.fb.accessToken = accessTok;
+  user.fb.expires = accessTokExtra.expires;
+  user.fb.id = fbUser.id;
+  user.fb.name.first = fbUser.first_name;
+  user.fb.name.last = fbUser.last_name;
+  user.fb.name.full = fbUser.name;
+  user.fb.alias = fbUser.link.match(/^http:\/\/www.facebook\.com\/(.+)/)[1];
+  user.fb.gender = fbUser.gender;
+  user.fb.email = fbUser.email;
+  user.fb.timezone = fbUser.timezone;
+  user.fb.locale = fbUser.locale;
+  user.fb.verified = fbUser.verified;
+  user.fb.updatedTime = fbUser.updated_time;
+
+  console.log('assigned: ', user.fb);
+}
+
+
+// not needed anymore?
+/*
 everyauth.everymodule.findUserById( function(userId, callback) {
   console.log('attempting to findUserById: ', userId);
 
@@ -150,7 +195,14 @@ everyauth.everymodule.findUserById( function(userId, callback) {
     callback(null, user);
   });
 });
+*/
 
+
+// why is this 2 lines?
+// @todo consolidate if possible
+// @todo move this back to model? can .model() run before the plugins are added?
+mongoose.model('User', UserSchema);
+var User = mongoose.model('User');
 
 
 // route middleware to get current user

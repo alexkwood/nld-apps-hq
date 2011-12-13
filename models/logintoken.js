@@ -7,7 +7,7 @@ var mongoose = require('mongoose')
   ;
 
 
-var LoginToken = new Schema({
+var LoginTokenSchema = module.exports.LoginTokenSchema = new Schema({
   userid: { type: String, index: true },
   series: { type: String, index: true },
   token: { type: String, index: true }
@@ -35,4 +35,5 @@ LoginToken.virtual('cookieValue').get(function() {
   return JSON.stringify({ userid: this.userid, token: this.token, series: this.series });
 });
 
-module.exports.LoginToken = mongoose.model('LoginToken', LoginToken);
+// moved modeling to app.js
+//module.exports.LoginToken = mongoose.model('LoginToken', LoginToken);

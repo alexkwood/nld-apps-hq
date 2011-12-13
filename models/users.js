@@ -5,7 +5,8 @@ var mongoose = require('mongoose')
   , ObjectId = Schema.ObjectId
   ;
 
-var User  = new Schema({
+var UserSchema = module.exports.UserSchema = new Schema({
+  /*
   userId: ObjectId,
   remoteUserId: String,
   method: String,  // @todo restrict to known connect types ('facebook' for now)
@@ -13,22 +14,26 @@ var User  = new Schema({
   lastLogin: Date,
   displayName: String,
   fbMeta: {}   //Object  // ?
+  */
 });
 
 // wrap in modeling stuff
 // does the model itself need to be exported for anything?
-User = module.exports.User = mongoose.model('User', User);
-
+//var User = module.exports.User = mongoose.model('User', User);
+// moved mongoose.model() to app.js
 
 // impt: 'user.my' syntax from docs doesn't work anymore!
 
+/*
 module.exports.addUser = function(userObj, callback) {
   var user = new User(userObj);
   // run save() on individual user, not model User !
   user.save(callback);
 };
+*/
 
-
+/*
 module.exports.findUser = function(criteria, callback) {
   User.find(criteria, callback);
 };
+*/
