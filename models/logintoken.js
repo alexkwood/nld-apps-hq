@@ -35,4 +35,4 @@ LoginToken.virtual('cookieValue').get(function() {
   return JSON.stringify({ userid: this.userid, token: this.token, series: this.series });
 });
 
-LoginToken = exports.module.LoginToken = mongoose.model('LoginToken', LoginToken);
+module.exports.LoginToken = mongoose.model('LoginToken', LoginToken);

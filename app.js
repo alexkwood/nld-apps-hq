@@ -24,9 +24,9 @@ app.configure(function(){
 // (we need the db for the session store)
 var db = require('./lib/db')(app)  // global connection
   , MongoStore = require('connect-mongodb')
-  , sessionStore = new MongoStore({db: db, reapInterval: 3000, collection: 'sessions'})  
+  , sessionStore = new MongoStore({db: db.connection.db, reapInterval: 3000, collection: 'sessions'})  
   ;
-
+console.log('db:', db);
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -42,9 +42,12 @@ app.configure(function(){
     store: sessionStore
   }));
 
-  app.use(everyauth.middleware());  
 
   app.use(app.router);
+
+  // this fills in the routes for each auth...? (should run after app.router)
+  app.use(everyauth.middleware());  
+
   app.use(express.static(__dirname + '/public'));
 
   everyauth.helpExpress(app);
@@ -131,7 +134,10 @@ everyauth.facebook
 
     return promise;
   })
-  .redirectPath('/');  // does this have to be an absolute url?
+  .redirectPath('/')  // does this have to be an absolute url?
+  .entryPath('/auth/facebook')
+  .callbackPath('/auth/facebook/callback')
+  ;
 
 
 everyauth.everymodule.findUserById( function(userId, callback) {
@@ -149,23 +155,30 @@ everyauth.everymodule.findUserById( function(userId, callback) {
 
 // route middleware to get current user
 var loadUser = function(req, res, next) {
+  console.log('in loadUser');
+
   // user already in session?
   if (req.session.user_id) {
+    console.log('already in session');
     User.findById(req.session.user_id, function (err, user) {
       if (user) {
+        console.log('session/user found');
         req.currentUser = user;
         next();
       } 
       else {
+        console.log('not found, new');
         res.redirect('/new');
       }
-    )};
+    });
   }
   // coming back to new session w/ old token
   else if (req.cookies.logintoken) {
+    console.log('old token, need auth');
     authenticateFromLoginToken(req, res, next);
   }
   else {
+    console.log('no session, new');
     res.redirect('/new');
   }
 };
@@ -238,6 +251,7 @@ app.get('/bye', loadUser, function (req, res) {
   }
   res.redirect('/new');
 });
+
 
 app.get('/auth', function (req, res) {
   console.log('at /auth');
