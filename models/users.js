@@ -17,7 +17,7 @@ var User  = new Schema({
 
 // wrap in modeling stuff
 // does the model itself need to be exported for anything?
-var User = module.exports.User = mongoose.model('User', User);
+User = module.exports.User = mongoose.model('User', User);
 
 
 // impt: 'user.my' syntax from docs doesn't work anymore!

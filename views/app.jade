@@ -1,6 +1,7 @@
 h1= title
 p Welcome to #{title}
 
+h3 Original
 - if (everyauth.loggedIn)
   div#welcome Hello #{everyauth.user.displayName}
   a(href="/logout") logout
@@ -8,4 +9,9 @@ p Welcome to #{title}
 - else
   a(href="/auth/facebook") login with facebook
 
+
+h3 Facebook User Data
+p= JSON.stringify(fbUser)
+div
+  a(href='/bye') Logout
 
