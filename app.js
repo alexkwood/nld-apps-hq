@@ -1,7 +1,7 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , mongooseAuth = require('mongoose-auth'),
+  , mongooseAuth = require('mongoose-auth')
   , everyauth = require('everyauth')
   , util = require('util')
   //, Seq = require('seq')
@@ -128,7 +128,7 @@ UserSchema.plugin(mongooseAuth, {
               console.log("CREATING FB USER");
               User.createWithFB(fbUser, accessTok, accessTokExtra.expires, function (err, createdUser) {
                 if (err) {
-                  console.log("ERROR creating fb User');
+                  console.log('ERROR creating fb User');
                   return promise.fail(err);
                 }
                 
