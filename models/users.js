@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
-  , ObjectId = Schema.ObjectId
+  //, ObjectId = Schema.ObjectId
   ;
 
 var UserSchema = module.exports.UserSchema = new Schema({
@@ -15,6 +15,11 @@ var UserSchema = module.exports.UserSchema = new Schema({
   displayName: String,
   fbMeta: {}   //Object  // ?
   */
+
+  // demo has this
+  // @todo remove after confirming not necessary
+  role: {type: String, default: 'free'}
+
 });
 
 // wrap in modeling stuff

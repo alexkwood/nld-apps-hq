@@ -1,4 +1,6 @@
 // LoginToken model
+// ** SOMETHING IS WRONG HERE, NONE GETTING SAVED!!
+// IMPT: don't return a model, just the schema, let app.js wrap in model.
 
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
@@ -7,20 +9,21 @@ var mongoose = require('mongoose')
   ;
 
 
-var LoginTokenSchema = module.exports.LoginTokenSchema = new Schema({
+var LoginTokenSchema = new Schema({
   userid: { type: String, index: true },
   series: { type: String, index: true },
   token: { type: String, index: true }
 });
 
 
-LoginToken.method('randomToken', function() {
+LoginTokenSchema.method('randomToken', function() {
   var token = Math.round( (new Date().valueOf() * Math.random()) ).toString();
   console.log('random login token: ', token);
   return token;
 });
 
-LoginToken.pre('save', function(next) {
+LoginTokenSchema.pre('save', function(next) {
+  console.log('pre-saving a LoginToken', this);
   this.token = this.randomToken();
 
   if (this.isNew) this.series = this.randomToken();  // what is this for?
@@ -29,11 +32,16 @@ LoginToken.pre('save', function(next) {
 });
 
 // virtuals only exist in object, not saved to DB
-LoginToken.virtual('id').get(function() { return this._id.toHexString(); });
+LoginTokenSchema.virtual('id').get(function() {
+  console.log('requested virtual ID for LoginToken');
+  return this._id.toHexString();
+});
 
-LoginToken.virtual('cookieValue').get(function() {
+LoginTokenSchema.virtual('cookieValue').get(function() {
+  console.log('requested cookieValue from LoginToken');
   return JSON.stringify({ userid: this.userid, token: this.token, series: this.series });
 });
 
 // moved modeling to app.js
+module.exports.LoginTokenSchema = LoginTokenSchema;   // (does it matter if this is here or above?)
 //module.exports.LoginToken = mongoose.model('LoginToken', LoginToken);
