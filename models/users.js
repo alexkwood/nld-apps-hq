@@ -5,16 +5,9 @@ var mongoose = require('mongoose')
   //, ObjectId = Schema.ObjectId
   ;
 
+
+// leave bare, let MongooseAuth fill it in
 var UserSchema = module.exports.UserSchema = new Schema({
-  /*
-  userId: ObjectId,
-  remoteUserId: String,
-  method: String,  // @todo restrict to known connect types ('facebook' for now)
-  signupDate: { type: Date, default:Date.now },
-  lastLogin: Date,
-  displayName: String,
-  fbMeta: {}   //Object  // ?
-  */
 
   // demo has this
   // @todo remove after confirming not necessary

@@ -4,6 +4,8 @@
  * - refactor code to be cleaner
  * - remove cruft
  * 
+ * IMPT: once a user is logged in, if they de-authorize the app in FB, they're still logged in!
+ *  -- the whole LoginToken mess might have mitigated that, but not worth the complexity.
  */
 
 var express = require('express')
@@ -12,8 +14,7 @@ var express = require('express')
   , mongooseAuth = require('mongoose-auth')
   , everyauth = require('everyauth')
   , util = require('util')
-  //, Schema = mongoose.Schema  // necessary here?
-  , Seq = require('seq')
+  , Seq = require('seq')    // needed?
   , _ = require('underscore')
   ;
 
@@ -21,7 +22,8 @@ var app = module.exports = express.createServer();
 
 // configuration
 app.conf = require('./conf');
-console.log('conf:', app.conf);
+// console.log('conf:', app.conf);
+
 
 // (we need the db for the session store)
 var db = require('./lib/db')(app)  // global connection
@@ -96,13 +98,13 @@ UserSchema.plugin(mongooseAuth, {
         );
 
         var promise = this.Promise()
-          , User = this.User()();  // ???
+          , User = this.User()();  // convoluted way of getting the MODEL... simplify?
 
-        console.log('LEARN: this.User = ', this.User);
-        console.log('LEARN: this.User() = ', this.User());
-        console.log('LEARN: this.User()() = ', User);
+        // console.log('LEARN: this.User = ', this.User);
+        // console.log('LEARN: this.User() = ', this.User());
+        // console.log('LEARN: this.User()() = ', User);
 
-        console.log('Looking for user with fb.email %s', fbUser.email);
+        // console.log('Looking for user with fb.email %s', fbUser.email);
         
         // try to match email
         // == no reason for both of these!! ==
@@ -126,26 +128,48 @@ UserSchema.plugin(mongooseAuth, {
             console.log('no match on fb.email to %s', fbUser.email);
             */
             
+            console.log('Looking for user with fb.id %s', fbUser.id);
+            
             // try to match ID instead ..?    (@todo why are both of these necessary??)
-            User.findOne({'fb.id': fbUser.id}, function (err, foundUser) {
+            User.findOne({'fb.id': fbUser.id}, function (err, user) {
+              
+              // HOW DOES IT GET IN DB IN THE FIRST PLACE???
+              // ... saved somewhere by mongooseAuth ??
               
               // should be a complete user obj w/ all FB metadata
-              if (foundUser) {
-                console.log('match on fb.id %s', fbUser.id);
-                return promise.fulfill(foundUser);
+              if (user) {
+                console.log('user match on fb.id %s', user);
+                return promise.fulfill(user);
               }
 
               console.log("CREATING FB USER");
               
-              // [createWithFB() is a model 'static', part of mongoose-auth]
-              User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, createdUser) {
+              // createWithFB() is a model 'static', part of mongoose-auth
+              // but this doesn't SAVE anything to DB!
+              User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, user) {
                 if (err) {
                   console.log('ERROR creating fb User');
                   return promise.fail(err);
                 }
                 
-                console.log('created FB user:', createdUser);
-                promise.fulfill(createdUser);
+                console.log('created FB user:', user);
+                
+                // == not sure about this part ==
+                // save to DB. this adds onto existing record.
+                user.save(function (err, user) {
+                  if (err) {
+                    console.log("Error saving FB user to DB");
+                    return promise.fail(err);
+                  }
+                  console.log('saved FB user to DB', user);
+                  
+                  promise.fulfill(user);
+                  // (this goes on to addToSession(), which puts userId in req.session.auth.userId)
+                });
+                
+                // =====
+                
+                // promise.fulfill(user);
               });
             }); //findOne
 
@@ -155,7 +179,7 @@ UserSchema.plugin(mongooseAuth, {
         return promise;
       }, //findOrCreateUser
 
-      redirectPath: '/auth',  // extremely important! whole process breaks if this is wrong
+      redirectPath: '/app',     //'/auth',  // extremely important! whole process breaks if this is wrong
       entryPath: '/auth/facebook',
       callbackPath: '/auth/facebook/callback'
 
@@ -204,51 +228,17 @@ UserSchema.plugin(mongooseAuth, {
 // move this back to model? can .model() run before the plugins are added?
 // ... NO, once it's modeled it can't be modified! (see test-mongoose.js)
 var User = mongoose.model('User', UserSchema);
-console.log('modeled User');
 
 
 /*
 consolidating:
   - don't use cookies at all anymore
   - req.session.userId is the user ID  (formerly .user_id)
+    -- CORRECTION: use req.session.auth.userId -- already part of everyauth flow
   - req.user is the whole user obj
   - eliminate req.currentUser
 */
 
-// route middleware to get current user
-var loadUser = function(req, res, next) {
-  console.log('in loadUser');
-
-  // user already in session? (ID corresponds to DB record)
-  if (req.session.userId) {
-    console.log('userId already in session:', req.session.userId);
-    
-    // retrieve this user from DB
-    User.findById(req.session.userId, function (err, user) {
-      if (user) {
-        console.log('req.user before re-setting:', req.user);
-        // req.currentUser = user;
-        req.user = user;
-        console.log('user in session found in DB, set: ', req.user);
-        next();
-      }
-      else {
-        console.log('user in session not found, goto /new');
-        return res.redirect('/new');
-      }
-    });
-  }
-  // // coming back to new session w/ old token
-  // else if (!_.isEmpty(req.cookies.logintoken)) {
-  //   console.log('old token, need auth', req.cookies.logintoken);
-  //   authenticateFromLoginToken(req, res, next);
-  // }
-  else {
-    console.log('no user_id in session');
-    console.log('session:', req.session);
-    return res.redirect('/new');
-  }
-};
 
 
 /*
@@ -321,7 +311,7 @@ app.configure(function(){
   app.use(express.cookieParser());
 
   app.use(express.session({
-    secret: 'ab55e616a760d302',  // @todo put in config
+    secret: app.conf.sessionSecret,
     //cookie: {maxAge: 60000*60*24*30},   // 30 days?
     store: sessionStore
   }));
@@ -351,6 +341,73 @@ app.configure('production', function(){
 
 
 
+// route middleware to get current user.
+// simply load if available, don't require. (split to requireUser().)
+var loadUser = function(req, res, next) {
+  console.log('in loadUser, session:', req.session);
+
+  // user already in session? (ID corresponds to DB record)
+  // - tried to do a pause() here but failed. use simple var instead.
+  
+  var wait = false;
+  if (! _.isUndefined(req.session.auth)) {
+    if (! _.isUndefined(req.session.auth.userId)) {
+      if (! _.isEmpty(req.session.auth.userId)) {
+        wait = true;
+        console.log('userId already in session:', req.session.auth.userId);
+        
+        // retrieve this user from DB
+        User.findById(req.session.auth.userId, function (err, user) {
+          console.warn('findById callback. still paused?');
+          
+          if (user) {
+            console.log('req.user before re-setting:', req.user);
+            // req.currentUser = user;
+            req.user = user;
+            console.log('user in session found in DB, set to req.user: ', req.user);
+          }
+
+          next();
+          console.warn('resuming.');
+        });
+      }
+    }
+  }
+
+  // waiting for callback response?
+  if (! wait) {
+    console.log('user not in session, continue w/o req.user');
+    next();    
+  }
+  
+  // // coming back to new session w/ old token
+  // else if (!_.isEmpty(req.cookies.logintoken)) {
+  //   console.log('old token, need auth', req.cookies.logintoken);
+  //   authenticateFromLoginToken(req, res, next);
+  // }
+  // else {
+  //   console.log('no userId in session');
+  //   console.log('session:', req.session);
+  //   res.redirect('/new');
+  // }
+};
+
+
+// for pages that need login. split from loadUser(), run after.
+var requireUser = function(req, res, next) {
+  console.log('in requireUser');
+  
+  if (! _.isUndefined(req.user)) {
+    if (! _.isUndefined(req.user.id)) {
+      console.log('have user Id in req, continue');
+      next();
+    }
+  }
+  
+  console.log('no req.user.id found, go to /new');
+  // console.log('session:', req.session);
+  res.redirect('/new');
+};
 
 
 // Routes
@@ -359,11 +416,16 @@ app.configure('production', function(){
 // @todo refactor this back into sep routes files
 //app.get('/', loadUser, routes.index);
 
-app.get('/', loadUser, function (req, res) {
-  res.redirect('/auth');
+app.get('/', loadUser, requireUser, function (req, res) {
+  // console.log('at /, redirect to /auth');
+  // res.redirect('/auth');
+  
+  console.log('at /, redirect to /app');
+  res.redirect('/app');
 });
 
-app.get('/bye', loadUser, function (req, res) {
+
+app.get('/bye', loadUser, requireUser, function (req, res) {
   console.log('at /bye');
   if (req.session) {
     console.log('has session, removing');
@@ -375,7 +437,9 @@ app.get('/bye', loadUser, function (req, res) {
 });
 
 
-app.get('/auth', function (req, res) {
+
+// ELIMINATE THIS??
+app.get('/auth', loadUser, function (req, res) {
   console.log('at /auth');  //'. cookies? ', req.cookies);
 
   /*
@@ -431,7 +495,9 @@ app.get('/auth', function (req, res) {
 });
 
 
-app.get('/app', loadUser, function (req, res) {
+app.get('/app', loadUser, requireUser, function (req, res) {
+  console.log('at /app');
+  
   res.render('app', {
     title: 'New Leaf Digital Apps',
   });
@@ -439,7 +505,9 @@ app.get('/app', loadUser, function (req, res) {
 
 
 // what's the point of this path?
-app.get('/new', function (req, res) {
+app.get('/new', loadUser, function (req, res) {
+  console.log('at /new');
+  
   res.render('new', {
     title: 'New Leaf Digital Apps',
   });
@@ -468,4 +536,3 @@ if (!module.parent) {
   app.listen(80);
   console.log("Express server listening");  // on port %d in %s mode", app.address().port, app.settings.env);
 }
-
