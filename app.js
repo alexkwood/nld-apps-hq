@@ -20,7 +20,8 @@ var express = require('express')
 var app = module.exports = express.createServer();
 
 // configuration
-app.conf = require('conf');
+app.conf = require('./conf');
+console.log('conf:', app.conf);
 
 // (we need the db for the session store)
 var db = require('./lib/db')(app)  // global connection
