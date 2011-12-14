@@ -2,7 +2,6 @@
  * todo:
  * - boilerplate has nice GET output in console, do the same here
  * - refactor code to be cleaner
- * - remove cruft
  * 
  * IMPT: once a user is logged in, if they de-authorize the app in FB, they're still logged in!
  *  -- the whole LoginToken mess might have mitigated that, but not worth the complexity.
@@ -11,10 +10,9 @@
 var express = require('express')
   //, routes = require('./routes')
   , mongoose = require('mongoose')  // necessary here?
+  , Schema = mongoose.Schema
   , mongooseAuth = require('mongoose-auth')
   , everyauth = require('everyauth')
-  , util = require('util')
-  , Seq = require('seq')    // needed?
   , _ = require('underscore')
   ;
 
@@ -34,18 +32,12 @@ var db = require('./lib/db')(app)  // global connection
 
 
 // load schemas after DB connection
-var UserSchema = require('./models/users').UserSchema  // (filled out below before modeling)
 
-  // REMOVING LOGIN TOKENS
-  // , LoginTokenSchema = require('./models/logintoken').LoginTokenSchema
-  // , LoginToken = mongoose.model('LoginToken', LoginTokenSchema)
-  ;
+// leave bare, let MongooseAuth fill it in
+var UserSchema = module.exports.UserSchema = new Schema({});
 
+// == removed LoginToken ==
 
-// app.LoginToken = LoginToken;  // shouldn't be necessary, but was in demo
-
-// db test
-//Users.findUser({}, function(err, users) { if (err) throw(err); console.log('users from Db:', users); });
 
 
 // EVERYAUTH
@@ -71,115 +63,67 @@ UserSchema.plugin(mongooseAuth, {
       myHostname: app.conf.hostName,  // otherwise oauth doesn't work
       appId: app.conf.fbAppId,
       appSecret: app.conf.fbAppSecret,
-      scope: 'email',  // ?
+      scope: 'email',   // minimal
       
-      //handleAuthCallbackError: function (req, res) {},
-
-      // TMP - intercept
-      getSession: function (req, res) {
-        console.log('in overridden getSession. session: ', req.session);
-        return req.session;
-      },
-
-      // TMP - override to intercept
-      sendResponse: function (res) {
-        var redirectTo = this.redirectPath();
-        console.log('in override sendResponse. redirecting to %s', redirectTo);
-          if (!redirectTo) throw new Error('You must configure a redirectPath');
-        res.writeHead(303, {'Location': redirectTo});
-        res.end();
-      },
 
       // this runs w/existing session or w/oauth popup
       findOrCreateUser: function (session, accessToken, accessTokExtra, fbUser) {
 
-        console.log("findOrCreateUser:", 
-          util.inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser})
-        );
+        console.log("findOrCreateUser"); // , 
+        //   require('util').inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser})
+        // );
 
         var promise = this.Promise()
           , User = this.User()();  // convoluted way of getting the MODEL... simplify?
 
-        // console.log('LEARN: this.User = ', this.User);
-        // console.log('LEARN: this.User() = ', this.User());
-        // console.log('LEARN: this.User()() = ', User);
+        // == stripped email check, ID is enough ==
 
-        // console.log('Looking for user with fb.email %s', fbUser.email);
+        console.log('Looking for user with fb.id %s', fbUser.id);
         
-        // try to match email
-        // == no reason for both of these!! ==
-        /*User.where('fb.email', fbUser.email).findOne(function (err, user) {
+        // try to match ID instead ..?    (@todo why are both of these necessary??)
+        User.findOne({'fb.id': fbUser.id}, function (err, user) {
+          
+          // HOW DOES IT GET IN DB IN THE FIRST PLACE???
+          // ... saved somewhere by mongooseAuth ??
+          
+          // should be a complete user obj w/ all FB metadata
+          if (user) {
+            console.log('user match on fb.id %s', user);
+            return promise.fulfill(user);
+          }
 
-          if (user) {   // matched by email
-            console.log('found user by email %s', fbUser.email);
-            console.dir(user);
-
-            assignFbDataToUser(user, accessToken, accessTokExtra, fbUser);
+          console.log("CREATING FB USER");
+          
+          // createWithFB() is a model 'static', part of mongoose-auth
+          // but this doesn't SAVE anything to DB!
+          User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, user) {
+            if (err) {
+              console.log('ERROR creating fb User');
+              return promise.fail(err);
+            }
+            
+            console.log('created FB user:', user);
+            
+            // [ADDED]
+            // save to DB. this adds onto existing record.
             user.save(function (err, user) {
               if (err) {
-                console.log("Error saving FB user");
+                console.log("Error saving FB user to DB");
                 return promise.fail(err);
               }
-              console.log('saved FB user info', user);
+              console.log('saved FB user to DB', user);
+              
               promise.fulfill(user);
+              // (this goes on to addToSession(), which puts userId in req.session.auth.userId)
             });
-          }
-          else {  // no email match
-            console.log('no match on fb.email to %s', fbUser.email);
-            */
             
-            console.log('Looking for user with fb.id %s', fbUser.id);
-            
-            // try to match ID instead ..?    (@todo why are both of these necessary??)
-            User.findOne({'fb.id': fbUser.id}, function (err, user) {
-              
-              // HOW DOES IT GET IN DB IN THE FIRST PLACE???
-              // ... saved somewhere by mongooseAuth ??
-              
-              // should be a complete user obj w/ all FB metadata
-              if (user) {
-                console.log('user match on fb.id %s', user);
-                return promise.fulfill(user);
-              }
-
-              console.log("CREATING FB USER");
-              
-              // createWithFB() is a model 'static', part of mongoose-auth
-              // but this doesn't SAVE anything to DB!
-              User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, user) {
-                if (err) {
-                  console.log('ERROR creating fb User');
-                  return promise.fail(err);
-                }
-                
-                console.log('created FB user:', user);
-                
-                // == not sure about this part ==
-                // save to DB. this adds onto existing record.
-                user.save(function (err, user) {
-                  if (err) {
-                    console.log("Error saving FB user to DB");
-                    return promise.fail(err);
-                  }
-                  console.log('saved FB user to DB', user);
-                  
-                  promise.fulfill(user);
-                  // (this goes on to addToSession(), which puts userId in req.session.auth.userId)
-                });
-                
-                // =====
-                
-                // promise.fulfill(user);
-              });
-            }); //findOne
-
-        //  }
-        //});
+          });
+        }); //findOne
 
         return promise;
       }, //findOrCreateUser
 
-      redirectPath: '/app',     //'/auth',  // extremely important! whole process breaks if this is wrong
+      redirectPath: '/app',     // was /auth, but that doesn't do anything
       entryPath: '/auth/facebook',
       callbackPath: '/auth/facebook/callback'
 
@@ -188,118 +132,11 @@ UserSchema.plugin(mongooseAuth, {
 }); //mongooseAuth plugins
 
 
-/*function assignFbDataToUser(user, accessTok, accessTokExtra, fbUser) {
-  console.log('in assignFbDataToUser');
-
-  // is all this really necessary??
-  user.fb.accessToken = accessTok;
-  user.fb.expires = accessTokExtra.expires;
-  user.fb.id = fbUser.id;
-  user.fb.name.first = fbUser.first_name;
-  user.fb.name.last = fbUser.last_name;
-  user.fb.name.full = fbUser.name;
-  user.fb.alias = fbUser.link.match(/^http:\/\/www.facebook\.com\/(.+)/)[1];
-  user.fb.gender = fbUser.gender;
-  user.fb.email = fbUser.email;
-  user.fb.timezone = fbUser.timezone;
-  user.fb.locale = fbUser.locale;
-  user.fb.verified = fbUser.verified;
-  user.fb.updatedTime = fbUser.updated_time;
-
-  console.log('assigned: ', user.fb);
-}*/
-
-
-// not needed anymore?
-// just seems to duplicate default behavior
-/*everyauth.everymodule.findUserById( function(userId, callback) {
-  console.log('attempting to findUserById [obsolete?]: ', userId);
-
-  //User.findById(callback);
-  User.findById(userId, function(err, user) {
-    if (err) { console.log('error:', err); return callback(err); }
-    console.log('found user:', user);
-    callback(null, user);
-  });
-});*/
-
-
-
-// move this back to model? can .model() run before the plugins are added?
-// ... NO, once it's modeled it can't be modified! (see test-mongoose.js)
 var User = mongoose.model('User', UserSchema);
 
 
-/*
-consolidating:
-  - don't use cookies at all anymore
-  - req.session.userId is the user ID  (formerly .user_id)
-    -- CORRECTION: use req.session.auth.userId -- already part of everyauth flow
-  - req.user is the whole user obj
-  - eliminate req.currentUser
-*/
+// == eliminated authenticateFromLoginToken ==
 
-
-
-/*
-// reload user info from old cookie
-var authenticateFromLoginToken = function(req, res, next) {
-  console.log('in authenticateFromLoginToken');
-  console.log('all cookies:', req.cookies);
-  var cookie = JSON.parse(req.cookies.logintoken);
-  console.log('logintoken cookie:', cookie);
-  
-  //TMP
-  LoginToken.find({}, function(err, tokens) { console.log("DEBUG: all tokens in DB: ", tokens); }); 
-
-  LoginToken.findOne({
-      userid:cookie.userid,
-      series: cookie.series,
-      token: cookie.token 
-    }, 
-    function onFindLoginToken(err, token) {
-      // PROBLEM HERE -- no token!! should be a token...
-
-      if (!token) {
-        console.log('no token found, redirect');
-
-        // FIX: make sure to delete the bad cookie! otherwise keeps going in loops trying to auth w/it.
-        //delete req.cookies.logintoken;
-        console.log('deleted bad logintoken cookie'); //, req.cookies);
-        // HOW TO ACTUALLY _DELETE_ A COOKIE??
-        res.cookie('logintoken', '');
-
-        return res.redirect('/new');
-      }
-      console.log('found token: ', token);
-      
-      User.findOne({ _id:token.userid }, 
-        function onFindUser(err, user) {
-          if (user) {
-            console.log('found user for token: ', user);
-            req.session.userId = user.id;
-            req.currentUser = user;
-            
-            token.token = token.randomToken();
-            console.log('random token: ', token.token);
-            token.save(function onTokenSave () {
-              console.log('saved login token, setting cookie');
-              res.cookie('logintoken', token.cookieValue, { expires:new Date(Date.now() + 2 * 604800000), path:'/' });
-              next();
-            });
-
-          }
-          // no user
-          else {
-            console.log('no user found for token, redirect');
-            return res.redirect('/new');
-          }
-        } 
-      );
-    } //onFindLoginToken
-  );
-}; //authFrom..
-*/
 
 
 app.configure(function(){
@@ -379,17 +216,6 @@ var loadUser = function(req, res, next) {
     console.log('user not in session, continue w/o req.user');
     next();    
   }
-  
-  // // coming back to new session w/ old token
-  // else if (!_.isEmpty(req.cookies.logintoken)) {
-  //   console.log('old token, need auth', req.cookies.logintoken);
-  //   authenticateFromLoginToken(req, res, next);
-  // }
-  // else {
-  //   console.log('no userId in session');
-  //   console.log('session:', req.session);
-  //   res.redirect('/new');
-  // }
 };
 
 
@@ -437,62 +263,7 @@ app.get('/bye', loadUser, requireUser, function (req, res) {
 });
 
 
-
-// ELIMINATE THIS??
-app.get('/auth', loadUser, function (req, res) {
-  console.log('at /auth');  //'. cookies? ', req.cookies);
-
-  /*
-  if (!_.isEmpty(req.cookies.logintoken)) {
-
-    // [tmp?]
-    // make sure the user's login token is in the DB
-    Seq()
-      .seq(function() {
-        var next = this;
-        LoginToken.find({}, function(err, tokens) {
-          console.log("DEBUG: all tokens in DB: ", tokens); 
-          next();
-        });
-      })
-      .seq(function() {
-        console.log('does it match logintoken cookie?', req.cookies.logintoken);
-        this();
-      })
-      .seq(function() {
-        console.log('has login token, goto app');
-        res.redirect('/app');
-        this();
-      });
-    return;
-  }
-  */
-
-  console.log('req.user:', req.user);
-
-  if (_.isUndefined(req.user)) {
-    console.log('no req.user, redirect to /new');
-    return res.redirect('/new');
-  }
-
-  // console.log('no logintoken yet, need to create');
-  // var loginToken = new LoginToken({ userid: req.user.id });
-  // console.log('new loginToken:', loginToken);
-  // loginToken.save(function() {
-  //   Seq()
-  //   .seq(function() {
-  //     var next = this;
-  //     console.log('***SAVED logintoken.');
-  //     LoginToken.find({}, function(err, tokens) { console.log("DEBUG: all tokens in DB: ", tokens); next() });
-  //   });
-  //   res.cookie('logintoken', loginToken.cookieValue, { expires: new Date(Date.now() + 2 * 604800000), path:'/' });
-  //   console.log('set cookie, goto app');
-  //   res.redirect('/app');
-  // });
-  
-  console.log("WHAT TO DO NOW???");
-  res.end("DEAD END");
-});
+// == removed /auth callback, does nothing ==
 
 
 app.get('/app', loadUser, requireUser, function (req, res) {
