@@ -2,9 +2,12 @@
  * todo:
  * - boilerplate has nice GET output in console, do the same here
  * - refactor code to be cleaner
+ * - use express 'basepath' config for sub-apps
+ * - add flash messages?
  * 
  * IMPT: once a user is logged in, if they de-authorize the app in FB, they're still logged in!
  *  -- the whole LoginToken mess might have mitigated that, but not worth the complexity.
+ *
  */
 
 var express = require('express')
@@ -20,23 +23,17 @@ var app = module.exports = express.createServer();
 
 // configuration
 app.conf = require('./conf');
-// console.log('conf:', app.conf);
 
-
+// 1 global DB connection.
 // (we need the db for the session store)
-var db = require('./lib/db')(app)  // global connection
+var db = mongoose.connect('mongodb://' + app.conf.dbHost + '/' + app.conf.dbName)
   , MongoStore = require('connect-mongodb')
-  , sessionStore = new MongoStore({db: db.connection.db, /*reapInterval: 3000, /* collection: 'sessions'*/ })  
+  , sessionStore = new MongoStore({db: db.connection.db, reapInterval: 3000 })  
   ;
-//console.log('db:', db);
 
-
-// load schemas after DB connection
 
 // leave bare, let MongooseAuth fill it in
 var UserSchema = module.exports.UserSchema = new Schema({});
-
-// == removed LoginToken ==
 
 
 
@@ -50,7 +47,6 @@ UserSchema.plugin(mongooseAuth, {
   everymodule: {
     everyauth: {
       User:function () {
-        console.log('everyauth requesting User model');
         return mongoose.model('User');    // attach the _model_
       }  
     }
@@ -69,7 +65,7 @@ UserSchema.plugin(mongooseAuth, {
       // this runs w/existing session or w/oauth popup
       findOrCreateUser: function (session, accessToken, accessTokExtra, fbUser) {
 
-        console.log("findOrCreateUser"); // , 
+        // console.log("findOrCreateUser",
         //   require('util').inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser})
         // );
 
@@ -78,40 +74,37 @@ UserSchema.plugin(mongooseAuth, {
 
         // == stripped email check, ID is enough ==
 
-        console.log('Looking for user with fb.id %s', fbUser.id);
+        // console.log('Looking for user with fb.id %s', fbUser.id);
         
         // try to match ID instead ..?    (@todo why are both of these necessary??)
         User.findOne({'fb.id': fbUser.id}, function (err, user) {
           
-          // HOW DOES IT GET IN DB IN THE FIRST PLACE???
-          // ... saved somewhere by mongooseAuth ??
-          
           // should be a complete user obj w/ all FB metadata
           if (user) {
-            console.log('user match on fb.id %s', user);
+            // console.log('user match on fb.id %s', user);
             return promise.fulfill(user);
           }
 
-          console.log("CREATING FB USER");
+          // console.log("CREATING FB USER");
           
           // createWithFB() is a model 'static', part of mongoose-auth
           // but this doesn't SAVE anything to DB!
           User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, user) {
             if (err) {
-              console.log('ERROR creating fb User');
+              // console.log('ERROR creating fb User');
               return promise.fail(err);
             }
             
-            console.log('created FB user:', user);
+            // console.log('created FB user:', user);
             
             // [ADDED]
             // save to DB. this adds onto existing record.
             user.save(function (err, user) {
               if (err) {
-                console.log("Error saving FB user to DB");
+                // console.log("Error saving FB user to DB");
                 return promise.fail(err);
               }
-              console.log('saved FB user to DB', user);
+              // console.log('saved FB user to DB', user);
               
               promise.fulfill(user);
               // (this goes on to addToSession(), which puts userId in req.session.auth.userId)
@@ -138,7 +131,6 @@ var User = mongoose.model('User', UserSchema);
 // == eliminated authenticateFromLoginToken ==
 
 
-
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -150,19 +142,17 @@ app.configure(function(){
   app.use(express.session({
     secret: app.conf.sessionSecret,
     //cookie: {maxAge: 60000*60*24*30},   // 30 days?
-    store: sessionStore
+    store: sessionStore   // (mongo, above)
   }));
 
 
   app.use(app.router);
 
-  // this fills in the routes for each auth...? (should run after app.router)
-  //app.use(everyauth.middleware()); 
-  app.use(mongooseAuth.middleware());  // wraps everyauth middleware. 
+  app.use(mongooseAuth.middleware());  // routes for auths; wraps everyauth middleware.
 
   app.use(express.static(__dirname + '/public'));
 
-  //everyauth.helpExpress(app);
+  // view helpers
   // needs to run after modeling/plugin above.
   mongooseAuth.helpExpress(app);
 });
@@ -170,6 +160,8 @@ app.configure(function(){
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
   everyauth.debug = true;
+  
+  // @todo output every request, how?
 });
 
 app.configure('production', function(){
@@ -181,7 +173,7 @@ app.configure('production', function(){
 // route middleware to get current user.
 // simply load if available, don't require. (split to requireUser().)
 var loadUser = function(req, res, next) {
-  console.log('in loadUser, session:', req.session);
+  // console.log('in loadUser, session:', req.session);
 
   // user already in session? (ID corresponds to DB record)
   // - tried to do a pause() here but failed. use simple var instead.
@@ -191,21 +183,19 @@ var loadUser = function(req, res, next) {
     if (! _.isUndefined(req.session.auth.userId)) {
       if (! _.isEmpty(req.session.auth.userId)) {
         wait = true;
-        console.log('userId already in session:', req.session.auth.userId);
+        // console.log('userId already in session:', req.session.auth.userId);
         
         // retrieve this user from DB
         User.findById(req.session.auth.userId, function (err, user) {
-          console.warn('findById callback. still paused?');
+          // console.warn('findById callback. still paused?');
           
           if (user) {
-            console.log('req.user before re-setting:', req.user);
-            // req.currentUser = user;
             req.user = user;
-            console.log('user in session found in DB, set to req.user: ', req.user);
+            // console.log('user in session found in DB, set to req.user: ', req.user);
           }
 
           next();
-          console.warn('resuming.');
+          // console.warn('resuming.');
         });
       }
     }
@@ -213,25 +203,26 @@ var loadUser = function(req, res, next) {
 
   // waiting for callback response?
   if (! wait) {
-    console.log('user not in session, continue w/o req.user');
-    next();    
+    // console.log('user not in session, continue w/o req.user');
+    next();
   }
 };
 
 
 // for pages that need login. split from loadUser(), run after.
 var requireUser = function(req, res, next) {
-  console.log('in requireUser');
+  // console.log('in requireUser');
   
   if (! _.isUndefined(req.user)) {
     if (! _.isUndefined(req.user.id)) {
-      console.log('have user Id in req, continue');
+      // console.log('have user Id in req, continue');
       next();
     }
   }
   
-  console.log('no req.user.id found, go to /new');
+  // console.log('no req.user.id found, go to /new');
   // console.log('session:', req.session);
+
   res.redirect('/new');
 };
 
@@ -246,7 +237,7 @@ app.get('/', loadUser, requireUser, function (req, res) {
   // console.log('at /, redirect to /auth');
   // res.redirect('/auth');
   
-  console.log('at /, redirect to /app');
+  // console.log('at /, redirect to /app');
   res.redirect('/app');
 });
 
@@ -254,9 +245,7 @@ app.get('/', loadUser, requireUser, function (req, res) {
 app.get('/bye', loadUser, requireUser, function (req, res) {
   console.log('at /bye');
   if (req.session) {
-    console.log('has session, removing');
-    // LoginToken.remove({ userid:req.session.userId }, function () {});
-    // res.clearCookie('logintoken');
+    // console.log('has session, removing');
     req.session.destroy(function () {});
   }
   res.redirect('/new');
@@ -267,7 +256,7 @@ app.get('/bye', loadUser, requireUser, function (req, res) {
 
 
 app.get('/app', loadUser, requireUser, function (req, res) {
-  console.log('at /app');
+  // console.log('at /app');
   
   res.render('app', {
     title: 'New Leaf Digital Apps',
@@ -277,7 +266,7 @@ app.get('/app', loadUser, requireUser, function (req, res) {
 
 // what's the point of this path?
 app.get('/new', loadUser, function (req, res) {
-  console.log('at /new');
+  // console.log('at /new');
   
   res.render('new', {
     title: 'New Leaf Digital Apps',
@@ -287,12 +276,21 @@ app.get('/new', loadUser, function (req, res) {
 
 app.dynamicHelpers({
   fbUser: function (req, res) {
-    console.log('using dynamic helper fbUser', req.currentUser);
-    if (req.currentUser) {
-      if (req.currentUser.fb.id) {
-        return req.currentUser;
+    // console.log('using dynamic helper fbUser', req.user);
+    if (req.user) 
+      if (req.user.fb.id)
+        return req.user;
+
+  },
+  
+  // @learn is there a way for one dynamic helper to call another??
+  fbUserName: function(req, res) {
+    try {
+      if (! _.isUndefined(req.user.fb.name.full)) {
+        return req.user.fb.name.full;        
       }
     }
+    catch(e) {}
   }
 });
 
@@ -303,7 +301,7 @@ app.dynamicHelpers({
 */
 
 
-if (!module.parent) {
+if (! module.parent) {
   app.listen(80);
-  console.log("Express server listening");  // on port %d in %s mode", app.address().port, app.settings.env);
+  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 }
