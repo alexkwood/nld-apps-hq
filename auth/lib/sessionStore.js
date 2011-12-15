@@ -7,15 +7,19 @@
 
 var _ = require('underscore');
 
-module.exports = function(app, module, envt) {
-  if (_.isUndefined(module.parent.sessionStore)) {
-    var MongoStore = require('connect-mongodb');
-    var sessionStore = new MongoStore({db: app.db.connection.db, reapInterval: 3000 });
-    console.log('%s gets its own sessionStore', envt);
+module.exports = function(app, parentApp, envt) {
+
+  if (! _.isEmpty(parentApp)) {
+    if (! _.isEmpty(parentApp.sessionStore)) {
+      app.sessionStore = parentApp.sessionStore;
+      console.log('%s taking parent sessionStore', envt);
+
+      return;
+    }
   }
-  else {
-    app.sessionStore = module.parent.sessionStore;
-    console.log('%s gets parent sessionStore', envt);
-  }
+
+  var MongoStore = require('connect-mongodb');
+  app.sessionStore = new MongoStore({db: app.db.connection.db, reapInterval: 3000 });
+  console.log('%s gets its own sessionStore', envt);
 
 };

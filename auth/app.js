@@ -21,15 +21,18 @@ var express = require('express')
 
 var app = module.exports = express.createServer();
 
-//app.configure(function(){
-//  app.set('basepath', '/auth');
-//});
+// is there a better wau to do this??
+// how do we know the parent is an Express app and not some other module?
+var parentApp = function() {
+  if (module.parent) {
+    if (module.parent.exports) {
+      return module.parent.exports;
+    }
+  }
+  return null;
+}();  //(load return value into var)
 
-/* //test
-if (module.parent) {
-  console.log('parent from child: ', module.parent);
-}
-*/
+//console.log('parentApp:', parentApp);
 
 // configuration
 app.conf = require('./conf');
@@ -37,19 +40,19 @@ console.log('auth conf: ', app.conf);
 
 // merge w/ parent conf.
 // we want the PARENT to trump the child, since the parent needs to control sessions, etc!
-if (module.parent) {
-  if (!_.isUndefined(module.parent.conf)) {
-    console.log('parent has conf too!');
-    _.extend(app.conf, module.parent.conf);
-    console.log('merged conf: ', app.conf);
+if (parentApp) {
+  if (!_.isUndefined(parentApp.conf)) {
+    //console.log('parent has conf too!');
+    _.extend(app.conf, parentApp.conf);
+    console.log('merged w/parent conf: ', app.conf);
   }
 }
 
 // populate DB fresh or from parent
-require('./lib/db')(app, module, 'auth'); //3rd param for logging
+require('./lib/db')(app, parentApp, 'auth'); //3rd param for logging
 
 // same w/ sessionStore
-require('./lib/sessionStore')(app, module, 'auth');
+require('./lib/sessionStore')(app, parentApp, 'auth');
 
 
 // leave bare, let MongooseAuth fill it in

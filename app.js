@@ -1,5 +1,7 @@
 // HQ app. central layer on top of auth and sub-apps.
 
+// @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated?
+
 var express = require('express')
   , routes = require('./routes')
   , _ = require('underscore')
@@ -14,10 +16,10 @@ console.log('parent conf: ', app.conf);
 
 
 // populate DB [fresh] -- using lib in auth submod
-require('./auth/lib/db')(app, module, 'hq'); //3rd param for logging
+require('./auth/lib/db')(app, null, 'hq'); //3rd param for logging
 
 // same w/ sessionStore
-require('./auth/lib/sessionStore')(app, module, 'hq');
+require('./auth/lib/sessionStore')(app, null, 'hq');
 
 
 
