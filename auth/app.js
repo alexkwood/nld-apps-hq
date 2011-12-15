@@ -12,7 +12,7 @@
 
 var express = require('express')
   //, routes = require('./routes')
-  , mongoose = require('mongoose')  // necessary here?
+  , mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , mongooseAuth = require('mongoose-auth')
   , everyauth = require('everyauth')
@@ -21,15 +21,35 @@ var express = require('express')
 
 var app = module.exports = express.createServer();
 
+//app.configure(function(){
+//  app.set('basepath', '/auth');
+//});
+
+/* //test
+if (module.parent) {
+  console.log('parent from child: ', module.parent);
+}
+*/
+
 // configuration
 app.conf = require('./conf');
+console.log('auth conf: ', app.conf);
 
-// 1 global DB connection.
-// (we need the db for the session store)
-var db = mongoose.connect('mongodb://' + app.conf.dbHost + '/' + app.conf.dbName)
-  , MongoStore = require('connect-mongodb')
-  , sessionStore = new MongoStore({db: db.connection.db, reapInterval: 3000 })  
-  ;
+// merge w/ parent conf.
+// we want the PARENT to trump the child, since the parent needs to control sessions, etc!
+if (module.parent) {
+  if (!_.isUndefined(module.parent.conf)) {
+    console.log('parent has conf too!');
+    _.extend(app.conf, module.parent.conf);
+    console.log('merged conf: ', app.conf);
+  }
+}
+
+// populate DB fresh or from parent
+require('./lib/db')(app, module, 'auth'); //3rd param for logging
+
+// same w/ sessionStore
+require('./lib/sessionStore')(app, module, 'auth');
 
 
 // leave bare, let MongooseAuth fill it in
@@ -142,7 +162,7 @@ app.configure(function(){
   app.use(express.session({
     secret: app.conf.sessionSecret,
     //cookie: {maxAge: 60000*60*24*30},   // 30 days?
-    store: sessionStore   // (mongo, above)
+    store: app.sessionStore   // (mongo, above)
   }));
 
 
