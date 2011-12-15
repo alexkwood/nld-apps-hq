@@ -21,7 +21,21 @@ var express = require('express')
 
 var app = module.exports = express.createServer();
 
-// is there a better wau to do this??
+// name for logging/scope checking
+app.name = 'Auth';
+
+
+// == this doesn't work ?? ==
+//var parentApp = null;
+// callback when this app is mounted as a sub-app
+app.mounted(function(parent){
+  // parent is parent app
+  // "this" is auth
+  console.log('mounted! setting parentApp');
+  //parentApp = parent;
+});
+
+// is there a better way to do this??
 // how do we know the parent is an Express app and not some other module?
 var parentApp = function() {
   if (module.parent) {
@@ -31,6 +45,7 @@ var parentApp = function() {
   }
   return null;
 }();  //(load return value into var)
+
 
 //console.log('parentApp:', parentApp);
 
@@ -140,6 +155,8 @@ UserSchema.plugin(mongooseAuth, {
       }, //findOrCreateUser
 
       redirectPath: '/app',     // was /auth, but that doesn't do anything
+                                // does this respect app.redirect() mapping??
+
       entryPath: '/auth/facebook',
       callbackPath: '/auth/facebook/callback'
 
@@ -192,11 +209,27 @@ app.configure('production', function(){
 });
 
 
+// app-level redirect mapping, should handle sub-path
+app.redirect('new', function(req, res) {
+    console.log('dynamic redirect map in %s to /new', app.name);
+    console.log('basepath is ', app.basepath);
+    return '/new';
+  });
+app.redirect('auth', function(req, res) {
+    console.log('dynamic redirect map in %s to /auth', app.name);
+    return '/auth';
+  });
+app.redirect('bye', function(req, res) {
+    console.log('dynamic redirect map in %s to /bye', app.name);
+    return '/bye';
+  });
+
 
 // route middleware to get current user.
 // simply load if available, don't require. (split to requireUser().)
-var loadUser = function(req, res, next) {
-  // console.log('in loadUser, session:', req.session);
+app.loadUser = function(req, res, next) {
+  console.log('in loadUser, app scope is %s', app.name);
+  console.log('in loadUser, session:', req.session);
 
   // user already in session? (ID corresponds to DB record)
   // - tried to do a pause() here but failed. use simple var instead.
@@ -214,7 +247,7 @@ var loadUser = function(req, res, next) {
           
           if (user) {
             req.user = user;
-            // console.log('user in session found in DB, set to req.user: ', req.user);
+            console.log('user in session found in DB, set to req.user: ', req.user);
           }
 
           next();
@@ -233,8 +266,8 @@ var loadUser = function(req, res, next) {
 
 
 // for pages that need login. split from loadUser(), run after.
-var requireUser = function(req, res, next) {
-  // console.log('in requireUser');
+app.requireUser = function(req, res, next) {
+  console.log('in requireUser');
   
   if (! _.isUndefined(req.user)) {
     if (! _.isUndefined(req.user.id)) {
@@ -243,10 +276,10 @@ var requireUser = function(req, res, next) {
     }
   }
   
-  // console.log('no req.user.id found, go to /new');
+  console.log('no req.user.id found, go to /new');
   // console.log('session:', req.session);
 
-  res.redirect('/new');
+  res.redirect('new'); //@see mapping
 };
 
 
@@ -254,31 +287,31 @@ var requireUser = function(req, res, next) {
 // auth in middle
 
 // @todo refactor this back into sep routes files
-//app.get('/', loadUser, routes.index);
+//app.get('/', app.loadUser, routes.index);
 
-app.get('/', loadUser, requireUser, function (req, res) {
+app.get('/', app.loadUser, app.requireUser, function (req, res) {
   // console.log('at /, redirect to /auth');
-  // res.redirect('/auth');
+  // res.redirect('auth');
   
   // console.log('at /, redirect to /app');
-  res.redirect('/app');
+  res.redirect('app');
 });
 
 
-app.get('/bye', loadUser, requireUser, function (req, res) {
+app.get('/bye', app.loadUser, app.requireUser, function (req, res) {
   console.log('at /bye');
   if (req.session) {
     // console.log('has session, removing');
     req.session.destroy(function () {});
   }
-  res.redirect('/new');
+  res.redirect('new');
 });
 
 
 // == removed /auth callback, does nothing ==
 
 
-app.get('/app', loadUser, requireUser, function (req, res) {
+app.get('/app', app.loadUser, app.requireUser, function (req, res) {
   // console.log('at /app');
   
   res.render('app', {
@@ -288,7 +321,7 @@ app.get('/app', loadUser, requireUser, function (req, res) {
 
 
 // what's the point of this path?
-app.get('/new', loadUser, function (req, res) {
+app.get('/new', app.loadUser, function (req, res) {
   // console.log('at /new');
   
   res.render('new', {

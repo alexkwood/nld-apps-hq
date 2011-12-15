@@ -10,6 +10,11 @@ var express = require('express')
 // this is the PARENT app
 var app = module.exports = express.createServer();
 
+
+// name for logging/scope checking
+app.name = 'HQ';
+
+
 // load conf. (each child app might have its own conf.)
 app.conf = require('./conf');
 console.log('parent conf: ', app.conf);
@@ -56,7 +61,18 @@ app.configure('production', function(){
 
 // load auth sub-app
 var auth = require('./auth/app.js');
-//auth.set('basepath', '/auth');
+
+// this doesn't seem to work
+auth.mounted(function(parent){
+  console.log('parent app caught auth mount');
+});
+
+
+// test app.name
+console.log('parent app is %s', app.name);
+console.log('auth app is %s', auth.name);
+
+
 app.use('/auth', auth);  // automatically namespaces everything at sub-path...?
 
 
@@ -79,7 +95,7 @@ var isAuthAuthed = function(req, res, next) {
 
 // Routes
 
-app.get('/', isAuthAuthed, routes.index);
+app.get('/', /*isAuthAuthed,*/ auth.loadUser, auth.requireUser, routes.index);
 
 
 
