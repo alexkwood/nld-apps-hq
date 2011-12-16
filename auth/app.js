@@ -1,17 +1,16 @@
 /*
- * todo:
- * - boilerplate has nice GET output in console, do the same here
- * - refactor code to be cleaner
- * - use express 'basepath' config for sub-apps
- * - add flash messages?
- * 
+ * Auth app for FB connect.
+ * loosely based on node-social-auth-boilerplate, but stripped a lot of redundancies/junk.
+ *
+ * this should run both standalone and as a SUB-APP w/ nld-apps-hq.
+ * auth middleware here will control access to other apps in NLD Apps Suite.
+ *
  * IMPT: once a user is logged in, if they de-authorize the app in FB, they're still logged in!
  *  -- the whole LoginToken mess might have mitigated that, but not worth the complexity.
  *
  */
 
 var express = require('express')
-  //, routes = require('./routes')
   , mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , mongooseAuth = require('mongoose-auth')
@@ -154,8 +153,8 @@ UserSchema.plugin(mongooseAuth, {
         return promise;
       }, //findOrCreateUser
 
-      redirectPath: '/app',     // was /auth, but that doesn't do anything
-                                // does this respect app.redirect() mapping??
+      redirectPath: '/',     // was /auth, then /app, try root.
+                             // does this respect app.redirect() mapping??
 
       entryPath: '/auth/facebook',
       callbackPath: '/auth/facebook/callback'
@@ -209,20 +208,9 @@ app.configure('production', function(){
 });
 
 
-// app-level redirect mapping, should handle sub-path
-app.redirect('new', function(req, res) {
-    console.log('dynamic redirect map in %s to /new', app.name);
-    console.log('basepath is ', app.basepath);
-    return '/new';
-  });
-app.redirect('auth', function(req, res) {
-    console.log('dynamic redirect map in %s to /auth', app.name);
-    return '/auth';
-  });
-app.redirect('bye', function(req, res) {
-    console.log('dynamic redirect map in %s to /bye', app.name);
-    return '/bye';
-  });
+// IMPT: if an app.redirect() is defined here, and a middleware define here uses it,
+// and a parent app uses that middleware, the parent app won't have the redirect mappings.
+// (would need to copy app.redirects separately)
 
 
 // route middleware to get current user.
@@ -265,66 +253,59 @@ app.loadUser = function(req, res, next) {
 };
 
 
+// helper to check if user is logged into request
+// return boolean
+app.isUserLoggedIn = function(req, res) {
+  if (! _.isUndefined(req.user)) 
+    if (! _.isUndefined(req.user.id))
+      return true;
+
+  return false;
+};
+
 // for pages that need login. split from loadUser(), run after.
 app.requireUser = function(req, res, next) {
   console.log('in requireUser');
   
-  if (! _.isUndefined(req.user)) {
-    if (! _.isUndefined(req.user.id)) {
-      // console.log('have user Id in req, continue');
-      next();
-    }
-  }
-  
-  console.log('no req.user.id found, go to /new');
+  if (app.isUserLoggedIn(req, res)) next();
+ 
+  console.log('no req.user.id found, go to /login');
   // console.log('session:', req.session);
 
-  res.redirect('new'); //@see mapping
+  res.redirect('/login');
 };
 
 
 // Routes
 // auth in middle
 
-// @todo refactor this back into sep routes files
-//app.get('/', app.loadUser, routes.index);
-
+// (was /app, moved to /)
 app.get('/', app.loadUser, app.requireUser, function (req, res) {
-  // console.log('at /, redirect to /auth');
-  // res.redirect('auth');
-  
-  // console.log('at /, redirect to /app');
-  res.redirect('app');
-});
-
-
-app.get('/bye', app.loadUser, app.requireUser, function (req, res) {
-  console.log('at /bye');
-  if (req.session) {
-    // console.log('has session, removing');
-    req.session.destroy(function () {});
-  }
-  res.redirect('new');
-});
-
-
-// == removed /auth callback, does nothing ==
-
-
-app.get('/app', app.loadUser, app.requireUser, function (req, res) {
-  // console.log('at /app');
-  
   res.render('app', {
     title: 'New Leaf Digital Apps',
   });
 });
 
 
-// what's the point of this path?
-app.get('/new', app.loadUser, function (req, res) {
-  // console.log('at /new');
-  
-  res.render('new', {
+// [don't need to check if logged in to logout]
+app.get('/bye', /*app.loadUser,*/ /*app.requireUser,*/ function (req, res) {
+  if (req.session) {
+    // console.log('has session, removing');
+    req.session.destroy(function () {});
+  }
+  res.redirect('/login');
+});
+
+
+// (was /new)
+app.get('/login', app.loadUser, function (req, res) {
+  // if already logged in, redirect to app
+  if (app.isUserLoggedIn(req, res)) {
+    console.log('user is already logged in, redirect to app');
+    res.redirect('/');
+  }
+
+  res.render('login', {
     title: 'New Leaf Digital Apps',
   });
 });
@@ -336,7 +317,6 @@ app.dynamicHelpers({
     if (req.user) 
       if (req.user.fb.id)
         return req.user;
-
   },
   
   // @learn is there a way for one dynamic helper to call another??

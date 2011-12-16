@@ -1,6 +1,7 @@
 // HQ app. central layer on top of auth and sub-apps.
 
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated?
+// @todo look in the express examples for smart favicon handling, before the logger.
 
 var express = require('express')
   , routes = require('./routes')
@@ -26,6 +27,8 @@ require('./auth/lib/db')(app, null, 'hq'); //3rd param for logging
 // same w/ sessionStore
 require('./auth/lib/sessionStore')(app, null, 'hq');
 
+
+app.use(express.logger(':method :url'));
 
 
 app.configure(function(){
@@ -69,34 +72,28 @@ auth.mounted(function(parent){
 
 
 // test app.name
-console.log('parent app is %s', app.name);
-console.log('auth app is %s', auth.name);
+console.log('parent app is named %s', app.name);
+console.log('auth app is named %s', auth.name);
 
 
-app.use('/auth', auth);  // automatically namespaces everything at sub-path...?
+// MOUNT at sub-path. auto-namespaces paths at sub.
+//app.use('/auth', auth);
+// -- change: auth paths should be global, make sure apps don't overlap.
+app.use(auth);
 
 
-// middleware, checks if auth module is authenticated
-var isAuthAuthed = function(req, res, next) {
-  console.log('in isAuthAuthed');
-
-  console.log('user? ', req.user);
-
-  console.log('session? ', req.session);
-
-  //console.dir(req);
-
-  console.log(': ', module.parent);
-
+// try to set up middleware that runs on EVERY PATH w/o being explicitly defined on each one.
+// (for sub-apps to require auth automatically)
+app.use( function (req, res, next) {
+  console.log('IN GLOBAL MIDDLEWARE! HOORAY!');
 
   next();
-};
+});
 
 
 // Routes
 
-app.get('/', /*isAuthAuthed,*/ auth.loadUser, auth.requireUser, routes.index);
-
+app.get('/', auth.loadUser, auth.requireUser, routes.index);
 
 
 if (! module.parent) {
