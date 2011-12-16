@@ -1,4 +1,14 @@
 h1= title
 p Welcome to #{title}
 
-a(href='/auth') Auth
+
+- if (everyauth.loggedIn)
+  p Hello #{fbUserName}
+  div
+    a(href='/bye') Logout  
+
+- else
+  a(href="/auth/facebook") login with facebook
+
+
+

@@ -194,6 +194,12 @@ app.configure(function(){
   // view helpers
   // needs to run after modeling/plugin above.
   mongooseAuth.helpExpress(app);
+
+  // klugy: load everyauth view helpers on parent app too.
+  // what's the proper way to share dynamic helpers?
+  if (parentApp) {
+    mongooseAuth.helpExpress(parentApp);
+  }
 });
 
 app.configure('development', function(){
@@ -211,6 +217,13 @@ app.configure('production', function(){
 // IMPT: if an app.redirect() is defined here, and a middleware define here uses it,
 // and a parent app uses that middleware, the parent app won't have the redirect mappings.
 // (would need to copy app.redirects separately)
+
+
+// test: does a global middleware set in a sup-app work in parent?
+app.use( function(req,res,next) {
+  console.log('in auth global middleware!');
+  next();
+});
 
 
 // route middleware to get current user.
@@ -251,6 +264,21 @@ app.loadUser = function(req, res, next) {
     next();
   }
 };
+
+// make sure loadUser runs on every request, in every app up the mount chain.
+// this ALONE isn't sufficient b/c requireUser was running BEFORE this,
+// but have this run again just in case
+app.use( function ensureLoadUser(req, res, next) {
+  console.log('in ensureLoadUser');
+  if (req.user) {
+    console.log('req.user already set, move on.');
+    next();
+  }
+  else {
+    console.log('loadUser has not yet run, run now.');
+    app.loadUser(req, res, next);
+  }
+});
 
 
 // helper to check if user is logged into request
@@ -311,24 +339,30 @@ app.get('/login', app.loadUser, function (req, res) {
 });
 
 
-app.dynamicHelpers({
-  fbUser: function (req, res) {
-    // console.log('using dynamic helper fbUser', req.user);
-    if (req.user) 
-      if (req.user.fb.id)
-        return req.user;
-  },
-  
-  // @learn is there a way for one dynamic helper to call another??
-  fbUserName: function(req, res) {
-    try {
-      if (! _.isUndefined(req.user.fb.name.full)) {
-        return req.user.fb.name.full;        
+// make dynamicHelpers (for views) available to this app and parent app.
+function applySharedDynamicHelpers(app) {
+  app.dynamicHelpers({
+    fbUser: function (req, res) {
+      // console.log('using dynamic helper fbUser', req.user);
+      if (req.user) 
+        if (req.user.fb.id)
+          return req.user;
+    },
+    
+    // @learn is there a way for one dynamic helper to call another??
+    fbUserName: function(req, res) {
+      try {
+        if (! _.isUndefined(req.user.fb.name.full)) {
+          return req.user.fb.name.full;        
+        }
       }
+      catch(e) {}
     }
-    catch(e) {}
-  }
-});
+  });
+}
+applySharedDynamicHelpers(app);
+if (parentApp) applySharedDynamicHelpers(parentApp);
+
 
 
 /*

@@ -84,11 +84,18 @@ app.use(auth);
 
 // try to set up middleware that runs on EVERY PATH w/o being explicitly defined on each one.
 // (for sub-apps to require auth automatically)
+// @learn how can the ORDER of these middlewares be controlled?
 app.use( function (req, res, next) {
   console.log('IN GLOBAL MIDDLEWARE! HOORAY!');
 
   next();
 });
+
+
+// test another sub-app for inheritance testing
+var fakeApp = express.createServer();
+fakeApp.get('/fake', function(req, res) { res.end('fake sub-app loaded'); });
+app.use(fakeApp);
 
 
 // Routes
