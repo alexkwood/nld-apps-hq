@@ -30,18 +30,17 @@ app.name = 'Auth';
 app.mounted(function(parent){
   // parent is parent app
   // "this" is auth
-  console.log('mounted! setting parentApp');
+  console.log('mounted! (can set parentApp)');
   //parentApp = parent;
 });
 
 // is there a better way to do this??
 // how do we know the parent is an Express app and not some other module?
 var parentApp = function() {
-  if (module.parent) {
-    if (module.parent.exports) {
+  if (module.parent) 
+    if (module.parent.exports) 
       return module.parent.exports;
-    }
-  }
+  
   return null;
 }();  //(load return value into var)
 
@@ -69,9 +68,10 @@ require('./lib/db')(app, parentApp, 'auth'); //3rd param for logging
 require('./lib/sessionStore')(app, parentApp, 'auth');
 
 
-// leave bare, let MongooseAuth fill it in
-var UserSchema = module.exports.UserSchema = new Schema({});
+var UserSchema = require('./lib/user-schema');
 
+// roles incl roles, defaulRole, canRole()
+var roles = require('./lib/roles');
 
 
 // EVERYAUTH
@@ -246,13 +246,16 @@ app.loadUser = function(req, res, next) {
         User.findById(req.session.auth.userId, function (err, user) {
           // console.warn('findById callback. still paused?');
           
-          if (user) {
+          if (!err && user) {
             req.user = user;
             console.log('user in session found in DB, set to req.user: ', req.user);
+            next();
+          }
+          else {
+            console.log('UNABLE TO FIND USER! 403');
+            res.send('Sorry, can\'t find your user', 403);
           }
 
-          next();
-          // console.warn('resuming.');
         });
       }
     }
@@ -268,7 +271,7 @@ app.loadUser = function(req, res, next) {
 // make sure loadUser runs on every request, in every app up the mount chain.
 // this ALONE isn't sufficient b/c requireUser was running BEFORE this,
 // but have this run again just in case
-app.use( function ensureLoadUser(req, res, next) {
+/*app.use( function ensureLoadUser(req, res, next) {
   console.log('in ensureLoadUser');
   if (req.user) {
     console.log('req.user already set, move on.');
@@ -278,65 +281,61 @@ app.use( function ensureLoadUser(req, res, next) {
     console.log('loadUser has not yet run, run now.');
     app.loadUser(req, res, next);
   }
-});
+});*/
 
 
 // helper to check if user is logged into request
 // return boolean
-app.isUserLoggedIn = function(req, res) {
+// [switched this from req.user.id to req.user._id to match actual obj]
+app.isUserLoggedIn = function(req) {
   if (! _.isUndefined(req.user)) 
-    if (! _.isUndefined(req.user.id))
+    if (! _.isUndefined(req.user._id)) {
+      console.log('appears that user is logged in: ', req.user._id);
       return true;
+    }
 
+  console.log('user does NOT seem to be logged in');
   return false;
 };
+
 
 // for pages that need login. split from loadUser(), run after.
 app.requireUser = function(req, res, next) {
   console.log('in requireUser');
   
-  if (app.isUserLoggedIn(req, res)) next();
+  if (app.isUserLoggedIn(req)) return next();
  
-  console.log('no req.user.id found, go to /login');
+  console.log('no req.user._id found, go to /login');
   // console.log('session:', req.session);
-
   res.redirect('/login');
+  res.end() //?
 };
 
+// for pages that need login by user w/ specific permission.
+// not sure about params here
+// called w/ param - app.requireUserCan('do_something') - so needs to return a _function_
+// also calls requireUser() inside, so no need to run both separately
+app.requireUserCan = function(doWhat) {
+  return function(req, res, next) {
+    console.log('checking if user can ' , doWhat);
 
-// Routes
-// auth in middle
+    console.dir(res);
 
-// (was /app, moved to /)
-app.get('/', app.loadUser, app.requireUser, function (req, res) {
-  res.render('app', {
-    title: 'New Leaf Digital Apps',
-  });
-});
+    app.requireUser(req, res, next);  // redirects if no user
+    // can now assume req.user exists
 
+    if (! req.user.canUser(doWhat)) {
+      // @todo something nicer
+      // THIS ISN'T WORKING -- THROWS HEADER ERROR
+      console.log('access denied');
+      return res.send(403);
+    }
+    else {
+      next();
+    }
+  };
+};
 
-// [don't need to check if logged in to logout]
-app.get('/bye', /*app.loadUser,*/ /*app.requireUser,*/ function (req, res) {
-  if (req.session) {
-    // console.log('has session, removing');
-    req.session.destroy(function () {});
-  }
-  res.redirect('/login');
-});
-
-
-// (was /new)
-app.get('/login', app.loadUser, function (req, res) {
-  // if already logged in, redirect to app
-  if (app.isUserLoggedIn(req, res)) {
-    console.log('user is already logged in, redirect to app');
-    res.redirect('/');
-  }
-
-  res.render('login', {
-    title: 'New Leaf Digital Apps',
-  });
-});
 
 
 // make dynamicHelpers (for views) available to this app and parent app.
@@ -365,10 +364,58 @@ if (parentApp) applySharedDynamicHelpers(parentApp);
 
 
 
-/*
- * global error catcher:
- process.on('uncaughtException',function(err){console.error('uncaughtexception:'+err.stack);});
-*/
+
+
+
+// Routes
+
+
+// do we need check if parent app has a route at same path, don't load this if so? ... appears not, parent route overrides. (good)
+// formerly /app
+app.get('/', app.loadUser, app.requireUser, function (req, res) {
+  console.log('rendering AUTH index');
+
+  res.render('app', {
+    title: 'New Leaf Digital Apps',
+  });
+});
+
+
+// [don't need to check if logged in to logout]
+app.get('/bye', function (req, res) {
+  if (req.session) {
+    req.session.destroy(function () {});
+  }
+  res.redirect('/login');
+  res.end(); //?
+});
+
+
+// (was /new)
+app.get('/login', app.loadUser, function (req, res) {
+  // if already logged in, redirect to app
+  if (app.isUserLoggedIn(req, res)) {
+    console.log('user is already logged in, redirect to app');
+    res.redirect('/');
+    res.end(); //?
+  }
+
+  res.render('login', {
+    title: 'New Leaf Digital Apps',
+  });
+});
+
+
+// user admin
+require('./routes/admin-users')(app);
+
+
+
+// global error catcher
+process.on('uncaughtException',function(err){
+  console.error('uncaught exception:', err.stack);
+});
+
 
 
 if (! module.parent) {

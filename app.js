@@ -99,7 +99,7 @@ app.use(fakeApp);
 
 
 // Routes
-
+// @todo set a global 'local' w/ app title
 app.get('/', auth.loadUser, auth.requireUser, routes.index);
 
 
