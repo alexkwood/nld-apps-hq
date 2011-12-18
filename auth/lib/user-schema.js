@@ -7,12 +7,21 @@ var mongoose = require('mongoose')
 
 // leave mostly bare, let MongooseAuth fill it in
 // added: role
-var UserSchema = module.exports = new Schema({
+
+// mongoose-admin needs separate raw obj. @todo try to consolidate later (in mongoose-admin, try to pull raw from modeled)
+var UserSchemaRaw = /*module.exports.UserSchemaRaw =*/ {
   role: {
     type: String,
     default: roles.defaultRole
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now()
   }
-});
+};
+
+var UserSchema = module.exports.UserSchema = new Schema(UserSchemaRaw);
 
 
 // check role/access on individual user

@@ -69,7 +69,7 @@ require('./lib/db')(app, parentApp, 'auth'); //3rd param for logging
 require('./lib/sessionStore')(app, parentApp, 'auth');
 
 
-var UserSchema = require('./lib/user-schema');
+var UserSchema = require('./lib/user-schema').UserSchema;
 
 // roles incl roles, defaulRole, canRole()
 var roles = require('./lib/roles');
@@ -219,19 +219,35 @@ app.configure('production', function(){
 // and a parent app uses that middleware, the parent app won't have the redirect mappings.
 // (would need to copy app.redirects separately)
 
-
+/*
 // test: does a global middleware set in a sup-app work in parent?
 app.use( function(req,res,next) {
   console.log('in auth global middleware!');
   next();
 });
+*/
+
+
+
+// WHY AREN'T ANY OF THESE ERROR HANDLERS WORKING???
+
+app.error(function(err, req, res, next) {
+  console.log('*** in auth app.error handler');
+  res.end('HORRIBLE FAIL.');
+});
+app.use(function(err, req, res, next) {
+  console.log('*** in auth app.error handler');
+  res.end('HORRIBLE FAIL.');
+});
+
+
 
 
 // route middleware to get current user.
 // simply load if available, don't require. (split to requireUser().)
 app.loadUser = function(req, res, next) {
   console.log('in loadUser, app scope is %s', app.name);
-  console.log('in loadUser, session:', req.session);
+  //console.log('in loadUser, session:', req.session);
 
   // user already in session? (ID corresponds to DB record)
   // - tried to do a pause() here but failed. use simple var instead.
@@ -415,14 +431,46 @@ app.get('/login', app.loadUser, function (req, res) {
 
 
 // user admin
-require('./routes/admin-users')(app);
+require('./routes/admin-users')(app, UserSchema);
+
+
+// test
+function fail(req, res, next) {
+  next(new Error('NEXT\'D FAIL'));
+}
+function getFail(p) {
+  return function(req, res, next) {
+    next('Passed Next FAIL for ' + p);
+  };
+}
+app.getFail = getFail;
+
+
+// test
+app.get('/admin', app.loadUser, /*app.getFail('bob'), //fail,*/ app.requireUserCan('admin_users'),
+  function(req, res, next) {
+    res.send('admin goes here');
+  }
+);
+
+
+// WHY AREN'T ANY OF THESE ERROR HANDLERS WORKING???
+
+app.error(function(err, req, res, next) {
+  console.log('*** in auth app.error handler');
+  res.end('HORRIBLE FAIL.');
+});
+app.use(function(err, req, res, next) {
+  console.log('*** in auth app.error handler');
+  res.end('HORRIBLE FAIL.');
+});
 
 
 
 // global error catcher
-process.on('uncaughtException',function(err){
+/*process.on('uncaughtException',function(err){
   console.error('uncaught exception:', err.stack);
-});
+});*/
 
 
 

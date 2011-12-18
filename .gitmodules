@@ -3,4 +3,5 @@
 	url = git@github.com:newleafdigital/node-http-proxy.git
 [submodule "auth/node_modules/mongoose-admin"]
 	path = auth/node_modules/mongoose-admin
-	url = git@github.com:newleafdigital/mongoose-admin.git
+ 	url = git@github.com:newleafdigital/mongoose-admin.git
+	branch = refactor	 

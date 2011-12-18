@@ -2,6 +2,8 @@
 
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated?
 // @todo look in the express examples for smart favicon handling, before the logger.
+//      - express.favicon() ?
+// @todo DB is now loaded in auth module, not parent. ok?
 
 var express = require('express')
   , routes = require('./routes')
@@ -102,6 +104,31 @@ app.use(fakeApp);
 // Routes
 // @todo set a global 'local' w/ app title
 app.get('/', auth.loadUser, auth.requireUser, routes.index);
+
+
+
+
+// error handling
+var appErrorHandler = function(err, req, res, next) {
+  console.log('*** in app.error handler');
+
+  //if (err instanceof NotFound) {
+  //  res.render('404.jade');
+  //}
+  //else {
+  //  next(err);
+  //}
+    
+  res.end("Error: " + err);
+};
+app.error(appErrorHandler);
+auth.error(appErrorHandler);
+app.use(appErrorHandler);
+auth.use(appErrorHandler);
+
+
+
+
 
 
 if (! module.parent) {
