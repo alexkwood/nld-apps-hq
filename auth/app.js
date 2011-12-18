@@ -312,28 +312,35 @@ app.requireUser = function(req, res, next) {
 };
 
 // for pages that need login by user w/ specific permission.
-// not sure about params here
 // called w/ param - app.requireUserCan('do_something') - so needs to return a _function_
-// also calls requireUser() inside, so no need to run both separately
+// also calls requireUser() inside, so no need to run both separately.
+// trying a wonky approach...
 app.requireUserCan = function(doWhat) {
-  return function(req, res, next) {
-    console.log('checking if user can ' , doWhat);
+  // array puts both callbacks on the stack async'ly
+  return [
+    app.requireUser,
 
-    console.dir(res);
+    function(req, res, next) {
+      console.log('checking if user can ' , doWhat);
 
-    app.requireUser(req, res, next);  // redirects if no user
-    // can now assume req.user exists
+      if (! req.user.canUser(doWhat)) {   // (return should be sync)
+        console.log('neg response from canUser');
 
-    if (! req.user.canUser(doWhat)) {
-      // @todo something nicer
-      // THIS ISN'T WORKING -- THROWS HEADER ERROR
-      console.log('access denied');
-      return res.send(403);
-    }
-    else {
+        // @todo something nicer
+        // THIS ISN'T WORKING -- THROWS HEADER ERROR
+        console.log('access denied');
+        res.send(403);
+        //next(new Error('Unauthorized'));    // none of the error catchers are working - fix!
+      }
+      else {
+        console.log('positive response from CanUser');
+      }
+
+      console.log('requireUserCan continues');
       next();
     }
-  };
+
+  ];  //callback stack
 };
 
 

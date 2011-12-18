@@ -18,6 +18,6 @@ var UserSchema = module.exports = new Schema({
 // check role/access on individual user
 UserSchema.methods.canUser = function(doWhat) {
   var ret = roles.canRole(this.role, doWhat);
-  console.log('can user %s? %d', doWhat, ret);
+  console.log('can user %s? (role:%s) %d', doWhat, this.role, ret);
   return ret;
 };

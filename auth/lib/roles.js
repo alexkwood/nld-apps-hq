@@ -25,12 +25,17 @@ var canRole = module.exports.canRole = function(role, doWhat) {
   try {
     if (! _.isUndefined(roles[role]))
       if (! _.isUndefined(roles[role][doWhat]))
-        if (roles[role][doWhat] === true) return true;
+        if (roles[role][doWhat] === true) {
+          console.log('canRole %s CAN %s', role, doWhat);
+          return true;
+        }
     }
-  catch(e) {}
-  finally {
-    return false;
+  catch(e) {
+    console.error('error caught in canRole: ', e);
   }
+
+  console.log('canRole %s CANNOT %s', role, doWhat);
+  return false;
 };
 
 // given a modeled user, check perm
