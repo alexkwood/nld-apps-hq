@@ -1,3 +1,6 @@
 [submodule "node_modules/http-proxy"]
 	path = node_modules/http-proxy
 	url = git@github.com:newleafdigital/node-http-proxy.git
+[submodule "auth/node_modules/mongoose-admin"]
+	path = auth/node_modules/mongoose-admin
+	url = git@github.com:newleafdigital/mongoose-admin.git
