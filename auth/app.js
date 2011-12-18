@@ -23,6 +23,7 @@ var app = module.exports = express.createServer();
 // name for logging/scope checking
 app.name = 'Auth';
 
+app.appRoot = __dirname;
 
 // == this doesn't work ?? ==
 //var parentApp = null;
