@@ -13,7 +13,7 @@ module.exports = function(app) {
   //var User = mongoose.model('User', app.UserSchema);
   //console.log('modeled:', User);
 
-  app.get('/admin/users', app.loadUser, app.requireUserCan('admin_users'),
+  app.get('/admin/users', app.ensureLoadUser, app.requireUserCan('admin_users'),
       function(req, res) {
         res.render('admin/users', {
           title: 'User Admin',
@@ -42,7 +42,7 @@ module.exports = function(app) {
         app: app,
 
         middleware: [
-          app.loadUser,
+          //app.loadUser,
           app.requireUserCan('admin_users')
         ],
         

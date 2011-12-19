@@ -7,12 +7,12 @@
 
 var _ = require('underscore');
 
-module.exports = function(app, parentApp, envt) {
+module.exports = function(app, parentApp) {
 
   if (! _.isEmpty(parentApp)) {
     if (! _.isEmpty(parentApp.sessionStore)) {
       app.sessionStore = parentApp.sessionStore;
-      console.log('%s taking parent sessionStore', envt);
+      console.log('%s taking parent sessionStore', app.name);
 
       return;
     }
@@ -20,6 +20,6 @@ module.exports = function(app, parentApp, envt) {
 
   var MongoStore = require('connect-mongodb');
   app.sessionStore = new MongoStore({db: app.db.connection.db, reapInterval: 3000 });
-  console.log('%s gets its own sessionStore', envt);
+  console.log('%s gets its own sessionStore', app.name);
 
 };
