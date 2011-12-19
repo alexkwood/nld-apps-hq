@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
+  , Promise = mongoose.Promise
   , roles = require('./roles')
   , _ = require('underscore')
 
@@ -30,3 +31,15 @@ UserSchema.methods.canUser = function(doWhat) {
   console.log('can user %s? (role:%s) %d', doWhat, this.role, ret);
   return ret;
 };
+
+
+// for express-mongoose
+UserSchema.statics.getUsers = function(callback) {
+  var promise = new Promise;
+  if (callback) promise.addBack(callback);
+
+  this.find({}, promise.resolve.bind(promise));
+  return promise;
+};
+
+
