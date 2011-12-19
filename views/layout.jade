@@ -3,4 +3,12 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body!= body
+  body
+    include header
+
+    //- != header
+
+    section#main
+      != body
+
+    include footer

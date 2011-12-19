@@ -1,0 +1,19 @@
+h2 User Admin
+
+div.admin
+  table#users
+    tr
+      th
+      th ID
+      th Name
+      th Role
+      th Joined
+
+    - var count = 0
+    - each user in users
+      tr
+        td.count!= ++count
+        td.id!= user._id
+        td.name!= user.fb.name.full
+        td.role!= user.role
+        td.joined!= user.joined
