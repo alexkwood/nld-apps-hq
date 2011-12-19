@@ -41,10 +41,11 @@ var parentApp = function() {
 }();  //(load return value into var)
 
 
+/*
 app.mounted(function(parent) {
   console.warn('CAUGHT %s app mounted by %s', app.name, parent.name);
 });
-
+*/
 
 
 // configuration
@@ -55,9 +56,7 @@ app.conf = require('./conf');
 // we want the PARENT to trump the child, since the parent needs to control sessions, etc!
 if (parentApp) {
   if (!_.isUndefined(parentApp.conf)) {
-    //console.log('parent has conf too!');
     _.extend(app.conf, parentApp.conf);
-    //console.log('merged w/parent conf: ', app.conf);
   }
 }
 
@@ -168,8 +167,6 @@ app.UserSchema.plugin(mongooseAuth, {
 var User = mongoose.model('User', app.UserSchema);
 
 
-// == eliminated authenticateFromLoginToken ==
-
 app.use(express.logger('[Auth] :method :url')); 
 
 // @todo are these necessary w/ parentApp??
@@ -180,12 +177,13 @@ app.use(express.methodOverride());
 
 app.use(express.cookieParser());
 
-app.use(express.session({
-  secret: app.conf.sessionSecret,
-  //cookie: {maxAge: 60000*60*24*30},   // 30 days?
-  store: app.sessionStore   // (mongo, above)
-}));
-
+  if (! parentApp) {
+    app.use(express.session({
+      secret: app.conf.sessionSecret,
+      //cookie: {maxAge: 60000*60*24*30},   // 30 days?
+      store: app.sessionStore   // (mongo, above)
+    }));
+  }
 
 // routes for auths; wraps everyauth middleware. only apply to parent app.
 if (parentApp) parentApp.use(mongooseAuth.middleware());
@@ -210,8 +208,6 @@ if (parentApp) {
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
   everyauth.debug = true;
-  
- // @todo output every request, how?
 });
 
 app.configure('production', function(){
@@ -223,14 +219,13 @@ app.configure('production', function(){
 // and a parent app uses that middleware, the parent app won't have the redirect mappings.
 // (would need to copy app.redirects separately)
 
-
+/*
 // test: does a global middleware set in a sup-app work in parent?
 app.use( function testAuthGlobalMiddleware(req,res,next) {
   console.log('in auth global middleware!');
   next();
 });
-
-
+*/
 
 
 // WHY AREN'T ANY OF THESE ERROR HANDLERS WORKING???
@@ -307,20 +302,16 @@ if (parentApp) parentApp.loadUser = app.loadUser;
 // make sure loadUser runs on every request
 // if mounted, set only on parent app, otherwise dup
 if (parentApp) {
-  console.warn('auth has parent app, set up loadUser to be applied on configure.');
-  parentApp.configure( function() {
-    console.warn('APPLYING loadUser middleware to parent app.');
-    
-    parentApp.use( parentApp.loadUser );
-    console.log('parent stack after:', parentApp.stack);
-  });
+  //console.warn('APPLYING loadUser middleware to parent app.');
+  parentApp.use( parentApp.loadUser );
+  //console.log('parent stack after:', parentApp.stack);
 }
 //else {
 // == try on both ==
 //console.warn('no parent app, setting up loadUser to be applied on configure.');
-  console.warn('APPLYING loadUser middleware to auth app.');
+  //console.warn('APPLYING loadUser middleware to auth app.');
   app.use( app.loadUser ); 
-  console.log('auth stack after:', app.stack);
+  //console.log('auth stack after:', app.stack);
 //}
 
 
@@ -380,7 +371,7 @@ app.requireUserCan = function requireUserCan(doWhat) {
         console.log('positive response from CanUser');
       }
 
-      console.log('requireUserCan continues');
+      //console.log('requireUserCan continues');
       next();
     }
 
@@ -418,9 +409,9 @@ if (parentApp) applySharedDynamicHelpers(parentApp);
 // tmp: make sure loadUser is running globally
 // WHY OH WHY OH WHY IS THIS RUNNING ___BEFORE___ loadUser??????????
 app.ensureLoadUser = function ensureLoadUser(req, res, next) {
-  console.warn('in ensureLoadUser.');
+  //console.warn('in ensureLoadUser.');
   if (req.ranLoadUser) {
-    console.warn('Already ran loadUser, GOOD');
+    //console.warn('Already ran loadUser, GOOD');
     next();
   }
   else {
@@ -432,65 +423,50 @@ if (parentApp) parentApp.ensureLoadUser = app.ensureLoadUser;
 
 
 
-// don't mount routes immediately -- if this is a sub-app, should wait until parent has loaded all middlware to mount,
-// otherwise middleware stack order gets screwed up
-// PROBABLY POINTLESS!
-
-app.loadRouters = function(app) {
+app.use(app.router);  //(redundant now)
 
 
-  // [after all the middleware]
-  app.use(app.router);
+// Routes
 
-
-  // Routes
-
-  // do we need check if parent app has a route at same path, don't load this if so? ... appears not, parent route overrides. (good)
-  app.get('/', app.ensureLoadUser, app.requireUser, function (req, res) {
-    console.warn('rendering AUTH index');
-
-    res.render('app', {
-      title: 'Auth',
-    });
+// do we need check if parent app has a route at same path, don't load this if so? ... appears not, parent route overrides. (good)
+app.get('/', app.ensureLoadUser, app.requireUser, function (req, res) {
+  //console.warn('rendering AUTH index');
+  res.render('app', {
+    title: 'Auth',
   });
+});
 
 
-  // [don't need to check if logged in to logout]
-  app.get('/bye', function (req, res) {
-    if (req.session) {
-      req.session.destroy(function () {});
-    }
+// [don't need to check if logged in to logout]
+app.get('/bye', function (req, res) {
+  if (req.session) {
+    req.session.destroy(function () {});
+  }
+  res.redirect('/');
+  res.end(); //?
+});
+
+
+app.get('/login', app.ensureLoadUser, function (req, res) {
+  // if already logged in, redirect to app
+  if (app.isUserLoggedIn(req, res)) {
+    console.log('user is already logged in, redirect to app');
     res.redirect('/');
     res.end(); //?
+  }
+
+  res.render('login', {
+    title: 'New Leaf Digital Apps',
   });
+});
 
 
-  app.get('/login', app.ensureLoadUser, function (req, res) {
-    // if already logged in, redirect to app
-    if (app.isUserLoggedIn(req, res)) {
-      console.log('user is already logged in, redirect to app');
-      res.redirect('/');
-      res.end(); //?
-    }
-
-    res.render('login', {
-      title: 'New Leaf Digital Apps',
-    });
-  });
-
-
-  // placeholder
-  app.get('/admin', app.ensureLoadUser, app.requireUserCan('admin_users'),
-    function(req, res, next) {
-      res.send('Captain on deck');
-    }
-  );
-
-};  // loadRouters
-
-if (!parentApp) app.loadRouters(app);
-else console.warn('Not loading Auth routes yet - parent needs to init them when ready!');
-
+// placeholder
+app.get('/admin', app.ensureLoadUser, app.requireUserCan('admin_users'),
+  function(req, res, next) {
+    res.send('Captain on deck');
+  }
+);
 
 
 

@@ -1,15 +1,12 @@
 // HQ app. central layer on top of auth and sub-apps.
 
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated?
-// @todo look in the express examples for smart favicon handling, before the logger.
-//      - express.favicon() ?
 // @todo DB is now loaded in auth module, not parent. ok?
-// @todo remove app.configure() except for specific envts, redundant
+
 
 var express = require('express')
-  //, routes = require('./routes')
   , _ = require('underscore')
-  ;
+
 
 // this is the PARENT app
 var app = module.exports = express.createServer();
@@ -25,7 +22,6 @@ app.name = 'HQ';
 
 // load conf. (each child app might have its own conf.)
 app.conf = require('./conf');
-//console.log('parent conf: ', app.conf);
 
 
 // populate DB [fresh] -- using lib in auth submod
@@ -69,15 +65,14 @@ app.configure('production', function(){
 });
 
 
+/*
 // try to set up middleware that runs on EVERY PATH w/o being explicitly defined on each one.
 // (this seems to be the FIRST middleware to run)
 app.use( function testGlobalMiddleware(req, res, next) {
   console.warn('IN GLOBAL MIDDLEWARE, path is ', req.path);
   next();
 });
-
-// load this app's routes now. (before mounting, otherwise mounted app's roots take precedence.)
-app.use(app.router);
+*/
 
 
 // load auth sub-app
@@ -93,51 +88,48 @@ auth.mounted(function(parent){
 
 
 // test app.name
-console.warn('parent app is named %s', app.name);
-console.warn('auth app is named %s', auth.name);
+//console.warn('parent app is named %s', app.name);
+//console.warn('auth app is named %s', auth.name);
 
-
-console.warn('APPLYING partials middleware to app.');
 
 // load partials for all routes
-// IMPT: these need to run AFTER loadUser (in auth app), for user to display
+// IMPT: these need to run AFTER loadUser (in auth app, on load), for user to display
 app.use(function setLocalTitle(req, res, next) {
-    console.warn('in setLocalTitle');
-    res.local('title', 'NewLeafDigital Apps');
-    res.local('testLocal', 'testing');
-    next();
+  //console.warn('in setLocalTitle');
+  res.local('title', 'NewLeafDigital Apps');
+  next();
 });
 
 app.use(function loadPartials(req, res, next) {
-  console.warn('in loadPartials');
-  res.partial('header.jade', {}, function(err, html) {
+  //console.warn('in loadPartials');
+  
+  // figure out how this is supposed to work... shouldn't need res.local() too
+  res.partial('header', { /*as:'global'*/ }, function(err, html) {
     if (err) {
       console.error('Failed to render header: ', err);
       res.local('header', '');
       return next();
     }
-    console.warn('rendered header:', html);
-    res.local('header', html);
+
+    //console.warn('rendered header:', html);
+    res.local('header', html);  // necessary? apparently so
 
     next();
   });
 });
 
 
+// load parent app's routes now. 
+// ** MUST run __after__ auth loads, otherwise INDIVIDUAL ROUTE MIDDLEWARE FROM AUTH TAKE PRECEDENCE OVER GLOBAL MIDDLEWARE HERE!!
+app.use(app.router);
+
 
 
 // MOUNT AUTH APP at sub-path. auto-namespaces paths at sub.
 //app.use('/auth', auth);
 // -- change: auth paths should be global, make sure apps don't overlap.
-// -- this also loads the middlware, like loadUser, into the stack.
 console.warn('MOUNTING auth app');
 app.use(auth);
-
-
-
-// init auth routes now
-// THIS IS PROBABLY STUPID, REMOVE AFTER VERIFYING THAT
-auth.loadRouters(auth);
 
 
 //app.dynamicHelpers({});
@@ -178,9 +170,8 @@ app.use(appErrorHandler);
 auth.use(appErrorHandler);
 
 
-
-console.log('app stack: ', app.stack);
-console.log('auth stack: ', auth.stack);
+//console.log('app stack: ', app.stack);
+//console.log('auth stack: ', auth.stack);
 
 
 if (! module.parent) {
