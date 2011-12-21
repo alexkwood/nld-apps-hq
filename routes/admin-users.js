@@ -13,12 +13,30 @@ module.exports = function(app) {
   //var User = mongoose.model('User', app.UserSchema);
   //console.log('modeled:', User);
 
-  app.get('/admin/users', app.ensureLoadUser, app.requireUserCan('admin_users'),
+  app.get('/admin/users', app.requireUserCan('admin_users'),
       function(req, res) {
         res.render('admin/users', {
           title: 'User Admin',
           users: User.getUsers()
         });
+      }
+  );
+
+  app.get('/admin/users/resave', app.requireUserCan('admin_users'),
+      function(req, res) {
+        User.getUsers(function(err, users) {
+          var countSaved = 0;
+          users.forEach(function(user) {
+            user.save();
+            countSaved++;
+          });
+
+          console.log('re-saved ' + countSaved + ' users');
+          req.flash('re-saved ' + countSaved + ' users');
+
+          res.redirect('/admin/users');
+        });
+
       }
   );
 };

@@ -5,8 +5,8 @@ header#bar
     a.hq(href="/") HQ
     
     - if (everyauth.loggedIn)
-     //- - if (user.canUser('admin_users'))
-     //-   a.admin(href="/admin/users') Manage Users
+      - if (user.canUser('admin_users'))
+        a.admin(href="/admin/users") Manage Users
 
     a.flashcards(href="/spanish-flashcards") Spanish Flashcards
 

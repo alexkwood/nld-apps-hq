@@ -3,7 +3,7 @@
  */
 
 module.exports = function(app) {
-  app.get('/', app.ensureLoadUser, app.requireUser,
+  app.get('/', app.requireUser,
     function(req, res){
       //console.log('rendering HQ index');
       

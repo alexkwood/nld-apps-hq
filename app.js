@@ -132,7 +132,9 @@ console.warn('MOUNTING auth app');
 app.use(auth);
 
 
-//app.dynamicHelpers({});
+app.dynamicHelpers({
+  messages: require('express-messages')   // populate w/ req.flash()    
+});
 
 
 /*
@@ -176,7 +178,15 @@ auth.use(appErrorHandler);
 
 if (! module.parent) {
   app.listen(80);
-  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+
+  try {
+    console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+  }
+  catch(e) {
+    console.error('Failed to listen to port 80 (' + e + '). Need sudo?');
+    //process.exit(1);
+  }
+
 }
 else {
   console.log('HQ app has parent, not listening.');

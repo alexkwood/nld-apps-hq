@@ -406,22 +406,6 @@ applySharedDynamicHelpers(app);
 if (parentApp) applySharedDynamicHelpers(parentApp);
 
 
-// tmp: make sure loadUser is running globally
-// WHY OH WHY OH WHY IS THIS RUNNING ___BEFORE___ loadUser??????????
-app.ensureLoadUser = function ensureLoadUser(req, res, next) {
-  //console.warn('in ensureLoadUser.');
-  if (req.ranLoadUser) {
-    //console.warn('Already ran loadUser, GOOD');
-    next();
-  }
-  else {
-    console.error('loadUser should have run already! BADDD');
-    return res.end('FAIL');
-  }
-};
-if (parentApp) parentApp.ensureLoadUser = app.ensureLoadUser;
-
-
 
 app.use(app.router);  //(redundant now)
 
@@ -429,7 +413,7 @@ app.use(app.router);  //(redundant now)
 // Routes
 
 // do we need check if parent app has a route at same path, don't load this if so? ... appears not, parent route overrides. (good)
-app.get('/', app.ensureLoadUser, app.requireUser, function (req, res) {
+app.get('/', app.requireUser, function (req, res) {
   //console.warn('rendering AUTH index');
   res.render('app', {
     title: 'Auth',
@@ -447,7 +431,7 @@ app.get('/bye', function (req, res) {
 });
 
 
-app.get('/login', app.ensureLoadUser, function (req, res) {
+app.get('/login', function (req, res) {
   // if already logged in, redirect to app
   if (app.isUserLoggedIn(req, res)) {
     console.log('user is already logged in, redirect to app');
@@ -462,7 +446,7 @@ app.get('/login', app.ensureLoadUser, function (req, res) {
 
 
 // placeholder
-app.get('/admin', app.ensureLoadUser, app.requireUserCan('admin_users'),
+app.get('/admin', app.requireUserCan('admin_users'),
   function(req, res, next) {
     res.send('Captain on deck');
   }

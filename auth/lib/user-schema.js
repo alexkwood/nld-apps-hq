@@ -19,6 +19,11 @@ var UserSchemaRaw = /*module.exports.UserSchemaRaw =*/ {
   joined: {
     type: Date,
     default: Date.now()
+  },
+
+  // username used as foreign key in other apps
+  system_name: {
+    type: String
   }
 };
 
@@ -42,4 +47,31 @@ UserSchema.statics.getUsers = function(callback) {
   return promise;
 };
 
+
+// set system name when saving
+UserSchema.pre('save', function(next) {
+  console.log('presave user:', this);
+  
+  if (! this.system_name) {
+    console.log('new user needs system_name');
+
+    var system_name = this.fb.name.full.replace(/ /g, '').toLowerCase().replace(/[^0-9a-z]/g, '');
+    console.log("Stripped %s to %s", this.fb.name.full, system_name);
+
+    // does this system name already exist? (unlikely but possible)
+    // is there a cleaner way of running a query here?
+    mongoose.model('User', UserSchema).find({ 'system_name': system_name }, function(err, matches) {
+        if (matches.length) {
+          system_name += this.fb.id;
+          console.log('system name is already in use, appending user ID:', system_name);
+        }
+
+        this.system_name = system_name;
+        next();
+      });
+
+  }
+  
+  next();
+});
 
