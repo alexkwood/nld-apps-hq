@@ -5,7 +5,7 @@
 
 
 var express = require('express')
-  , _ = require('underscore')
+  , _ = require('underscore');
 
 
 // this is the PARENT app
@@ -21,7 +21,13 @@ app.name = 'HQ';
 
 
 // load conf. (each child app might have its own conf.)
-app.conf = require('./conf');
+try {
+  app.conf = require('./conf');
+}
+catch(e) {
+  console.error("Missing conf.js. Exiting. (" + e + ")");
+  process.exit(1);
+};
 
 
 // populate DB [fresh] -- using lib in auth submod
@@ -177,13 +183,13 @@ auth.use(appErrorHandler);
 
 
 if (! module.parent) {
-  app.listen(80);
+  app.listen(app.conf.port);
 
   try {
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
   }
   catch(e) {
-    console.error('Failed to listen to port 80 (' + e + '). Need sudo?');
+    console.error('Failed to listen to port ' + app.conf.port + ' (' + e + '). Need sudo?');
     //process.exit(1);
   }
 

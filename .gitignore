@@ -1,6 +1,9 @@
 vimproj
 *.swp
+
+# compiled dynamically from .less
 public/stylesheets/style.css
+
 log
 node_modules/.bin
 conf.js
