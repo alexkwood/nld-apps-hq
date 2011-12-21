@@ -2,4 +2,5 @@ vimproj
 *.swp
 public/stylesheets/style.css
 log
+node_modules/.bin
 conf.js
