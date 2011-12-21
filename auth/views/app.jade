@@ -1,13 +1,13 @@
 h1= title
 p Welcome to #{title}
 
-- if (everyauth.loggedIn)
-  p Hello #{fbUserName}
-  div
-    a(href='/bye') Logout  
+- if (loggedIn)
+    p Hello #{username}
+    div
+      a(href='/bye') Logout  
 
 - else
-  a(href="/auth/facebook") login with facebook
+    a(href="/auth/facebook") login with facebook
 
 
 

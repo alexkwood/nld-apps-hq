@@ -33,9 +33,7 @@ app.appRoot = __dirname;
 // how do we know the parent is an Express app and not some other module?
 // [could use mounted() callback but only 1 allowed, and this should apply before mounting]
 var parentApp = function() {
-  if (module.parent) 
-    if (module.parent.exports) 
-      return module.parent.exports;
+  if (module.parent && module.parent.exports) return module.parent.exports;
   
   return null;
 }();  //(load return value into var)
@@ -328,11 +326,11 @@ if (parentApp) {
 app.isUserLoggedIn = function isUserLoggedIn(req) {
   if (! _.isUndefined(req.user)) 
     if (! _.isUndefined(req.user._id)) {
-      console.log('appears that user is logged in: ', req.user._id);
+      // console.log('appears that user is logged in: ', req.user._id);
       return true;
     }
 
-  console.log('user does NOT seem to be logged in');
+  // console.log('user does NOT seem to be logged in');
   return false;
 };
 if (parentApp) app.isUserLoggedIn = app.isUserLoggedIn;
@@ -390,21 +388,39 @@ if (parentApp) parentApp.requireUserCan = app.requireUserCan;
 // make dynamicHelpers (for views) available to this app and parent app.
 function applySharedDynamicHelpers(app) {
   app.dynamicHelpers({
-    fbUser: function (req, res) {
-      // console.log('using dynamic helper fbUser', req.user);
-      if (req.user) 
-        if (req.user.fb.id)
-          return req.user;
+    
+    // replaces everyauth.loggedIn - for local mode, and for consistency
+    loggedIn: function(req, res) {
+      return app.isUserLoggedIn(req);
     },
     
+    // [renamed from fbUser]
+    user: function (req, res) {
+      try {
+        if (! _.isUndefined(req.user.fb.id)) {
+          return req.user;          
+        }
+      } catch(e) {}          
+      return null;
+    },
+    
+    // [renamed from fbUserName]
     // @learn is there a way for one dynamic helper to call another??
-    fbUserName: function(req, res) {
+    username: function(req, res) {
       try {
         if (! _.isUndefined(req.user.fb.name.full)) {
           return req.user.fb.name.full;        
         }
-      }
-      catch(e) {}
+      } catch(e) {}
+      return null;
+    },
+    
+    // pass localNoAuth mode to views
+    localNoAuth: function(req, res) {
+      try {
+        if (app.conf.localNoAuth) return true;
+      } catch(e) {}
+      return false;
     }
   });
 }

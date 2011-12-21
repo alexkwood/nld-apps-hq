@@ -4,18 +4,21 @@ header#bar
   div.links
     a.hq(href="/") HQ
     
-    - if (everyauth.loggedIn)
+    - if (loggedIn)
       - if (user.canUser('admin_users'))
         a.admin(href="/admin/users") Manage Users
 
     a.flashcards(href="/spanish-flashcards") Spanish Flashcards
 
   div.user
-    - if (everyauth.loggedIn)
-        div.username #{fbUserName}
-        a.logout(href='/bye') Logout  
-
+    - if (localNoAuth)
+      
     - else
-        a.login(href="/auth/facebook") Login with Facebook
+      - if (loggedIn)
+          div.username #{username}
+          a.logout(href='/bye') Logout  
 
+      - else
+          a.login(href="/auth/facebook") Login with Facebook
+      
   //!= testLocal
