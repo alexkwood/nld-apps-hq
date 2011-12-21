@@ -2,6 +2,8 @@
 
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated?
 // @todo DB is now loaded in auth module, not parent. ok?
+// @todo make error handlers work
+// @todo ask on stackoverflow how to check if nested obj exists
 
 
 var express = require('express')
@@ -71,26 +73,14 @@ app.configure('production', function(){
 });
 
 
-/*
-// try to set up middleware that runs on EVERY PATH w/o being explicitly defined on each one.
-// (this seems to be the FIRST middleware to run)
-app.use( function testGlobalMiddleware(req, res, next) {
-  console.warn('IN GLOBAL MIDDLEWARE, path is ', req.path);
-  next();
-});
-*/
-
 
 // load auth sub-app
-console.warn('parent app loading Auth app...');
 var auth = require('./auth/app.js');
-console.warn('Auth app LOADED but not yet mounted.');
 
-/*
-auth.mounted(function(parent){
-  console.warn('parent app caught auth mount');
-});
-*/
+
+// auth.mounted(function(parent){
+//   console.warn('parent app caught auth mount');
+// });
 
 
 // test app.name
@@ -101,7 +91,6 @@ auth.mounted(function(parent){
 // load partials for all routes
 // IMPT: these need to run AFTER loadUser (in auth app, on load), for user to display
 app.use(function setLocalTitle(req, res, next) {
-  //console.warn('in setLocalTitle');
   res.local('title', 'NewLeafDigital Apps');
   next();
 });
@@ -114,12 +103,11 @@ app.use(function loadPartials(req, res, next) {
     if (err) {
       console.error('Failed to render header: ', err);
       res.local('header', '');
-      return next();
+      return next();    // (returns to loadPartials)
     }
 
     //console.warn('rendered header:', html);
     res.local('header', html);  // necessary? apparently so
-
     next();
   });
 });
@@ -134,7 +122,7 @@ app.use(app.router);
 // MOUNT AUTH APP at sub-path. auto-namespaces paths at sub.
 //app.use('/auth', auth);
 // -- change: auth paths should be global, make sure apps don't overlap.
-console.warn('MOUNTING auth app');
+// console.warn('MOUNTING auth app');
 app.use(auth);
 
 

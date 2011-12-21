@@ -3,6 +3,15 @@
   "version": "0.0.1",
   "author": "Ben Buckman - NewLeafDigital.com",
   "dependencies": {
+    "connect-less" : "> 0",
+    "mongodb": "*",
+    "mongoose" : "> 0",
+    "underscore" : "> 0",
+    "express" : "> 0",
+    "express-mongoose" : "> 0",
+    "express-messages" : "> 0",
+    "jade" : "> 0",
+    "pkginfo" : "> 0",
   },
   "engine": "node 0.6.5"
 }

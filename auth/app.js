@@ -80,88 +80,91 @@ var roles = require('./lib/roles');
 // show all configurable options
 //console.log('all fb options:', everyauth.facebook.configurable());
 
-app.UserSchema.plugin(mongooseAuth, {
-  everymodule: {
-    everyauth: {
-      User:function () {
-        return mongoose.model('User');    // attach the _model_
-      }  
-    }
-  },
+// localNoAuth mode disables all this remote auth
+if (! app.conf.localNoAuth) {
+  app.UserSchema.plugin(mongooseAuth, {
+    everymodule: {
+      everyauth: {
+        User:function () {
+          return mongoose.model('User');    // attach the _model_
+        }  
+      }
+    },
   
-  facebook: {
-    everyauth: {
+    facebook: {
+      everyauth: {
 
-      // [refactoring all this as keys in everyauth obj, rather than chained functions]
-      myHostname: app.conf.hostName,  // otherwise oauth doesn't work
-      appId: app.conf.fbAppId,
-      appSecret: app.conf.fbAppSecret,
-      scope: 'email',   // minimal
+        // [refactoring all this as keys in everyauth obj, rather than chained functions]
+        myHostname: app.conf.hostName,  // otherwise oauth doesn't work
+        appId: app.conf.fbAppId,
+        appSecret: app.conf.fbAppSecret,
+        scope: 'email',   // minimal
       
 
-      // this runs w/existing session or w/oauth popup
-      findOrCreateUser: function (session, accessToken, accessTokExtra, fbUser) {
+        // this runs w/existing session or w/oauth popup
+        findOrCreateUser: function (session, accessToken, accessTokExtra, fbUser) {
 
-        // console.log("findOrCreateUser",
-        //   require('util').inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser})
-        // );
+          // console.log("findOrCreateUser",
+          //   require('util').inspect({'session':session,'accessToken':accessToken,'accessTokExtra':accessTokExtra,'fbUser':fbUser})
+          // );
 
-        var promise = this.Promise()
-          , User = this.User()();  // convoluted way of getting the MODEL... simplify?
+          var promise = this.Promise()
+            , User = this.User()();  // convoluted way of getting the MODEL... simplify?
 
-        // == stripped email check, ID is enough ==
+          // == stripped email check, ID is enough ==
 
-        // console.log('Looking for user with fb.id %s', fbUser.id);
+          // console.log('Looking for user with fb.id %s', fbUser.id);
         
-        // try to match ID instead ..?    (@todo why are both of these necessary??)
-        User.findOne({'fb.id': fbUser.id}, function (err, user) {
+          // try to match ID instead ..?    (@todo why are both of these necessary??)
+          User.findOne({'fb.id': fbUser.id}, function (err, user) {
           
-          // should be a complete user obj w/ all FB metadata
-          if (user) {
-            // console.log('user match on fb.id %s', user);
-            return promise.fulfill(user);
-          }
-
-          // console.log("CREATING FB USER");
-          
-          // createWithFB() is a model 'static', part of mongoose-auth
-          // but this doesn't SAVE anything to DB!
-          User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, user) {
-            if (err) {
-              // console.log('ERROR creating fb User');
-              return promise.fail(err);
+            // should be a complete user obj w/ all FB metadata
+            if (user) {
+              // console.log('user match on fb.id %s', user);
+              return promise.fulfill(user);
             }
-            
-            // console.log('created FB user:', user);
-            
-            // [ADDED]
-            // save to DB. this adds onto existing record.
-            user.save(function (err, user) {
+
+            // console.log("CREATING FB USER");
+          
+            // createWithFB() is a model 'static', part of mongoose-auth
+            // but this doesn't SAVE anything to DB!
+            User.createWithFB(fbUser, accessToken, accessTokExtra.expires, function (err, user) {
               if (err) {
-                // console.log("Error saving FB user to DB");
+                // console.log('ERROR creating fb User');
                 return promise.fail(err);
               }
-              // console.log('saved FB user to DB', user);
-              
-              promise.fulfill(user);
-              // (this goes on to addToSession(), which puts userId in req.session.auth.userId)
-            });
             
-          });
-        }); //findOne
+              // console.log('created FB user:', user);
+            
+              // [ADDED]
+              // save to DB. this adds onto existing record.
+              user.save(function (err, user) {
+                if (err) {
+                  // console.log("Error saving FB user to DB");
+                  return promise.fail(err);
+                }
+                // console.log('saved FB user to DB', user);
+              
+                promise.fulfill(user);
+                // (this goes on to addToSession(), which puts userId in req.session.auth.userId)
+              });
+            
+            });
+          }); //findOne
 
-        return promise;
-      }, //findOrCreateUser
+          return promise;
+        }, //findOrCreateUser
 
-      redirectPath: '/',     // was /auth, then /app, try root.
-                             // does this respect app.redirect() mapping??
+        redirectPath: '/',     // was /auth, then /app, try root.
+                               // does this respect app.redirect() mapping??
 
-      entryPath: '/auth/facebook',
-      callbackPath: '/auth/facebook/callback'
+        entryPath: '/auth/facebook',
+        callbackPath: '/auth/facebook/callback'
 
-    } //everyauth
-  } //facebook
-}); //mongooseAuth plugins
+      } //everyauth
+    } //facebook
+  }); //mongooseAuth plugins
+} //localNoAuth
 
 
 var User = mongoose.model('User', app.UserSchema);
@@ -185,9 +188,12 @@ app.use(express.cookieParser());
     }));
   }
 
+
 // routes for auths; wraps everyauth middleware. only apply to parent app.
-if (parentApp) parentApp.use(mongooseAuth.middleware());
-else app.use(mongooseAuth.middleware());
+if (! app.conf.localNoAuth) {
+  if (parentApp) parentApp.use(mongooseAuth.middleware());
+  else app.use(mongooseAuth.middleware());
+}
 
 
 // only use local stylesheets etc if no parent.
@@ -196,11 +202,11 @@ if (!parentApp) app.use(express.static(__dirname + '/public'));
 
 // view helpers
 // needs to run after modeling/plugin above.
-mongooseAuth.helpExpress(app);
+if (! app.conf.localNoAuth) mongooseAuth.helpExpress(app);
 
 // klugy: load everyauth view helpers on parent app too.
 // what's the proper way to share dynamic helpers?
-if (parentApp) {
+if (parentApp && !app.conf.localNoAuth) {
   mongooseAuth.helpExpress(parentApp);
 }
 
