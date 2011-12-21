@@ -7,3 +7,9 @@ public/stylesheets/style.css
 log
 node_modules/.bin
 conf.js
+npm-debug.log
+.bin
+.lock-wscript
+config.log
+*.lock-wscript
+*.waf*
