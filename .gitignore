@@ -2,3 +2,4 @@ vimproj
 *.swp
 public/stylesheets/style.css
 log
+conf.js
