@@ -34,7 +34,6 @@ app.appRoot = __dirname;
 // [could use mounted() callback but only 1 allowed, and this should apply before mounting]
 var parentApp = function() {
   if (module.parent && module.parent.exports) return module.parent.exports;
-  
   return null;
 }();  //(load return value into var)
 
@@ -511,7 +510,7 @@ app.use(function(err, req, res, next) {
 
 
 if (! module.parent) {
-  app.listen(80);
+  app.listen(app.conf.port);
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 }
 else {
