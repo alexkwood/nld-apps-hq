@@ -47,6 +47,9 @@ Seq()
   })*/
   ;
 
+// this runs before the sequence ends!!!
+console.log('== out of sequence ==');
+
 // a way to build key:value pairs async'ly:
 Seq()
   .seq('firstVar', function() { this(null, 'A'); })
