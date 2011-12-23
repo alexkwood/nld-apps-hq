@@ -1,4 +1,4 @@
-var _ = require('underscore');
+/*var _ = require('underscore');
 
 var o = {
   a: 1,
@@ -19,3 +19,19 @@ try {
 catch(e) {
   console.log('caught: ', e);
 }
+*/
+
+// test 'finally'
+function testMe() {
+  try {
+    return 'done';
+  }
+  catch(e) {
+    return 'caught error' + e;
+  }
+  finally {
+    // return here supersedes return above!!
+    // return 'finally!';
+  }
+}
+console.log( testMe() );
