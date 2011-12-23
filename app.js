@@ -7,7 +7,8 @@
 
 
 var express = require('express')
-  , _ = require('underscore');
+  , _ = require('underscore')
+  , messages = require('express-messages')
 
 
 // this is the PARENT app
@@ -126,9 +127,11 @@ app.use(app.router);
 app.use(auth);
 
 
-app.dynamicHelpers({
-  messages: require('express-messages')   // populate w/ req.flash()    
-});
+var sharedDynamicHelpers = {
+  messages: messages   // populate w/ req.flash()
+};
+app.dynamicHelpers(sharedDynamicHelpers);
+auth.dynamicHelpers(sharedDynamicHelpers);
 
 
 /*
@@ -148,8 +151,9 @@ require('./routes/admin-users')(app, auth.UserSchema);
 
 
 // error handling
+// -- this caught a mongo error in app.param()
 var appErrorHandler = function(err, req, res, next) {
-  console.log('*** in app.error handler', err);
+  console.log('*** in app.error handler', require('util').inspect(err));
 
   //if (err instanceof NotFound) {
   //  res.render('404.jade');

@@ -5,6 +5,7 @@ var mongoose = require('mongoose')
   , Promise = mongoose.Promise
   , roles = require('./roles')
   , _ = require('underscore')
+  , async = require('async');
 
 // leave mostly bare, let MongooseAuth fill it in
 // added: role
@@ -37,6 +38,18 @@ UserSchema.methods.canUser = function(doWhat) {
   return ret;
 };
 
+// get displayed username (FB Full Name)
+// @todo convert this to a getter?
+UserSchema.methods.displayName = function() {
+  try {
+    if (!_.isUndefined(this.fb.name.full)) {
+      return this.fb.name.full;
+    }
+  }
+  catch(e) {}
+  return null;
+};
+
 
 // for express-mongoose
 UserSchema.statics.getUsers = function(callback) {
@@ -49,29 +62,63 @@ UserSchema.statics.getUsers = function(callback) {
 
 
 // set system name when saving
+// note: assuming the user has all the FB properties, not accounting for new & EMPTY system_name.
 UserSchema.pre('save', function(next) {
-  console.log('presave user:', this);
+  var user = this;
+  console.log('presave user ', user._id);
   
-  if (! this.system_name) {
-    console.log('new user needs system_name');
+  if (!_.isUndefined(user.system_name) && !_.isEmpty(user.system_name)) {
+    console.log('user already has system name %s', user.system_name);
+    next();
+  }
 
-    var system_name = this.fb.name.full.replace(/ /g, '').toLowerCase().replace(/[^0-9a-z]/g, '');
-    console.log("Stripped %s to %s", this.fb.name.full, system_name);
+  console.log('new user needs system_name');
+  var system_name = '';
 
-    // does this system name already exist? (unlikely but possible)
-    // is there a cleaner way of running a query here?
-    mongoose.model('User', UserSchema).find({ 'system_name': system_name }, function(err, matches) {
-        if (matches.length) {
-          system_name += this.fb.id;
+  // need a series for query.
+  async.series([
+    function(cb) {
+      // use alias first
+      if (!_.isEmpty(user.fb.alias)) {
+        system_name = user.fb.alias;
+        console.log("Using FB alias: %s", system_name);
+      }
+      else console.log('no fb.alias?', user.fb, user.fb.alias);
+      cb();
+    },
+    
+    function(cb) {
+      if (_.isEmpty(system_name)) {
+        system_name = user.fb.name.full.replace(/ /g, '').toLowerCase().replace(/[^0-9a-z]/g, '');
+        console.log("Stripped %s to %s", user.fb.name.full, system_name);
+      }
+      cb()
+    },
+    
+    function(cb) {
+      // does this system name already exist? (unlikely but possible)
+      // (is there a cleaner way of running a query here?)
+      mongoose.model('User', UserSchema).find({ 'system_name': system_name }, function(err, matches) {
+        if (! _.isEmpty(matches)) {
+          system_name += user.fb.id;
           console.log('system name is already in use, appending user ID:', system_name);
         }
+        else {
+          console.log('system name %s is new', system_name);
+        }
+        cb();
+      })
+    },
+    
+    function(cb){
+      user.system_name = system_name;
+      // console.log('check new system_name:', user);
 
-        this.system_name = system_name;
-        next();
-      });
-
-  }
+      next();
+      cb();
+    }
+  ]); //series
   
-  next();
+  // [anything after this series will actually run BEFORE (or parallel to) series.]  
 });
 

@@ -6,19 +6,17 @@ header#bar
     
     - if (loggedIn)
       - if (user.canUser('admin_users'))
-        a.admin(href="/admin/users") Manage Users
+          a.admin(href="/admin/users") Manage Users
 
     a.flashcards(href="/spanish-flashcards") Spanish Flashcards
 
   div.user
+    //- LOCAL TESTING MODE
     - if (localNoAuth)
-      
-    - else
-      - if (loggedIn)
-          div.username #{username}
-          a.logout(href='/bye') Logout  
+      div.warning In local test mode
 
-      - else
-          a.login(href="/auth/facebook") Login with Facebook
-      
-  //!= testLocal
+    - if (loggedIn)
+        div.username #{username}
+        a.logout(href='/bye') Logout  
+    - else if (! localNoAuth)
+        a.login(href="/auth/facebook") Login with Facebook
