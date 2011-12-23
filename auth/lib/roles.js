@@ -37,16 +37,3 @@ var canRole = module.exports.canRole = function(role, doWhat) {
   console.log('canRole %s CANNOT %s', role, doWhat);
   return false;
 };
-
-// given a modeled user, check perm
-// put this in UserSchema instead, disable here.
-/*var canUser = module.exports.canUser = function(user, doWhat) {
-  try {
-    if (canRole(user.role, doWhat) === true)
-      return true;
-  }
-  catch(e) {}
-  finally {
-    return false;
-  }
-};*/
