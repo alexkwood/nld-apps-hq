@@ -15,6 +15,7 @@ var express = require('express')
 var app = module.exports = express.createServer();
 
 
+
 // run early so middleware doesn't screw w/favicon
 app.use(express.favicon());
 
@@ -22,6 +23,8 @@ app.use(express.favicon());
 // name for logging/scope checking
 app.name = 'HQ';
 
+app.appRoot = __dirname;
+var libDir = app.appRoot + '/lib';
 
 // load conf. (each child app might have its own conf.)
 try {
@@ -34,10 +37,10 @@ catch(e) {
 
 
 // populate DB [fresh] -- using lib in auth submod
-require('./auth/lib/db')(app, null);
+require(libDir + '/db')(app, null);
 
 // same w/ sessionStore
-require('./auth/lib/sessionStore')(app, null);
+require(libDir + '/sessionStore')(app, null);
 
 
 app.use(express.logger('[HQ] :method :url'));

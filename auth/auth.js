@@ -38,6 +38,9 @@ var parentApp = function() {
 }();  //(load return value into var)
 
 
+// use parent lib for common stuff
+var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
+
 /*
 app.mounted(function(parent) {
   console.warn('CAUGHT %s app mounted by %s', app.name, parent.name);
@@ -59,16 +62,16 @@ if (parentApp) {
 
 
 // populate DB fresh or from parent
-require('./lib/db')(app, parentApp);
+require(libDir + '/db')(app, parentApp);
 
 // same w/ sessionStore
-require('./lib/sessionStore')(app, parentApp);
+require(libDir + '/sessionStore')(app, parentApp);
 
 
-app.UserSchema = require('./lib/user-schema').UserSchema;
+app.UserSchema = require(app.appRoot + '/lib/user-schema').UserSchema;
 
 // roles incl roles, defaulRole, canRole()
-var roles = require('./lib/roles');
+var roles = require(app.appRoot + '/lib/roles');
 
 
 // EVERYAUTH
