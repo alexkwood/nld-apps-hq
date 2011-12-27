@@ -79,7 +79,7 @@ app.configure('production', function(){
 
 
 // load auth sub-app
-var auth = require('./auth/app.js');
+var auth = require('./auth/auth.js');
 
 
 // auth.mounted(function(parent){
