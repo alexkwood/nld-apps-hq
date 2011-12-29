@@ -178,6 +178,7 @@ app.use(express.methodOverride());
 
 app.use(express.cookieParser());
 
+  // good restriction?
   if (! parentApp) {
     app.use(express.session({
       secret: app.conf.sessionSecret,
@@ -434,6 +435,7 @@ function applySharedHelpers(app) {
       }
       return null;
     }
+    
   });
 }
 applySharedHelpers(app);

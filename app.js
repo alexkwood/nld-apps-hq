@@ -4,6 +4,7 @@
 // @todo DB is now loaded in auth module, not parent. ok?
 // @todo make error handlers work
 // @todo ask on stackoverflow how to check if nested obj exists
+// @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed!!
 
 
 var express = require('express')
@@ -106,12 +107,12 @@ app.use(function loadPartials(req, res, next) {
   res.partial('header', { /*as:'global'*/ }, function(err, html) {
     if (err) {
       console.error('Failed to render header: ', err);
-      res.local('header', '');
+      res.local('appsHeader', '');
       return next();    // (returns to loadPartials)
     }
 
     //console.warn('rendered header:', html);
-    res.local('header', html);  // necessary? apparently so
+    res.local('appsHeader', html);  // necessary? apparently so
     next();
   });
 });
@@ -135,6 +136,13 @@ var sharedDynamicHelpers = {
 };
 app.dynamicHelpers(sharedDynamicHelpers);
 auth.dynamicHelpers(sharedDynamicHelpers);
+
+
+
+// load Flashcards app too
+var flashcards = require('./flashcards/flashcards.js');
+app.use('/flashcards', flashcards);
+console.log('MOUNTED FLASHCARDS!');
 
 
 /*
