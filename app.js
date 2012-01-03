@@ -5,6 +5,7 @@
 // @todo make error handlers work
 // @todo ask on stackoverflow how to check if nested obj exists
 // @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed!!
+// @todo is there a way for each app to console.log() w/ a namespace?
 
 
 var express = require('express')

@@ -255,7 +255,7 @@ app.loadUser = function loadUser(req, res, next) {
  
   // make sure this only runs once per request
   if (req.ranLoadUser) {
-    console.error('Already ran loadUser, skip');
+    // console.error('Already ran loadUser, skip');
     return next();
   }
   else req.ranLoadUser = true;
@@ -267,18 +267,18 @@ app.loadUser = function loadUser(req, res, next) {
   try {
     if (! _.isEmpty(req.session.auth.userId)) {
       wait = true;
-      console.log('userId already in session:', req.session.auth.userId);
+      // console.log('userId already in session:', req.session.auth.userId);
       
       // retrieve this user from DB
       User.findById(req.session.auth.userId, function (err, user) {
         
         if (!err && user) {
           req.user = user;
-          console.log('user in session found in DB, set to req.user');  //: ', req.user);
+          // console.log('user in session found in DB, set to req.user');  //: ', req.user);
           
           // res.local('user', user);
           
-          console.log('CONTINUE from loadUser (1)');
+          // console.log('CONTINUE from loadUser (1)');
           next();
         }
         else {
@@ -293,9 +293,7 @@ app.loadUser = function loadUser(req, res, next) {
 
   // waiting for callback response?
   if (! wait) {
-    console.log('user not in session, continue w/o req.user');
-
-    console.log('CONTINUE from loadUser (2)');
+    // console.log('user not in session, continue w/o req.user');
     next();
   }
 };
@@ -336,8 +334,6 @@ if (parentApp) parentApp.isUserLoggedIn = app.isUserLoggedIn;
 
 // for pages that need login. split from loadUser(), run after.
 app.requireUser = function requireUser(req, res, next) {
-  console.log('in requireUser');
-  
   if (app.isUserLoggedIn(req)) return next();
  
   console.log('no req.user._id found, go to /login');
@@ -410,7 +406,6 @@ function applySharedHelpers(app) {
     
     // [renamed from fbUser]
     user: function (req, res) {
-      // console.log('dynHelp: getting user');
       try {
         if (app.isUserLoggedIn(req)) { // && !_.isUndefined(req.user.fb.id)) {
           // console.log('got user:', req.user);
@@ -428,8 +423,6 @@ function applySharedHelpers(app) {
     // @learn is there a way for one dynamic helper to call another??
     // == was using this the wrong way, is it still needed?? ==
     username: function(req, res) {
-      console.log('dynHelp: getting username');
-      
       if (app.isUserLoggedIn(req)) {
         return req.user.displayName();
       }

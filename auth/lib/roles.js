@@ -26,7 +26,7 @@ var canRole = module.exports.canRole = function(role, doWhat) {
     if (! _.isUndefined(roles[role]))
       if (! _.isUndefined(roles[role][doWhat]))
         if (roles[role][doWhat] === true) {
-          console.log('canRole %s CAN %s', role, doWhat);
+          // console.log('canRole %s CAN %s', role, doWhat);
           return true;
         }
     }
@@ -34,6 +34,6 @@ var canRole = module.exports.canRole = function(role, doWhat) {
     console.error('error caught in canRole: ', e);
   }
 
-  console.log('canRole %s CANNOT %s', role, doWhat);
+  // console.log('canRole %s CANNOT %s', role, doWhat);
   return false;
 };
