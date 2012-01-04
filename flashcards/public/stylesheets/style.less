@@ -1,0 +1,388 @@
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  /*padding: 10px;*/
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.rounded-corners (@radius: 10px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  border-radius: @radius;
+}
+
+#main {
+  /*width: 100%;*/
+  min-height: 85%;
+  padding: 10px;
+  clear: both;
+}
+
+#footer {
+  float: left;
+  /*width: 100%;*/
+  .clearlist;
+  font-size: .8em;
+  color: #999;
+  margin: 4em 0 0 0;
+  padding: 1em;
+  //border-top: dashed #999 1px;
+}
+
+#main > h1:first-child {
+  margin-top: 0;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.clearlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+form#add-word, form#lookup-word {
+  * {
+    font-size: 1.2em;
+  }
+  
+  div.field {
+    float: left;
+    clear: both;
+    margin-bottom: 1em;
+  }
+  label {
+    float: left;
+    width: 100px;
+  }
+  
+  input.submit {
+    float: left;
+    clear: both;
+  }
+}
+
+
+form#lookup-word {
+  float: left;
+  clear: both;
+  width: 100%;
+  border-bottom: solid #999 1px;
+  margin-bottom: 1em;
+
+  label {
+    font-size: 1.1em;
+  }
+  .field.missing {
+    font-size: .7em;
+  }
+}
+
+
+ul#nav {
+  .clearlist;
+  margin: 0 0 1em 0;
+  
+  float: left;
+  width: 100%;
+  clear: both;
+  
+  li {
+    float: left;
+    display: block;
+    min-width: 15%;
+    
+    background-color: #d6d6d6;
+    padding: 5px;
+    margin-right: 1em;
+    
+    //border: solid #666 1px;
+    .rounded-corners(5px);
+    
+    a {
+      color: #000;
+      font-weight: bold;
+      padding: 3px;
+      text-decoration: none;
+      display: block;
+      
+      span.details {
+        display: block;
+        font-size: .8em;
+      }
+    }    
+  }
+  li.active {
+    background-color: #666;
+    a {
+      color: #fff;
+    }
+  }
+  
+
+  li.login, li.logout {
+    background: #ededed;
+
+    a.login, a.logout {
+      color: #888;
+    }
+  }
+  
+  li.last {}
+  
+}
+
+
+body.home #nav {
+  font-size: 3em;
+  
+  li {
+    margin-right: 2em;
+  }
+}
+
+
+ul.words, ul.definitions, ul.compounds {
+  float: left;
+  width: 100%;
+  .clearlist;
+  
+  li {
+    float: left;
+    clear: both;
+    
+    margin-bottom: .5em;
+    padding-bottom: .5em;
+    border-bottom: dotted 1px #ccc;
+    
+    div {
+      float: left;
+    }
+    
+    span {
+      margin: 0 20px 0 0;
+      width: 100px;
+      min-height: 1em;
+      display: block;
+      float: left;
+    }
+    
+    span.label {
+      color: #999;
+      margin: 0 5px 0 0;
+      width: auto;
+    }
+    
+    .group span.label {  /*filler*/
+      width: 45px;
+      text-align: right;
+    }
+  }
+  
+  .links {
+    float: left;
+    a {
+      margin-right: 1em;
+    }
+  }
+}
+
+
+body.lookup {
+  h3 {
+    margin-top: 1em;
+    /*float: left;*/
+    clear: both;
+  }
+}
+
+
+#play {
+  float: left;
+  margin-bottom: 3em;
+  min-width: 650px;
+
+  .question {
+    font-size: 3em;
+    
+    span.label {
+      color: #999;
+      margin: 0 1em 0 0;
+      width: auto;
+    }
+  }
+  
+  #answer {
+    display: none;
+    
+    font-size: 2em;
+    margin-top: 1em;
+    
+    ul.words, ul.words li {
+      width: 100%;
+      clear: both;
+      border-bottom: none;
+    }
+    
+    li div {
+      clear: both;
+    }
+    
+    div.type {
+      font-size: .8em;
+      margin-top: .5em;
+    }
+    
+    span {
+      width: auto;
+      white-space: nowrap;
+    }
+    span.label {
+      width: 5em;
+      /*clear: left;*/
+    }
+    
+    div.links {
+      clear: both;
+      font-size: .5em;
+      margin-top: 2em;
+    }
+  }
+
+  div#show-wrapper {
+    margin: 2em 0 3em 0;
+    float: left;
+    clear: both;
+    width: 100%;
+  }
+  a#show {
+    display: block;
+    float: left;
+
+    font-size: 2em;
+    
+    border: solid #ccc 4px;
+    .rounded-corners(20px);
+
+    background: #111;
+    color: #fff;
+    
+    padding: 10px 40px;
+    text-decoration: none;
+  }
+  
+  div.remaining {
+    float: left;
+    clear: left;
+    margin-top: 2em;
+    color: #666;
+  }
+}
+
+#play.lang-en #answer div.english,
+#play.lang-es #answer div.spanish
+ { display: none; }
+
+
+a.next-correct, a.next-incorrect {
+  display: block;
+  float: left;
+  font-size: 1.5em;
+  color: #fff;
+  padding: 30px 100px;
+  margin-right: 30px;
+  text-decoration: none;
+  .rounded-corners(20px);
+}
+a.next-correct {
+  background-color: green;
+}
+a.next-incorrect {
+  background-color: red;
+}
+
+a.next-restart {
+  .rounded-corners(10px);
+  display: block;
+  float: left;
+  clear: both;
+  margin-top: 2em;
+  background: #000;
+  color: #fff;
+  padding: 10px;
+  text-decoration: none;
+}
+
+#messages {
+  border: solid #999 1px;
+  .rounded-corners(10px);
+  
+  padding: 5px 5px 0 5px;
+  margin: 0 0 2em 0;
+  font-weight: bold;
+  clear: both;
+  
+  ul, li {
+    list-style-type: none;
+  }
+  ul {
+    padding-left: 0;
+    margin: 0;
+    
+    li {
+      margin-bottom: .5em;
+    }
+  }
+  span.msg-type {
+    color: #999;
+    padding-right: 1em;
+  }
+  
+  ul.error {
+    span.msg-type {
+      color: red;
+    }
+  }
+}
+
+div.gameover {
+  font-size: 4em;
+  .rounded-corners(20px);
+}
+
+div#kb-legend {
+  display: none; /*toggled w/ JS*/
+  float: right;
+  border: solid #666 1px;
+  .rounded-corners(20px);
+  padding: 8px;
+  
+  h4 {
+    margin: 0 0 .5em 0;
+  }
+  
+  div {
+    float: left;
+    clear: both;
+    font-size: .8em;
+    color: #666;
+    padding-bottom: .5em;
+    
+    span {
+      display: block;
+      float: left;
+    }
+    span.key {
+      width: 70px;
+    }
+    span.does {
+    }
+  }
+}

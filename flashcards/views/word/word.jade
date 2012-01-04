@@ -1,0 +1,29 @@
+//- partial for each word in 'list' view
+
+div.spanish
+  span.label spanish
+  span= word.word_es || '[missing]'
+
+div.english
+  span.label english      
+  span= word.word_en || '[missing]'
+
+div.type
+  span.label type
+  span!= getWordType(word.type)
+  
+div.group
+  - if (word.group != '' && word.group != null)
+      span.label Group
+      span
+        a(href='#{fcBase}/word/list?group=#{word.group}')!= word.group
+  - else
+      span.label
+      span
+
+- if (typeof showWordLinks != 'undefined' && showWordLinks == true)
+  div.links
+    a.perma(href='#{fcBase}/word/#{word._id}') link
+    - if (fcIsLoggedIn)
+      a.edit(href='#{fcBase}/word/#{word._id}/edit') edit
+      a.delete(href='#{fcBase}/word/#{word._id}/delete') delete

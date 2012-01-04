@@ -1,0 +1,27 @@
+//- global nav bar
+ul#nav
+
+  li.first(class=(activeNav=='list' ? 'active' : ''))
+    a(href='#{fcBase}/word/list', class=(activeNav=='list' ? 'active' : '')) List
+      span.details all your words
+  
+  li(class=(activeNav=='play' ? 'active' : ''))
+    a(href='#{fcBase}/play') Play
+      span.details a random word
+
+  li(class=(activeNav=='add' ? 'active' : ''))
+    a(href='#{fcBase}/word/add') Add
+      span.details a word
+
+  li(class=(activeNav=='lookup' ? 'active' : ''))
+    a(href='#{fcBase}/lookup') Lookup
+      span.details with WordReference API
+
+
+  //-this should be in global nav, not here
+  //-    - if (fcIsLoggedIn)
+  //-      li.logout.last
+  //-        a.logout(href="/logout") Logout
+  //-    - else
+  //-      li.login.last
+  //-        a.login(href="/login") Login

@@ -1,0 +1,62 @@
+form#lookup-word(method='post', action='#{fcBase}/lookup')
+  //-div.field
+  //-  label Spanish to English
+  //-  input(type='text', name='word_es', id='word_es', value=words.word_es ? words.word_es : '')
+  
+  div.field.missing (The Spanish-English dictionary is not yet available with the API.)
+
+  div.field
+    label English to Spanish
+    input(type='text', name='word_en', id='word_en', value=words.word_en ? words.word_en : '')
+  
+  div.field
+    input(type='submit', value='Lookup')
+
+
+- if (typeof definitions != 'undefined' && definitions)
+  h3 Definitions
+  
+  - if (! definitions.length)
+    div.error No definitions returned.
+  - else
+      div.intro Click on a word to add it.
+      ul.definitions
+        - each definition in definitions
+          li
+            span.label Term
+            span.term
+              a(href=definition.addWordUrl)!=definition.term
+            span.label Type
+            span.type!= getWordType(definition.type)
+            span.label Sense
+            span.sense!= definition.sense
+            span.label Usage
+            span.usage!= definition.usage
+
+
+- if (typeof compounds != 'undefined' && compounds)
+  h3 Compounds
+  - if (! compounds.length)
+    div.error No compounds returned.
+  - else
+    ul.compounds
+      - each compound in compounds
+        li
+          span.label Term
+          span.term!= compound.OriginalTerm.term
+          span.label Type
+          span.type!= getWordType(compound.type)
+          span.label Sense
+          span.sense!= compound.OriginalTerm.sense
+          span.label Usage
+          span.usage!= compound.OriginalTerm.usage
+      
+          span.label Translation
+          span.trans!= compound.FirstTranslation.term
+          span.label Sense
+          span.sense!= compound.FirstTranslation.sense
+
+    
+- if (typeof result != 'undefined' && result)
+  div.result
+    != result

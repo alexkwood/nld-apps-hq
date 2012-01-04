@@ -1,0 +1,9 @@
+
+- if (success)
+  div.success Word #{results} added!
+  
+  h3 Add another word
+
+form#add-word(method='post')
+  != form
+  input(class='submit', type='submit', value='Add Word')
