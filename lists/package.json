@@ -1,0 +1,14 @@
+{
+  "name": "interactive-shopping-list",
+  "version": "0.0.1",
+  "description": "Socket-based interactive shopping list app",
+  "author": "Ben Buckman - NewLeafDigital.com",
+  "dependencies": {
+    "express": ">= 2.5.1",
+    "jade": ">= 0.0.1",
+    "socket.io": ">= 0.8",
+    "socket.io-client": ">= 0.8.7",
+    "underscore": ">= 1.2.3"
+  },
+  "engine": "node 0.6.5"
+}

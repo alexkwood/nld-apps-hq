@@ -1,0 +1,15 @@
+!!!
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+    script(src="/socket.io/socket.io.js")
+    script(src="/javascripts/lists.js")
+  body
+   div#main!= body
+
+   div#footer
+    | A proof of concept using <a href="http://nodejs.org">Node.js</a> with <a href="http://socket.io">Socket.io</a>.
+    | By <a href="http://newleafdigital.com">Ben Buckman, New Leaf Digital</a>.
+    | Code is on <a href="https://github.com/newleafdigital/interactive-shopping-list">Github</a>.

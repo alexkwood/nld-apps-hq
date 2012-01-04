@@ -1,0 +1,73 @@
+body {
+  padding: 10px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+h1, h2 {
+  margin-top: 0;
+}
+
+#main {
+  min-height: 80%;
+}
+#footer {
+  border-top: solid #666 1px;
+  margin-top: .5em;
+  padding-top: .5em;
+  font-size: .8em;
+  line-height: 1.2em;
+}
+
+#messages-wrapper, #list-wrapper, #new-item-wrapper {
+  width: auto;
+  margin-bottom: 2em;
+}
+
+#users-wrapper {
+  float: right;
+  border: solid #666 1px;
+  padding: .5em;
+  width: 150px;
+  margin: 0 0 1em 1em;
+  background: #fff;
+}
+
+#messages {
+  border: solid #ccc 1px;
+  padding: 1em;
+}
+
+#messages .message {
+  background: #ccc;
+  padding: .5em;
+  min-height: 1em;
+  margin-bottom: 1em;
+}
+
+#messages .message.error {
+  color: red;
+}
+
+#list {
+  border: solid #000 1px;
+  margin: 0 0 2em 0;
+  padding: 1em;
+}
+#list div {
+  margin-bottom: 1em;
+}
+
+#new-item {
+  border: solid #000 1px;
+  padding: 1em;
+}
+#item {}
+#add {}
+
+#users .current {
+  font-weight: bold;
+}
