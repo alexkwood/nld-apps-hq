@@ -1,5 +1,6 @@
 /**
- * interactive shopping list
+ * interactive list app
+ * running as sub-app inside NLD Apps
  */
 
 var util = require('util')
@@ -9,17 +10,56 @@ var util = require('util')
 
 var app = module.exports = express.createServer()
   , io = require('socket.io').listen(app);
+  
+app.name = 'Lists';
+app.appRoot = __dirname;
 
-app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.use(express.cookieParser());
-  app.use(express.session({ secret: "shopping" }));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(__dirname + '/public'));
+var parentApp = function() {
+  if (module.parent && module.parent.exports) return module.parent.exports;
+  return null;
+}();
+
+// pointer to top app
+var primaryApp = parentApp ? parentApp : app;
+
+app.mounted(function(parent){
+  console.warn('Lists app detects mount by parent app %s', parent.name);
 });
+
+// configuration
+try {
+  app.conf = require('./conf');  
+  if (parentApp) if (!_.isUndefined(parentApp.conf)) _.extend(app.conf, parentApp.conf);
+}
+catch(e) {
+  console.error("Missing conf.js!");
+  process.exit(1);
+}
+
+// use parent lib for common stuff
+var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
+
+// override console.log
+if (parentApp) {
+  var Log = require(libDir + '/console-log')('[' + app.name + ']');
+  console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
+}
+
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+
+// DB
+// require(libDir + '/db')(app, parentApp);
+
+// sessions
+// require(libDir + '/sessionStore')(app, parentApp);
+
+// app.use(express.cookieParser());
+
+// app.use(express.bodyParser());
+// app.use(express.methodOverride());
+
+app.use(express.static(__dirname + '/public'));
 
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
@@ -29,6 +69,17 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
 
+
+
+var sharedDynamicHelpers = {
+  listsBase: function(req, res){
+    return '/' == app.route ? '' : app.route;
+  }
+};
+primaryApp.dynamicHelpers(sharedDynamicHelpers);
+
+
+app.use(app.router);
 
 app.get('/', function(req, res){
   res.render('index', { title: 'Interactive Shopping List' })
@@ -142,5 +193,10 @@ io.sockets.on('connection', function (socket) {
 });
 
 
-app.listen(3000);
-console.log("Express server listening"); // on port %d in %s mode", app.address().port, app.settings.env);
+if (!module.parent) {
+  app.listen(3000);
+  console.log("Express server listening to %s on port %d in %s mode", app.address().address, app.address().port, app.settings.env);
+}
+else {
+  console.log('Lists module has parent, not listening.');
+}
