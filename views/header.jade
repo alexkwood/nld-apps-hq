@@ -17,6 +17,6 @@ header#bar
 
     - if (loggedIn)
         div.username #{username}
-        a.logout(href='/bye') Logout  
+        a.logout(href='/logout') Logout  
     - else if (! localNoAuth)
         a.login(href="/auth/facebook") Login with Facebook

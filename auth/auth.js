@@ -450,7 +450,7 @@ app.get('/', app.requireUser, function (req, res) {
 
 
 // [don't need to check if logged in to logout]
-app.get('/bye', function (req, res) {
+app.get('/logout', function (req, res) {
   if (req.session) {
     req.session.destroy(function () {});
   }
