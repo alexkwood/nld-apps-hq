@@ -5,7 +5,4 @@
 	path = auth/node_modules/mongoose-admin
  	url = git@github.com:newleafdigital/mongoose-admin.git
 	branch = refactor	 
-[submodule "flashcards"]
-	path = flashcards
-        url = git@github.com:newleafdigital/nodejs_spanish_flashcards.git
-        branch = subapp
+
