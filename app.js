@@ -21,6 +21,12 @@ var app = module.exports = express.createServer();
 // name for logging/scope checking
 app.name = 'HQ';
 
+// override console.log
+var Log = require('./lib/console-log')('[' + app.name + ']');
+console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
+
+console.log('test overridden log?');
+
 app.appRoot = __dirname;
 var libDir = app.appRoot + '/lib';
 
