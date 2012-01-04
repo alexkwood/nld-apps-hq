@@ -18,10 +18,6 @@ var app = module.exports = express.createServer();
 
 
 
-// run early so middleware doesn't screw w/favicon
-app.use(express.favicon());
-
-
 // name for logging/scope checking
 app.name = 'HQ';
 
@@ -36,6 +32,10 @@ catch(e) {
   console.error("Missing conf.js. Exiting. (" + e + ")");
   process.exit(1);
 };
+
+
+// run early so middleware doesn't screw w/favicon
+app.use(express.favicon(app.appRoot + 'public/nld_favicon.png'));
 
 
 // populate DB [fresh] -- using lib in auth submod
@@ -98,6 +98,11 @@ var auth = require('./auth/auth.js');
 // IMPT: these need to run AFTER loadUser (in auth app, on load), for user to display
 app.use(function setLocalTitle(req, res, next) {
   res.local('title', 'NewLeafDigital Apps');
+  next();
+});
+
+app.use(function setDefaultMeta(req, res, next) {
+  res.local('meta_description', '');
   next();
 });
 

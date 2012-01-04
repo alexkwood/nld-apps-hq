@@ -7,12 +7,67 @@ body {
 }
 
 a {
-  color: #00B7FF;
+  color: #13a7b5; /*#00B7FF;*/
 }
 
 section#main {
   padding: 10px;
   min-height: 80%;
+  clear: both;
+  
+  h1 {
+    margin: 0;
+  }
+}
+
+
+#apps-home {
+  #intro {
+    margin: 1em auto;
+    /*width: 700px;*/
+    color: #444;
+    text-align: center;
+    border: solid #ccc 1px;
+    padding: 1em;
+    line-height: 1.5em;
+    /*font-weight: bold;*/
+    font-size: 1.2em;
+  }
+  
+  #applist {
+    padding: 1em 0;
+    
+    ul {
+      li {
+        margin-bottom: 1em;
+
+        > a {
+          font-size: 1.3em;
+          font-weight: bold;
+          color: #333;
+        }
+
+        > .desc {
+        }
+      }
+    }
+  }
+  
+  #more {
+    margin: 1em 0;
+    padding-top: 2em;
+    border-top: solid #ccc 1px;
+    
+    > div {
+      padding: 0 2em;
+      margin-bottom: .5em;
+    }
+  }
+  
+  form#paypal-button {
+    display: inline;
+    padding-left: .5em;
+  }
 }
 
 header#bar {

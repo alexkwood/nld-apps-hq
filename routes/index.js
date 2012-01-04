@@ -8,7 +8,7 @@ module.exports = function(app) {
       //console.log('rendering HQ index');
       
       res.render('index', { 
-        //title: 'Express'  // should be set globally now 
+        'meta_description': 'Apps built in node.js by freelance node.js developer Ben Buckman, New Leaf Digital.'
       });
     }
   )
