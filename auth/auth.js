@@ -167,7 +167,7 @@ app.UserSchema.plugin(mongooseAuth, {
 }); //mongooseAuth plugins
 
 
-var User = mongoose.model('User', app.UserSchema);
+var User = app.db.model('User', app.UserSchema);
 
 app.use(express.logger('[Auth] :method :url')); 
 

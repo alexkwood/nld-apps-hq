@@ -57,12 +57,12 @@ app.set('view engine', 'jade');
 app.use(express.static(__dirname + '/public'));
 
 // DB
-// require(libDir + '/db')(app, parentApp);
+require(libDir + '/db')(app, parentApp);
 
 // sessions
-// require(libDir + '/sessionStore')(app, parentApp);
+require(libDir + '/sessionStore')(app, parentApp);
 
-// app.use(express.cookieParser());
+// app.use(express.cookieParser());   // ?
 
 app.use(express.bodyParser());
 // app.use(express.methodOverride());
@@ -76,6 +76,29 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
 });
 
+
+
+// models
+var //mongoose = require('mongoose')
+  //, 
+  ListSchema = require('./lib/model-list')
+  , List = app.db.model('List', ListSchema);
+
+//tmp - create a list on load
+var list = new List({
+  title: 'List ' + (Math.random()*11),
+  created_by: 'someone',
+  items: [
+    'Something ' + (Math.random()*11),
+    'Something ' + (Math.random()*11),
+    'Something ' + (Math.random()*11)
+  ]
+});
+
+console.log('new list:', list);
+list.save();
+
+// WORKING ... CONTINUE THIS APPROACH...
 
 
 var sharedDynamicHelpers = {
