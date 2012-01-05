@@ -8,8 +8,7 @@ var util = require('util')
   //, routes = require('./routes')  // (don't need yet)
   , _ = require('underscore');
 
-var app = module.exports = express.createServer()
-  , io = require('socket.io').listen(app);
+var app = module.exports = express.createServer();
   
 app.name = 'Lists';
 app.appRoot = __dirname;
@@ -21,6 +20,10 @@ var parentApp = function() {
 
 // pointer to top app
 var primaryApp = parentApp ? parentApp : app;
+
+
+var io = require('socket.io').listen(primaryApp);
+
 
 app.mounted(function(parent){
   console.warn('Lists app detects mount by parent app %s', parent.name);

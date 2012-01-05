@@ -7,8 +7,8 @@
 
 /*
 @todo 1/5:
+  - make lists use existing user, no prompt
   - apply canUser() check to each app
-  - make socket.io work w/ mounted lists app
 */
 
 var express = require('express')

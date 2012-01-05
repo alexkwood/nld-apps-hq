@@ -1,4 +1,4 @@
-!!!
+!!! 5
 html
   head
     title= title
@@ -10,7 +10,9 @@ html
     link(rel='stylesheet', href='/stylesheets/lists.css')
     
     script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
-    script(src="#{listsBase}/socket.io/socket.io.js")
+
+    //- no #{listsBase} here, listening to parent app (?)
+    script(src="/socket.io/socket.io.js")
     script(src="#{listsBase}/javascripts/lists.js")
     
   body

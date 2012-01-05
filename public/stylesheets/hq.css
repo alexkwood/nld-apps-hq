@@ -4,17 +4,22 @@ body {
   margin: 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
+body {
+  /*padding: 10px;*/
+
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
 a {
   color: #13a7b5;
   /*#00B7FF;*/
 
 }
-section#main {
+body > #main, section#main {
   padding: 10px;
   min-height: 80%;
   clear: both;
 }
-section#main h1 {
+body > #main h1, section#main h1 {
   margin: 0;
 }
 #apps-home #intro {

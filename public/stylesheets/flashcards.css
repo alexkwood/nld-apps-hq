@@ -1,20 +1,3 @@
-html, body {
-  height: 100%;
-  padding: 0;
-  margin: 0;
-}
-body {
-  /*padding: 10px;*/
-
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
-#main {
-  /*width: 100%;*/
-
-  min-height: 85%;
-  padding: 10px;
-  clear: both;
-}
 #footer {
   float: left;
   /*width: 100%;*/
