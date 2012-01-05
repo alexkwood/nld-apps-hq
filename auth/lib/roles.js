@@ -7,12 +7,15 @@ var roles = module.exports.roles = {
   // put in permissions as doSomething: true
   // assumed false if not explicitly allowed
   user: {
+    use_app_flashcards: true,
     use_app_lists: true
   },
 
   admin: {
     // @todo put in 'all' perm?
     admin_users: true,
+
+    use_app_flashcards: true,
     use_app_lists: true
   }
 
