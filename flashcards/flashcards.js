@@ -40,7 +40,8 @@ if (parentApp) {
 
 // configuration
 try {
-  app.conf = require('./conf');
+  app.envId = require(libDir + '/env-id')(app);
+  app.conf = require('./conf.js')(app.envId);
   
   // merge w/ parent conf.
   // we want the PARENT to trump the child, since the parent needs to control sessions, etc!

@@ -9,6 +9,8 @@
 @todo 1/5:
   - make lists use existing user, no prompt
   - apply canUser() check to each app
+  - lists at URLs, etc [see evernote]
+  - share functionality for lists
 */
 
 var express = require('express')
@@ -34,13 +36,15 @@ var libDir = app.appRoot + '/lib';
 
 // load conf. (each child app might have its own conf.)
 try {
-  app.conf = require('./conf');
+  app.envId = require(libDir + '/env-id')(app);
+  console.log('Identified environment: ', app.envId);
+  app.conf = require('./conf.js')(app.envId);
 }
 catch(e) {
   console.error("Missing conf.js. Exiting. (" + e + ")");
   process.exit(1);
 };
-
+console.log('conf:', app.conf);
 
 // run early so middleware doesn't screw w/favicon
 app.use(express.favicon(app.appRoot + '/public/nld_favicon.png'));

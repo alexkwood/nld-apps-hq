@@ -8,11 +8,10 @@ log
 */.bin/*
 .bin
 
-conf.js
-
 npm-debug.log
 config.log
 *.lock*
 *.waf*
 
 *node_modules/*/build
+*node_modules/*/out

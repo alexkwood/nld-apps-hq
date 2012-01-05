@@ -22,6 +22,7 @@ var parentApp = function() {
 var primaryApp = parentApp ? parentApp : app;
 
 
+// sockets need to run on listening app, otherwise (e.g.) client doesn't load
 var io = require('socket.io').listen(primaryApp);
 
 
@@ -39,9 +40,9 @@ if (parentApp) {
   console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
 }
 
-// configuration
+// configuration [none needed yet]
 try {
-  app.conf = {};    //require('./conf');  
+  app.conf = {};    // copy other apps' method if needed
   if (parentApp) if (!_.isUndefined(parentApp.conf)) _.extend(app.conf, parentApp.conf);
 }
 catch(e) {

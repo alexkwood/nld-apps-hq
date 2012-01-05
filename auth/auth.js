@@ -49,7 +49,8 @@ app.mounted(function(parent) {
 
 
 // configuration
-app.conf = require('./conf');
+app.envId = require(libDir + '/env-id')(app);
+app.conf = require('./conf.js')(app.envId);
 
 
 // merge w/ parent conf.
