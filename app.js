@@ -5,6 +5,11 @@
 // @todo make error handlers work
 // @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed!!
 
+/*
+@todo 1/5:
+  - apply canUser() check to each app
+  - make socket.io work w/ mounted lists app
+*/
 
 var express = require('express')
   , _ = require('underscore')
@@ -23,7 +28,6 @@ app.name = 'HQ';
 var Log = require('./lib/console-log')('[' + app.name + ']');
 console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
 
-console.log('test overridden log?');
 
 app.appRoot = __dirname;
 var libDir = app.appRoot + '/lib';
@@ -39,7 +43,7 @@ catch(e) {
 
 
 // run early so middleware doesn't screw w/favicon
-app.use(express.favicon(app.appRoot + 'public/nld_favicon.png'));
+app.use(express.favicon(app.appRoot + '/public/nld_favicon.png'));
 
 
 // populate DB [fresh] -- using lib in auth submod
@@ -70,18 +74,26 @@ app.use(express.session({
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
 
-  app.use(require('connect-less')({ src: __dirname + '/public', compress:false, debug:true, force:true })); 
-  app.use(express.static(__dirname + '/public'));  // has to be after connect-less
+  app.use(require('connect-less')({
+    src: __dirname + '/public',     // dir w/ .less files
+    // dst:                            // dir to store css files
+    // dstRoot:         // public root, set it if `dstDir` is not your public root
+    compress:false, 
+    debug:true, 
+    force:true,
+    ignore: true      // [added]
+  }));
 });
 
 
 app.configure('production', function(){
   app.use(express.errorHandler()); 
   
+  // @todo tweak
   app.use(require('connect-less')({ src: __dirname + '/public', compress:true, debug:false, force:false }));
-  app.use(express.static(__dirname + '/public'));
 });
 
+app.use(express.static(__dirname + '/public'));  // has to be after connect-less
 
 
 // load auth sub-app
@@ -152,7 +164,12 @@ auth.dynamicHelpers(sharedDynamicHelpers);
 // load Flashcards app too
 var flashcards = require('./flashcards/flashcards.js');
 app.use('/flashcards', flashcards);
-console.log('MOUNTED FLASHCARDS!');
+// console.log('MOUNTED FLASHCARDS!');
+
+
+// load Interactive Lists app
+var lists = require('./lists/lists.js');
+app.use('/lists', lists);
 
 
 /*
