@@ -27,6 +27,17 @@ app.mounted(function(parent){
 
 if (! parentApp) app.use(express.favicon());
 
+// use parent lib for common stuff
+var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
+
+
+if (parentApp) {
+  // override console.log
+  var Log = require(libDir + '/console-log')('[' + app.name + ']');
+  console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
+}
+
+
 // configuration
 try {
   app.conf = require('./conf');
@@ -42,17 +53,6 @@ try {
 catch(e) {
   console.error("Missing conf.js!");
   process.exit(1);
-}
-
-
-// use parent lib for common stuff
-var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
-
-
-if (parentApp) {
-  // override console.log
-  var Log = require(libDir + '/console-log')('[' + app.name + ']');
-  console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
 }
 
 

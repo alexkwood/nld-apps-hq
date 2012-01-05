@@ -4,13 +4,11 @@ html
     title= fcAppTitle
     
     //-shared
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    //-flashcards
-    link(rel='stylesheet/less', type='text/css', href='#{fcBase}/stylesheets/style.less')
-    
-    //-@todo replace this w/ connect-less
-    script(src='#{fcBase}/javascripts/lesscss.min.js')
+    link(rel='stylesheet', href='/stylesheets/hq.css')
 
+    //-flashcards (symlinked to root)
+    link(rel='stylesheet', href='/stylesheets/flashcards.css')
+    
     script(src='//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js')
     script(src='#{fcBase}/javascripts/flashcards.js')
     

@@ -1,0 +1,332 @@
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+body {
+  /*padding: 10px;*/
+
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+#main {
+  /*width: 100%;*/
+
+  min-height: 85%;
+  padding: 10px;
+  clear: both;
+}
+#footer {
+  float: left;
+  /*width: 100%;*/
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: .8em;
+  color: #999;
+  margin: 4em 0 0 0;
+  padding: 1em;
+}
+#main > h1:first-child {
+  margin-top: 0;
+}
+a {
+  color: #00B7FF;
+}
+.clearlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+form#add-word *, form#lookup-word * {
+  font-size: 1.2em;
+}
+form#add-word div.field, form#lookup-word div.field {
+  float: left;
+  clear: both;
+  margin-bottom: 1em;
+}
+form#add-word label, form#lookup-word label {
+  float: left;
+  width: 100px;
+}
+form#add-word input.submit, form#lookup-word input.submit {
+  float: left;
+  clear: both;
+}
+form#lookup-word {
+  float: left;
+  clear: both;
+  width: 100%;
+  border-bottom: solid #999 1px;
+  margin-bottom: 1em;
+}
+form#lookup-word label {
+  font-size: 1.1em;
+}
+form#lookup-word .field.missing {
+  font-size: .7em;
+}
+ul#nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin: 0 0 1em 0;
+  float: left;
+  width: 100%;
+  clear: both;
+}
+ul#nav li {
+  float: left;
+  display: block;
+  min-width: 15%;
+  background-color: #d6d6d6;
+  padding: 5px;
+  margin-right: 1em;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+ul#nav li a {
+  color: #000;
+  font-weight: bold;
+  padding: 3px;
+  text-decoration: none;
+  display: block;
+}
+ul#nav li a span.details {
+  display: block;
+  font-size: .8em;
+}
+ul#nav li.active {
+  background-color: #666;
+}
+ul#nav li.active a {
+  color: #fff;
+}
+ul#nav li.login, ul#nav li.logout {
+  background: #ededed;
+}
+ul#nav li.login a.login,
+ul#nav li.logout a.login,
+ul#nav li.login a.logout,
+ul#nav li.logout a.logout {
+  color: #888;
+}
+body.home #nav {
+  font-size: 3em;
+}
+body.home #nav li {
+  margin-right: 2em;
+}
+ul.words, ul.definitions, ul.compounds {
+  float: left;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+ul.words li, ul.definitions li, ul.compounds li {
+  float: left;
+  clear: both;
+  margin-bottom: .5em;
+  padding-bottom: .5em;
+  border-bottom: dotted 1px #ccc;
+}
+ul.words li div, ul.definitions li div, ul.compounds li div {
+  float: left;
+}
+ul.words li span, ul.definitions li span, ul.compounds li span {
+  margin: 0 20px 0 0;
+  width: 100px;
+  min-height: 1em;
+  display: block;
+  float: left;
+}
+ul.words li span.label, ul.definitions li span.label, ul.compounds li span.label {
+  color: #999;
+  margin: 0 5px 0 0;
+  width: auto;
+}
+ul.words li .group span.label, ul.definitions li .group span.label, ul.compounds li .group span.label {
+  /*filler*/
+
+  width: 45px;
+  text-align: right;
+}
+ul.words .links, ul.definitions .links, ul.compounds .links {
+  float: left;
+}
+ul.words .links a, ul.definitions .links a, ul.compounds .links a {
+  margin-right: 1em;
+}
+body.lookup h3 {
+  margin-top: 1em;
+  /*float: left;*/
+
+  clear: both;
+}
+#play {
+  float: left;
+  margin-bottom: 3em;
+  min-width: 650px;
+}
+#play .question {
+  font-size: 3em;
+}
+#play .question span.label {
+  color: #999;
+  margin: 0 1em 0 0;
+  width: auto;
+}
+#play #answer {
+  display: none;
+  font-size: 2em;
+  margin-top: 1em;
+}
+#play #answer ul.words, #play #answer ul.words li {
+  width: 100%;
+  clear: both;
+  border-bottom: none;
+}
+#play #answer li div {
+  clear: both;
+}
+#play #answer div.type {
+  font-size: .8em;
+  margin-top: .5em;
+}
+#play #answer span {
+  width: auto;
+  white-space: nowrap;
+}
+#play #answer span.label {
+  width: 5em;
+  /*clear: left;*/
+
+}
+#play #answer div.links {
+  clear: both;
+  font-size: .5em;
+  margin-top: 2em;
+}
+#play div#show-wrapper {
+  margin: 2em 0 3em 0;
+  float: left;
+  clear: both;
+  width: 100%;
+}
+#play a#show {
+  display: block;
+  float: left;
+  font-size: 2em;
+  border: solid #ccc 4px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  background: #111;
+  color: #fff;
+  padding: 10px 40px;
+  text-decoration: none;
+}
+#play div.remaining {
+  float: left;
+  clear: left;
+  margin-top: 2em;
+  color: #666;
+}
+#play.lang-en #answer div.english, #play.lang-es #answer div.spanish {
+  display: none;
+}
+a.next-correct, a.next-incorrect {
+  display: block;
+  float: left;
+  font-size: 1.5em;
+  color: #fff;
+  padding: 30px 100px;
+  margin-right: 30px;
+  text-decoration: none;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+}
+a.next-correct {
+  background-color: green;
+}
+a.next-incorrect {
+  background-color: red;
+}
+a.next-restart {
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  display: block;
+  float: left;
+  clear: both;
+  margin-top: 2em;
+  background: #000;
+  color: #fff;
+  padding: 10px;
+  text-decoration: none;
+}
+#messages {
+  border: solid #999 1px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  padding: 5px 5px 0 5px;
+  margin: 0 0 2em 0;
+  font-weight: bold;
+  clear: both;
+}
+#messages ul, #messages li {
+  list-style-type: none;
+}
+#messages ul {
+  padding-left: 0;
+  margin: 0;
+}
+#messages ul li {
+  margin-bottom: .5em;
+}
+#messages span.msg-type {
+  color: #999;
+  padding-right: 1em;
+}
+#messages ul.error span.msg-type {
+  color: red;
+}
+div.gameover {
+  font-size: 4em;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+}
+div#kb-legend {
+  display: none;
+  /*toggled w/ JS*/
+
+  float: right;
+  border: solid #666 1px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  padding: 8px;
+}
+div#kb-legend h4 {
+  margin: 0 0 .5em 0;
+}
+div#kb-legend div {
+  float: left;
+  clear: both;
+  font-size: .8em;
+  color: #666;
+  padding-bottom: .5em;
+}
+div#kb-legend div span {
+  display: block;
+  float: left;
+}
+div#kb-legend div span.key {
+  width: 70px;
+}

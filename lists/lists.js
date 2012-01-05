@@ -26,15 +26,6 @@ app.mounted(function(parent){
   console.warn('Lists app detects mount by parent app %s', parent.name);
 });
 
-// configuration
-try {
-  app.conf = require('./conf');  
-  if (parentApp) if (!_.isUndefined(parentApp.conf)) _.extend(app.conf, parentApp.conf);
-}
-catch(e) {
-  console.error("Missing conf.js!");
-  process.exit(1);
-}
 
 // use parent lib for common stuff
 var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
@@ -45,8 +36,21 @@ if (parentApp) {
   console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
 }
 
+// configuration
+try {
+  app.conf = {};    //require('./conf');  
+  if (parentApp) if (!_.isUndefined(parentApp.conf)) _.extend(app.conf, parentApp.conf);
+}
+catch(e) {
+  console.error("Missing conf.js!");
+  process.exit(1);
+}
+
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+
+app.use(express.static(__dirname + '/public'));
 
 // DB
 // require(libDir + '/db')(app, parentApp);
@@ -56,10 +60,9 @@ app.set('view engine', 'jade');
 
 // app.use(express.cookieParser());
 
-// app.use(express.bodyParser());
+app.use(express.bodyParser());
 // app.use(express.methodOverride());
 
-app.use(express.static(__dirname + '/public'));
 
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
