@@ -5,7 +5,6 @@
 
 var util = require('util')
   , express = require('express')
-  //, routes = require('./routes')  // (don't need yet)
   , _ = require('underscore');
 
 var app = module.exports = express.createServer();
@@ -20,10 +19,6 @@ var parentApp = function() {
 
 // pointer to top app
 var primaryApp = parentApp ? parentApp : app;
-
-
-// sockets need to run on listening app, otherwise (e.g.) client doesn't load
-var io = require('socket.io').listen(primaryApp);
 
 
 app.mounted(function(parent){
@@ -79,11 +74,10 @@ app.configure('production', function(){
 
 
 // models
-var //mongoose = require('mongoose')
-  //, 
-  ListSchema = require('./lib/model-list')
+var ListSchema = require('./lib/model-list')
   , List = app.db.model('List', ListSchema);
 
+/*
 //tmp - create a list on load
 var list = new List({
   title: 'List ' + (Math.random()*11),
@@ -97,130 +91,43 @@ var list = new List({
 
 console.log('new list:', list);
 list.save();
-
-// WORKING ... CONTINUE THIS APPROACH...
+*/
 
 
 var sharedDynamicHelpers = {
   listsBase: function(req, res){
     return '/' == app.route ? '' : app.route;
   }
+  
+, envId: function(req, res) {
+    if (parentApp) return parentApp.envId;
+  }
+  
+, listsAppTitle: function(req, res) {
+    return 'Real-time Shared Lists';
+  }
 };
 primaryApp.dynamicHelpers(sharedDynamicHelpers);
 
 
+// route middleware to authenticate user.
+app.restrictUser = function(req, res, next) {
+  if (parentApp && parentApp.isUserLoggedIn(req)) return next();
+
+  req.flash('error', "Please login to do that.");
+  res.redirect('/login');     // @todo go to root /login not app
+};
+
+
 app.use(app.router);
 
-app.get('/', function(req, res){
-  res.render('index', { title: 'Interactive Shopping List' })
-});
+require('./routes/routes')(app);
 
 
-// @todo make this part of class prototype?
-function getSocketNickname(socket) {
-  if (! _.isUndefined(socket.nickname)) {
-    if (! _.isNull(socket.nickname) && socket.nickname != "") {
-      return socket.nickname;
-    }
-  }
-  return 'Someone';  //fallback
-}
-
-function getUsers() {
-  var nicknames = [];
-  _.each(io.sockets.sockets, function(socket) {
-   nicknames.push( getSocketNickname(socket) );
- }); 
- console.log('got users:', nicknames);
- return nicknames;
-}
-
-var listItems = [];
-
-var counter = 0;
-
-io.sockets.on('connection', function (socket) {
-  //console.log('new socket:', socket);
-  console.log("connection #" + (++counter));
-
-  // convention: 'message' types are strings, 'info' are objects', 'todo' are objects
- 
-  // demos the ways to distribute a message
-  socket.on('message', function(msg){
-    socket.broadcast.emit('message', 'someone else says: ' + msg);
-    socket.emit('message', 'you said: ' + msg);
-    io.sockets.emit('message', 'someone said: ' + msg);
-  });
-
-  // when client uses socket.send(), server callback only gets 1 val (object),
-  // but socket.emit() from client passes separate params into callback
-
-  socket.on("info", function(key, val) {
-    console.log("got info: ", key, val);
-    socket.set(key, val);
-
-    if (key == 'nickname') {
-      socket.nickname = val;
-      var nickname = getSocketNickname(socket);
-      
-      socket.emit('message', "Hello " + nickname + "!");
-
-      socket.broadcast.emit('message', nickname + ' connected');
-      socket.broadcast.emit('have-users', [ nickname ]);  // redundant for new user
-
-      
-      /*
-      // long form
-      socket.get('nickname', function (err, nickname) {
-        if (err) socket.emit('error: ' + util.inspect(err));
-        else {
-          socket.emit('message', "Hello " + nickname + "!");
-          socket.broadcast.emit('message', nickname + ' connected');
-        }
-      });
-      */     
-    }
-  });
-  
-
-  // user adds a new item
-  socket.on('add-item', function(item) {
-    socket.emit('message', "Acknowledged your " + item);
-    socket.broadcast.emit('message', getSocketNickname(socket) + " added " + item + " to the list.");
-
-    listItems.push(item);
-    io.sockets.emit('have-items', [ item ]);
-  });
-
-  // user removes an item
-  socket.on('remove-item', function(item) {
-    // remove from array
-    var ind = _.indexOf(listItems, item);
-    if (ind == -1) return;
-    listItems.splice(ind, 1);
-
-    socket.broadcast.emit('message', getSocketNickname(socket) + " removed " + item + " from the list.");
-    io.sockets.emit('item-removed', item);
-  });
-
-  // user requests all items in the list
-  socket.on('get-items', function() {
-    socket.emit('have-items', listItems);
-  });
-
-  // user requests all users
-  socket.on('get-users', function() {
-    socket.emit('have-users', getUsers());
-  });
-
-  socket.on('disconnect', function() {
-    console.log("user disconnected", arguments);
-    io.sockets.emit('message', getSocketNickname(socket) + ' disconnected.');
-    io.sockets.emit('user-removed', getSocketNickname(socket));
-  });
-
-  //console.dir(io.sockets.sockets);
-});
+// sockets
+// (sockets need to run on listening app, otherwise (e.g.) client js doesn't load)
+var io = require('socket.io').listen(primaryApp);
+require('./lib/sockets')(app, io);
 
 
 if (!module.parent) {

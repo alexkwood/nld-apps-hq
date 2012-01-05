@@ -216,7 +216,7 @@ app.username = function(req) {
 
 // route middleware to authenticate user.
 app.restrictUser = function(req, res, next) {
-  console.log('in flashcards restrictUser', app.isLoggedIn(req));
+  // console.log('in flashcards restrictUser', app.isLoggedIn(req));
   if (app.isLoggedIn(req)) {
     return next();
   }
