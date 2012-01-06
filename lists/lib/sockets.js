@@ -109,7 +109,7 @@ module.exports = function(app, io) {
       listItems.splice(ind, 1);
 
       socket.broadcast.to('list:' + item.listId)
-        .emit('message', getSocketNickname(socket) + " removed " + item.name + " from the list.");
+        .emit('message', getSocketNickname(socket) + " removed " + item.name + " from the list.")
         .emit('item-removed', item.name);
     });
 
