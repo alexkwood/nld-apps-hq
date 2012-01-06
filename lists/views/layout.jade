@@ -9,25 +9,37 @@ html
     //-lists (symlinked to root)
     link(rel='stylesheet', href='/stylesheets/lists.css')
     
+    //- use a local copy when developing locally/offline
     - if (envId === 'local')
-      script(src='#{listsBase}/javascripts/jquery-1.6.4.min.js');
+      script(src='#{listsBase}/javascripts/jquery.min.js');
     - else  
       script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
 
     //- no #{listsBase} here, listening to parent app (?)
     script(src="/socket.io/socket.io.js")
-    script(src="#{listsBase}/javascripts/lists.js")
+    script(src="#{listsBase}/javascripts/lists-client.js")
 
     //-pass current list Id to JS
     //-@todo extend this layout template only for lists.jade?
     - if (typeof list != "undefined")
       script
-        var listId = "#{list._id}";
+        // catch the loaded client app
+        $(window).on('loaded-app', function(event, app){
+          // pass back an event w/ list ID (initializes socket)
+          $(window).trigger('watch-list', '#{list._id}');
+        });
     
   body
     != appsHeader
+    
   
-    div#main!= body
+    div#main
+      h1= listsAppTitle
+
+      - if (typeof title != "undefined")
+        h2= title
+    
+      != body
 
     div#footer
       | A proof of concept using <a href="http://nodejs.org">Node.js</a> with <a href="http://socket.io">Socket.io</a>.

@@ -9,7 +9,7 @@ module.exports = function(app) {
 
   app.param('listId', app.restrictUser, function(req, res, next, listId) {
     req.list = List.findById(listId, function(error, list) {
-      console.log('getById response:', error, list);
+      // console.log('getById response:', error, list);
       if (error) return next(error);
       if (! list) return next(new Error("Unknown list!"));
       
@@ -30,10 +30,26 @@ module.exports = function(app) {
   });
   
 
+  app.get('/login', function(req, res){
+    res.render('login', {
+      locals: {
+        pageTitle : 'Login'
+      }
+    });
+  });
+  
+
   app.get('/', app.restrictUser, function(req, res){
     res.render('index', {
       lists: List.getLists()
     });
+  });
+  
+  
+  app.post('/list/new', app.restrictUser, function(req, res) {
+    // ....
+    req.flash("Added the new list!");
+    res.redirect('/');
   });
 
 };

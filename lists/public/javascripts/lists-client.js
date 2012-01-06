@@ -1,77 +1,80 @@
-/** client-side socket handling **/
+/** client-side Lists: socket handling, etc **/
 
 (function($){
   var app = window.app = {};
 
-  /*
-  // @todo lookup in jquery docs how to do this. purpose is to pass listId when client app initializes.
-  // test custom events
-  $(window).on('custom1', function(event){
-    alert('caught custom event!');
-    console.log(event);
-  });
-  $(function(){
-    $(window).emit('custom1', 'hello');
-  });
-  */
+  app.username = '';    // @todo...
+
+  app.msgCount = 0;
+  app.putMsg = function(msg, type) {
+    app.msgCount++;
+    var div = $('<div></div>');
+    div.addClass('message');
+    div.attr('id', 'message-' + app.msgCount);
+    if (typeof type != "undefined") div.addClass(type);
+
+    div.text(msg);
+    $('#messages').append(div);
+
+    // fade out message
+    setTimeout(function() {
+      //console.log('removing div ' + $(div).attr('id'));
+      $(div).slideUp('slow', function() {
+        $(div).remove();
+      });
+    }, 5000);
+  };
+
   
+  // initialize on doc ready
   $(function() {
     $('#new-item #item').focus();
     
-    // @todo 'var listId' is silly, should go straight to app when ready
-    app.listId = typeof listId != "undefined" ? listId : null;
-    
-    
-    app.msgCount = 0;
-    app.putMsg = function(msg, type) {
-      app.msgCount++;
-      var div = $('<div></div>');
-      div.addClass('message');
-      div.attr('id', 'message-' + app.msgCount);
-      if (typeof type != "undefined") div.addClass(type);
-
-      div.text(msg);
-      $('#messages').append(div);
-
-      // fade out message
-      setTimeout(function() {
-        //console.log('removing div ' + $(div).attr('id'));
-        $(div).slideUp('slow', function() {
-          $(div).remove();
-        });
-      }, 5000);
-    };
-
-    var nickname = "";
-
-    // socket on same host
-    var socket = app.socket = io.connect( document.location.origin );
-
     // @todo this should be passed from server
-    // if (nickname == "") nickname = prompt("What's your name?");
-    if (nickname == "") nickname = "The nameless one";
+    // if (app.username == "") app.username = prompt("What's your name?");
+    if (app.username == "") app.username = "The nameless one";
 
+    // allow event catchers to grab/manipulate this app
+    // -- 'loaded-app' notifies doc that app is ready,
+    // -- doc then passes back 'watch-list' ID
+    // (not sure what obj to run this event on, using window for now)
+    $(window).on('watch-list', function(event, listId){
+      app.watchList(listId);
+    })
+    .trigger('loaded-app', app);
+    
+  }); // ready
+  
 
-    socket.on('connect', function() {
+  
+  // loads a socket to watch/handle an individual list.
+  // triggered on 'watch-list' event below.
+  app.watchList = function(listId) {
+    app.listId = listId;
+    
+    // socket on same host
+    app.socket = io.connect( document.location.origin );
+    
+    app.socket.on('connect', function() {
       //console.log('connect', arguments);
       app.putMsg("Connected.");
 
       // join room
-      socket.emit('list:watch', app.listId);
+      app.socket.emit('list:watch', app.listId);
 
-      socket.emit("info", "nickname", nickname);
+      app.socket.emit("info", "nickname", app.username);
 
       // reset list. impt if server disconnects & reconnects.
       $('#list .item').remove();
-      socket.emit("get-items", app.listId);
+      app.socket.emit("get-items", app.listId);
 
       $('#users .user').remove();
-      socket.emit("get-users", app.listId);
+      app.socket.emit("get-users", app.listId);
     });
 
 
     // server response to 'get-items'
-    socket.on('have-items', function(items) {
+    app.socket.on('have-items', function(items) {
       try {
         if (typeof items.length == "undefined") {
           app.putMsg("Got invalid items", 'error');
@@ -90,7 +93,7 @@
 
     // server response to 'get-users'
     // @todo this mostly duplicates get-items, consolidate
-    socket.on('have-users', function(users) {
+    app.socket.on('have-users', function(users) {
       try {
         if (typeof users.length == "undefined") {
           app.putMsg("Got invalid users", 'error');
@@ -99,7 +102,7 @@
 
         for(var i = 0; i < users.length; i++) {
           var newUser = $('<div class="user">' + users[i] + '</div>');
-          if (users[i] == nickname) newUser.addClass('current');
+          if (users[i] == app.username) newUser.addClass('current');
           $('#users').append(newUser);
         }
       }
@@ -111,7 +114,7 @@
 
 
     // notified by server that any user removed an item
-    socket.on('item-removed', function(itemToRemove) {
+    app.socket.on('item-removed', function(itemToRemove) {
       //console.log('caught item-remove for ', itemToRemove);
       $('#list .item').each(function(ind, itemInList) {
         if ($(itemInList).find('label').text() == itemToRemove) {
@@ -123,7 +126,7 @@
 
     // notified by server that a user logged out
     // @todo consolidate this logic into 'item-removed'
-    socket.on('user-removed', function(itemToRemove) {
+    app.socket.on('user-removed', function(itemToRemove) {
       $('#users .user').each(function(ind, itemInList) {
         if ($(itemInList).text() == itemToRemove) {
           $(itemInList).slideUp().remove();
@@ -133,17 +136,17 @@
     });
 
 
-    socket.on('disconnect', function() {
+    app.socket.on('disconnect', function() {
       app.putMsg("Goodbye.");
     });
 
-    socket.on('message', function (data) {
+    app.socket.on('message', function (data) {
       app.putMsg(data);
-
       //console.log('message:', data);
     });
-
-
+    
+    
+    // form works w/ sockets
     $('form#new-item').live('submit', function(event) {
       try {
         var itemToAdd = $('input#item').val();
@@ -153,7 +156,7 @@
           app.putMsg("Can't add an empty item", 'error');
         }
         else {
-          socket.emit('add-item', {
+          app.socket.emit('add-item', {
             listId: app.listId,
             name: itemToAdd
           });
@@ -170,13 +173,13 @@
 
     $('#list .item input[type="checkbox"]').live('click', function(event){
       var itemToRemove = $(this).next('label').text();
-      socket.emit('remove-item', {
+      app.socket.emit('remove-item', {
         name: itemToRemove,
         listId: app.listId
       });
     });
     
-  }); // ready
+  };  // watchList
 
 })(jQuery);
 

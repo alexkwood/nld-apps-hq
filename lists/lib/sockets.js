@@ -1,12 +1,17 @@
 // socket handling for Lists
 // @todo figure out how 'rooms' work in socket.io
 // @todo namespace sockets using .of('/lists') ?
+// @todo escape item names for bad strings
 
 module.exports = function(app, io) {
 
-  var _ = require('underscore');
-  var List = app.db.model('List');
-    
+  var _ = require('underscore')
+    , List = app.db.model('List')
+    , async = require('async');
+  
+
+  // get the username of a socket
+  // @todo refactor this to use sessions, replace 'nickname' with 'username'
   function getSocketNickname(socket) {
     if (! _.isUndefined(socket.nickname)) {
       if (! _.isNull(socket.nickname) && socket.nickname != "") {
@@ -15,16 +20,74 @@ module.exports = function(app, io) {
     }
     return 'Someone';  //fallback
   }
-
-  // @todo this needs to be _per list_
-  function getUsers() {
-    var nicknames = [];
-    _.each(io.sockets.sockets, function(socket) {
-     nicknames.push( getSocketNickname(socket) );
-   }); 
-   console.log('got users:', nicknames);
-   return nicknames;
+  
+  
+  /*
+  rooms ref:
+    - io.rooms = array of rooms, key is arbitrary, values are socket IDs (as strings)
+    - io.roomClients = list of clients and their rooms [reverse of io.rooms]
+    - io.sockets.in().emit() sends to all users in a room
+    - socket.broadcast.to().emit() sends to all users in room except _socket_
+  */
+  
+  // key for a list room (namespacing to allow other room types in future)
+  function listRoomKey(listId) {
+    return 'list:' + listId;
   }
+  
+  // join an individual socket to a list room
+  function joinListRoom(socket, listId) {
+    socket.join( listRoomKey(listId) );
+  }
+  
+  // get array of socket IDs in a list room
+  function getListRoom(listId) {
+    if (!_.isEmpty(listId)) {
+      // == crude (just returns socket IDs)==
+      // var roomKey = '/list:' + listId;      // (note leading /)
+      // if (!_.isUndefined(io.rooms[roomKey])) return io.rooms[roomKey];
+      
+      // == better (returns socket objects) ==
+      var room = io.sockets.in( listRoomKey(listId) );
+      if (room && room.sockets) return room.sockets;
+    }
+    return false;
+  }
+  
+
+  // passes usernames (aka nicknames) to 'have-users' client event
+  // @todo this needs to be _per list_ ... find the _room_ for that list?
+  function getListRoomUsernames(listId) {
+    var users = []
+      , user = null
+      , room = getListRoom(listId);
+    
+    if (room) {
+      // console.log('room for list ', listId, room);
+      _.each(room, function(socket) {
+        users.push( getSocketNickname(socket) );
+      });   
+    }
+    
+    //  _.each(io.sockets.sockets, function(socket) {
+    //   users.push( getSocketNickname(socket) );
+    // });
+    console.log('got users:', users);
+    return users;
+  }
+  
+  
+  // - pass socket to excludeSocket to 'broadcast', otherwise goes to everyone in room
+  function broadcastToListRoom(listId, key, value, excludeSocket) {
+    var roomKey = listRoomKey(listId);
+    if (excludeSocket) {
+      excludeSocket.broadcast.to(roomKey).emit(key, value);
+    }
+    else {
+      io.sockets.in(roomKey).emit(key, value);
+    }    
+  }
+  
 
   // @todo remove this, use DB
   var listItems = [];
@@ -42,24 +105,41 @@ module.exports = function(app, io) {
 
     // convention: 'message' types are strings, 'info' are objects', 'todo' are objects
 
-    // demos the ways to distribute a message
+    /*
+    // demos the ways to distribute a message (w/o rooms)
     socket.on('message', function(msg){
       socket.broadcast.emit('message', 'someone else says: ' + msg);
       socket.emit('message', 'you said: ' + msg);
       io.sockets.emit('message', 'someone said: ' + msg);
     });
+    */
 
-    // when client uses socket.send(), server callback only gets 1 val (object),
-    // but socket.emit() from client passes separate params into callback
+    // note: when client uses socket.send(), server callback only gets 1 val (object),
+    //  but socket.emit() from client passes separate params into callback
 
 
     // detect which list a user is watching, join that 'room'
     // list rooms namespaced w/ 'list:ID'
     socket.on('list:watch', function(listId) {
-      socket.join('list:' + listId);
+      joinListRoom(socket, listId);
+      broadcastToListRoom(
+        listId,
+        'message',
+        getSocketNickname(socket) + " is now viewing this list.",
+        socket
+      );
+      
+      broadcastToListRoom(
+        listId,
+        'have-users',
+        [ getSocketNickname(socket) ],
+        socket
+      );
     });
 
 
+    /*
+    // @todo eliminate this, should get from session instead
     socket.on("info", function(key, val) {
       console.log("got info: ", key, val);
       socket.set(key, val);
@@ -72,67 +152,142 @@ module.exports = function(app, io) {
 
         socket.broadcast.emit('message', nickname + ' connected');
         socket.broadcast.emit('have-users', [ nickname ]);  // redundant for new user
-
-
-        /*
-        // long form
-        socket.get('nickname', function (err, nickname) {
-          if (err) socket.emit('error: ' + util.inspect(err));
-          else {
-            socket.emit('message', "Hello " + nickname + "!");
-            socket.broadcast.emit('message', nickname + ' connected');
-          }
-        });
-        */     
       }
     });
-
+    */
 
     // user adds a new item
     // (item contains 'name' and 'listId')
     socket.on('add-item', function(item) {
       // @todo eliminate listItems, go to DB
-      listItems.push(item.name);
+      // listItems.push(item.name);
+      
+      // run these in a series. error at any point skips to end.
+      async.series([
+          // first find the list
+          function(next) {
+            var series = this;
+            List.findById(item.listId, function(error, list) {
+              // console.log('found by id:', error, list);
+              if (error || !list) return next(new Error("List doesn't exist?"));
+              series.list = list;
+              next();
+            });
+          },
+          // now add the new item
+          function (next) {
+            // tried to use List.update(this.list, { $push ...}), but that doesn't update the doc! - so using JS push.
+            this.list.items.push( item.name );
+            this.list.save(next);
+          },
+          // // check item?
+          // function(next) {
+          //   console.log('check list has new item ', item.name, this.list);
+          //   next();
+          // }
 
-      socket.emit('message', "Acknowledged your " + item.name);
-      socket.broadcast.to('list:' + item.listId)
-        .emit('message', getSocketNickname(socket) + " added " + item.name + " to the list.")
-        .emit('have-items', [ item.name ]);
+          // success
+          function(next) {
+            socket.emit('message', "Acknowledged your " + item.name);
+            broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " added " + item.name + " to the list.", socket);
+            broadcastToListRoom(item.listId, 'have-items', [ item.name ], null);    // also to sender
+          }
+        ],
+        function(error, results) {
+          // console.log('done with series, results:', results, 'this:', this);
+          if (error) {
+            socket.emit('message', "An error occurred adding your " + item.name + " to the list. (" + error + ")");
+          }
+        }
+      );
+      
     });
 
     // user removes an item
     // (item contains 'name' and 'listId')
     socket.on('remove-item', function(item) {
-      // remove from array
-      var ind = _.indexOf(listItems, item.name);
-      if (ind == -1) return;
-      listItems.splice(ind, 1);
-
-      socket.broadcast.to('list:' + item.listId)
-        .emit('message', getSocketNickname(socket) + " removed " + item.name + " from the list.")
-        .emit('item-removed', item.name);
+      // (using same approach as add-item)
+      async.series([
+          function(next) {
+            var series = this;
+            List.findById(item.listId, function(error, list) {
+              if (error || !list) return next(new Error("List doesn't exist?"));
+              series.list = list;
+              next();
+            });
+          },
+          // remove item
+          function (next) {
+            // remove from array
+            var ind = _.indexOf(this.list.items, item.name);
+            if (ind == -1) return next("Can't find item, maybe already removed?");
+            this.list.items.splice(ind, 1);
+            this.list.save(next);
+          },
+          // check item?
+          function(next) {
+            console.log('check list no longer has item ', item.name, this.list);
+            next();
+          },
+          // success
+          function(next) {
+            socket.emit('message', "Removed " + item.name);
+            broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " removed " + item.name + " from the list.", socket);
+            broadcastToListRoom(item.listId, 'item-removed', [ item.name ], null);    // also to sender
+          }
+        ],
+        function(error, results) {
+          // console.log('done with series, results:', results, 'this:', this);
+          if (error) {
+            socket.emit('message', "An error occurred removing " + item.name + " from the list. (" + error + ")");
+          }
+        }
+      );
     });
+
 
     // user requests all items in the list
     socket.on('get-items', function(listId) {
-      // @todo get items for list # listId
-      socket.emit('have-items', listItems);
+      
+      List.findById(listId, function(error, list) {
+        if (error || !list) {
+          socket.emit('message', "Error, can't load items for that list! (" + error + ")");
+          return;
+        }
+        
+        socket.emit('have-items', list.items);
+      });
     });
+    
 
     // user requests all users watching a given list
     socket.on('get-users', function(listId) {
-      // @todo return usernames in the list _room_
-      socket.emit('have-users', getUsers());
+      socket.emit('have-users', getListRoomUsernames(listId));
     });
+    
 
     socket.on('disconnect', function() {
-      console.log("user disconnected", arguments);
-      // @todo only broadcast to this socket's rooms!
-      io.sockets.emit('message', getSocketNickname(socket) + ' disconnected.');
-      io.sockets.emit('user-removed', getSocketNickname(socket));
+      console.log("user %s disconnected", getSocketNickname(socket));
+    
+      // only broadcast to this socket's rooms
+      if (! _.isUndefined(io.roomClients[socket.id])) {
+        
+        _.each(io.roomClients[socket.id], function(inRoom, roomKey, list) {
+          console.log('--- room: ', roomKey, inRoom);
+          
+          // 1) skip default room '', 2) check inRoom==true (probably redundant)
+          if (roomKey != '' && inRoom == true) {
+            // note: roomKey here is raw, not just listId (so don't use broadcastToListRoom).
+            io.sockets.in(roomKey).emit('message', getSocketNickname(socket) + ' left.');
+            io.sockets.in(roomKey).emit('user-removed', getSocketNickname(socket));
+          }
+        });
+      }
     });
 
+
     //console.dir(io.sockets.sockets);
-  });
+    
+  }); // on connection
   
-};
+};  //module

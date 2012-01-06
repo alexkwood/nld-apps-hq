@@ -13,9 +13,12 @@ var List = {
   title: String,
 
   created_by: String,         // username
+
+  // @todo fill this in whenever someone other than author loads a list
   shared_with: [ String ],    // more usernames  
   
   created_time: { type: Date, default: Date.now },
+  updated_time: { type: Date, default: Date.now },
   
   items: [ String ]
 };
@@ -34,6 +37,7 @@ ListSchema.statics.getLists = function(callback) {
 };
 
 
+// @todo use me?
 ListSchema.methods.countItems = function() {
   try {
     return this.items.length;
@@ -42,3 +46,11 @@ ListSchema.methods.countItems = function() {
     return "Unknown (" + e + ")";
   }
 }
+
+
+ListSchema.pre('save', function(next) {
+  this.updated_time = new Date;
+  console.log('saving list:', this);
+  next();
+});
+

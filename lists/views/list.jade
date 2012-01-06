@@ -1,20 +1,22 @@
-h1= listsAppTitle
-h2= title
-
 div.user= username
 
 div#users-wrapper.sidebar
-  h2 Users
+  h2 Currently Viewing
   div#users
 
 div#lists-wrapper.sidebar
   h2 Your Lists
   div#lists
     - if (lists)
-      ul
-      - each list in lists
-        li
-          a(href='/lists/list/#{list._id}')= list.title
+      ol
+        - each list in lists
+          li
+            a(href='/lists/list/#{list._id}')= list.title
+
+    form#new-list(action='/lists/list/new', method='post')
+      h3 Create a new list
+      input(type='text', name='list-name', id='new-list-name')
+      input(type='submit', value='Create')
 
 div#messages-wrapper
   h2 Messages
@@ -30,6 +32,3 @@ div#new-item-wrapper
     input#item(type='text', size='60')
     input#add(type='submit', value='Add')
 
-
-- if (typeof list != "undefined")
-  != list
