@@ -16,19 +16,27 @@ div#lists-wrapper.sidebar
       input(type='text', name='list_name', id='new-list-name')
       input(type='submit', value='Create')
 
-div#messages-wrapper
-  div#messages
+  - if (guestLists && guestLists.length)
+    h2 Visited Lists
+    div#visited-lists
+      ol
+        - each list in guestLists
+          li
+            a(href='#{listsBase}/list/#{list._id}')= list.title
+
 
 div#list-wrapper
   h2= list.title
+  div.credits Created by #{list._creator.displayName()}
   div#list
+    div#no-items There are no items in the list.
 
 div#new-item-wrapper
-  h3 Add new item
+  h3 Add an item
   form#new-item
     input#item(type='text', size='60')
     input#add(type='submit', value='Add')
 
-//-@todo limit this to list AUTHOR
-div#delete-list
-  a.delete-list(href='#{listsBase}/list/#{list._id}/delete') Delete this list
+- if (userIsListCreator)
+  div#delete-list
+    a.delete-list(href='#{listsBase}/list/#{list._id}/delete') Delete this list

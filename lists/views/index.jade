@@ -1,16 +1,23 @@
-div#messages-wrapper
-  h2 Messages
-  div#messages
 
 div#lists-wrapper
   h2 Your Lists
   div#lists
     - if (lists)
-      ul
-      - each list in lists
-        li
-          a(href='/lists/list/#{list._id}')= list.title
-          |  (#{list.countItems()} items)
+      ol
+        - each list in lists
+          li
+            a(href='/lists/list/#{list._id}')= list.title
+            |  (#{list.countItems()} items)
+
+
+  - if (guestLists && guestLists.length)
+    h2 Visited Lists
+    div#visited-lists
+      ol
+        - each list in guestLists
+          li
+            a(href='#{listsBase}/list/#{list._id}')= list.title
+
 
 form#new-list(action='/lists/list/new', method='post')
   h3 Create a new list

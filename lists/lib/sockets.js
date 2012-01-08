@@ -126,13 +126,13 @@ module.exports = function(app, io) {
        }
 
        ss.get(data.sessionID, function onGetSession(error, session) {
-         console.log('get session from store: ', error, session);
+         // console.log('get session from store: ', error, session);
 
          if (error) return next(new Error("Session error"));
          else if (!session) return next(new Error("Invalid session"));
 
          data.session = session;
-         console.log('got session', data.session);
+         // console.log('got session', data.session);
          
          next();  // (accept)
 
@@ -162,7 +162,7 @@ module.exports = function(app, io) {
          // visible name (defined in model's methods)
          data.username = user.displayName();
 
-         console.log('user in socket session found in DB, username:', data.username);
+         // console.log('user in socket session found in DB, username:', data.username);
 
          next();
        });
@@ -281,7 +281,8 @@ module.exports = function(app, io) {
     // user requests all items in the list
     socket.on('get-items', function(listId) {
 
-      List.findById(listId, function(error, list) {
+      // (only need the items)
+      List.findById(listId, ['items'], function(error, list) {
         if (error || !list) {
           socket.emit('message', "Error, can't load items for that list! (" + error + ")");
           return;

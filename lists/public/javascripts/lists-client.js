@@ -20,6 +20,7 @@
   
   // start a 15-second fade countdown on a message
   var fadeMessage = function(div) {
+    // console.log('starting fade on', div);
     setTimeout(function() {
       $(div).slideUp('slow', function() {
         $(div).remove().die();
@@ -54,7 +55,7 @@
     });
     
     // apply fades to initial (static html) messages
-    $('#messages .message').each(function(div) {
+    $('#messages .message').each(function(ind, div) {
       fadeMessage(div);
     });    
     
@@ -100,6 +101,8 @@
           var newItem = $('<div class="item"><input type="checkbox" /><label>' + items[i] + '</label></div>');
           $('#list').append(newItem);
         }
+        
+        app.toggleNoItemsMessage();
       }
       catch(e) {
         app.putMsg("Error getting items: " + e.message, 'error');
@@ -137,6 +140,8 @@
           return false;  // break
         }
       });
+      
+      app.toggleNoItemsMessage();
     });
 
     // notified by server that a user logged out
@@ -195,6 +200,12 @@
     });
     
   };  // watchList
+  
+  app.toggleNoItemsMessage = function() {
+    // toggle no-items message
+    if ($('#list .item').size()) $('#no-items').hide();
+    else $('#no-items').show();
+  };
 
 })(jQuery);
 

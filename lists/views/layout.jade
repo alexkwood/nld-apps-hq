@@ -42,6 +42,13 @@ html
       - if (typeof title != "undefined")
         h2= title
     
+      //- moved from index. for individual list, gets populated w/ socket messages. otherwise just from req.flash.
+      div#messages-wrapper
+        div#messages
+          - if (typeof listsMessages != "undefined")
+            - each message,type in listsMessages
+              div.message(class=type)!= message
+    
       != body
 
     div#footer

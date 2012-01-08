@@ -9,6 +9,8 @@
 // @todo if socket doesn't connect, put in big error message
 // @todo hide messages wrapper if none (and make longer delay)
 
+// @todo graceful degradation to non-socket posts? (low priority)
+
 var util = require('util')
   , express = require('express')
   , _ = require('underscore');
@@ -108,8 +110,6 @@ app.restrictUser = function(req, res, next) {
   res.redirect('/login');     // @todo go to root /login not app
 };
 
-
-app.use(app.router);
 
 require('./routes/routes')(app);
 
