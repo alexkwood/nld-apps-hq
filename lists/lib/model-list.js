@@ -100,3 +100,13 @@ ListSchema.statics.removeItemFromList = function(listId, itemName, callback) {
     });
   });
 };
+
+
+// find and delete a list
+ListSchema.statics.removeList = function(listId, callback) {
+  this.findById(listId, function(error, list) {
+    if (error || !list) return callback(new Error("List doesn't exist?"));
+    
+    list.remove(callback);
+  });
+};

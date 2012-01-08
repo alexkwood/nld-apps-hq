@@ -1,5 +1,3 @@
-div.user= username
-
 div#users-wrapper.sidebar
   h2 Currently Viewing
   div#users
@@ -11,15 +9,14 @@ div#lists-wrapper.sidebar
       ol
         - each list in lists
           li
-            a(href='/lists/list/#{list._id}')= list.title
+            a(href='#{listsBase}/list/#{list._id}')= list.title
 
-    form#new-list(action='/lists/list/new', method='post')
+    form#new-list(action='#{listsBase}/list/new', method='post')
       h3 Create a new list
       input(type='text', name='list_name', id='new-list-name')
       input(type='submit', value='Create')
 
 div#messages-wrapper
-  h2 Messages
   div#messages
 
 div#list-wrapper
@@ -27,11 +24,11 @@ div#list-wrapper
   div#list
 
 div#new-item-wrapper
-  h2 Add new item
+  h3 Add new item
   form#new-item
     input#item(type='text', size='60')
     input#add(type='submit', value='Add')
 
 //-@todo limit this to list AUTHOR
 div#delete-list
-  a.delete-list(href='/list/#{list._id}/delete') Delete this list
+  a.delete-list(href='#{listsBase}/list/#{list._id}/delete') Delete this list

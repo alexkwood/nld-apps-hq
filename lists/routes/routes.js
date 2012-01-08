@@ -1,4 +1,3 @@
-
 module.exports = function(app) {
 
   require('express-mongoose');
@@ -6,7 +5,7 @@ module.exports = function(app) {
     , _ = require('underscore');
 
   // middleware to ensure logged in
-  
+  // @todo ...?
 
   app.param('listId', app.restrictUser, function(req, res, next, listId) {
     req.list = List.findById(listId, function(error, list) {
@@ -32,20 +31,12 @@ module.exports = function(app) {
 
 
   // @todo restrict to author!
-  app.get('/list/:listId/delete', app.restrictUser, function(req, res) {
-        
-    // List.findById(listId, function(error, list) {
-    //   if (!error && list) {
-    //     List.remove(list, ...);
-    //   }
-    // });
-    // ...
-    
-    //tmp
-    res.render('list', {
-      // title: req.list.title,
-      lists: List.getLists(),
-      list: req.list
+  app.get('/list/:listId/delete', app.restrictUser, function(req, res) {        
+    req.list.remove(function(error){
+      if (error) req.flash('error', 'Error deleting the list.');
+      else req.flash('info', 'Deleted the list <em>' + req.list.title + '</em>');
+      
+      res.redirect('/');
     });
   });
   
