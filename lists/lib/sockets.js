@@ -1,19 +1,17 @@
 // socket handling for Lists
 // @todo namespace sockets using .of('/lists') ?
-// @todo escape item names for bad strings
+// note escape item names for bad strings
 
 module.exports = function(app, io) {
 
   var parseCookie = require('express/node_modules/connect').utils.parseCookie;   // simpler way?
-
 
   var _ = require('underscore')
     , List = app.db.model('List')
     , async = require('async');
   
 
-  // get the username of a socket
-  // @todo refactor this to use sessions, replace 'nickname' with 'username'
+  // get the username of a socket [via session info set in socket 'authorization' below]
   function getSocketUsername(socket) {
     if (! _.isUndefined(socket.handshake.username)) {
       if (! _.isEmpty(socket.handshake.username)) {
@@ -22,7 +20,6 @@ module.exports = function(app, io) {
     }
     return '[no name]';
   }
-  
   
   /*
   rooms ref:
@@ -88,8 +85,7 @@ module.exports = function(app, io) {
   }
   
 
-  // @todo remove?
-  var counter = 0;
+  global.socketCounter = 0;    // [total]
 
   // track sockets connected to each list
   // assign as listId : [ sockets ]
@@ -183,9 +179,7 @@ module.exports = function(app, io) {
 
   io.sockets.on('connection', function (socket) {
     // console.log('new socket:', socket);
-    console.log("connection #" + (++counter));
-    
-    console.log('A socket with sessionID ' + socket.handshake.sessionID + ' connected, username:', socket.handshake.username);
+    console.log("socket connection #" + (++global.socketCounter) + ' by', socket.handshake.username);
 
 
     // convention: 'message' types are strings, 'info' are objects', 'todo' are objects
@@ -205,7 +199,9 @@ module.exports = function(app, io) {
 
     // detect which list a user is watching, join that 'room'
     // list rooms namespaced w/ 'list:ID'
-    socket.on('list:watch', function(listId) {
+    socket.on('list:watch', function(listId) {      
+      socket.emit('message', "Hello " + getSocketUsername(socket)  + "!");
+      
       joinListRoom(socket, listId);
       broadcastToListRoom(
         listId,
@@ -222,24 +218,6 @@ module.exports = function(app, io) {
       );
     });
 
-
-    /*
-    // @todo eliminate this, should get from session instead
-    socket.on("info", function(key, val) {
-      console.log("got info: ", key, val);
-      socket.set(key, val);
-
-      if (key == 'nickname') {
-        socket.nickname = val;
-        var nickname = getSocketUsername(socket);
-
-        socket.emit('message', "Hello " + nickname + "!");
-
-        socket.broadcast.emit('message', nickname + ' connected');
-        socket.broadcast.emit('have-users', [ nickname ]);  // redundant for new user
-      }
-    });
-    */
 
     // user adds a new item
     // (item contains 'name' and 'listId')

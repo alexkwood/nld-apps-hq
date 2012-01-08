@@ -1,9 +1,9 @@
 /** client-side Lists: socket handling, etc **/
 
 (function($){
-  var app = window.app = {};
+  var app = window.ListsApp = {};
 
-  app.username = '';    // @todo...
+  app.username = null;
   
   app.msgCount = 0;
   app.putMsg = function(msg, type) {
@@ -33,15 +33,15 @@
   $(function() {
     $('#new-item #item').focus();
     
-    // @todo this should be passed from server
-    // if (app.username == "") app.username = prompt("What's your name?");
-    if (app.username == "") app.username = "The nameless one";
-
     // allow event catchers to grab/manipulate this app
     // -- 'loaded-app' notifies doc that app is ready,
     // -- doc then passes back 'watch-list' ID
     // (not sure what obj to run this event on, using window for now)
-    $(window).on('watch-list', function(event, listId){
+    $(window)
+    .on('set-username', function(event, username) {
+      app.username = username;
+    })
+    .on('watch-list', function(event, listId){
       app.watchList(listId);
     })
     .trigger('loaded-app', app);
@@ -77,8 +77,6 @@
 
       // join room
       app.socket.emit('list:watch', app.listId);
-
-      app.socket.emit("info", "nickname", app.username);
 
       // reset list. impt if server disconnects & reconnects.
       $('#list .item').remove();
@@ -120,7 +118,7 @@
 
         for(var i = 0; i < users.length; i++) {
           var newUser = $('<div class="user">' + users[i] + '</div>');
-          if (users[i] == app.username) newUser.addClass('current');
+          if (app.username && users[i] == app.username) newUser.addClass('current');
           $('#users').append(newUser);
         }
       }

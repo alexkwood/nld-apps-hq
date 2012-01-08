@@ -29,7 +29,7 @@ html
         // catch the loaded client app
         $(window).on('loaded-app', function(event, app){
           // pass back an event w/ list ID (initializes socket)
-          $(window).trigger('watch-list', '#{list._id}');
+          $(window).trigger('watch-list', '#{list._id}').trigger('set-username', '#{username}');
         });
     
   body

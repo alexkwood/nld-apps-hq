@@ -35,9 +35,9 @@ h1 {
 }
 #messages .message {
   background: #d5f2ff;
-  padding: .5em;
+  padding: .2em .5em;
   min-height: 1em;
-  margin-bottom: 1em;
+  margin-bottom: .5em;
 }
 #messages .message.error {
   color: red;

@@ -3,13 +3,11 @@
  * running as sub-app inside NLD Apps
  */
 
-// @todo connect SESSIONS so user is identified to socket!!
-// @todo put in req.flash messages, same style as socket messages
 // @todo show socket status at top
 // @todo if socket doesn't connect, put in big error message
-// @todo hide messages wrapper if none (and make longer delay)
 
 // @todo graceful degradation to non-socket posts? (low priority)
+// @todo more string escaping to prevent injections? ... (socket.io seems to escape well enough for now)
 
 var util = require('util')
   , express = require('express')
