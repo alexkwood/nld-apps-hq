@@ -33,6 +33,10 @@ h1 {
   background: #fff;
   clear: right;
 }
+.sidebar h2 {
+  margin-top: 0;
+  font-size: 1.3em;
+}
 #messages .message {
   background: #d5f2ff;
   padding: .2em .5em;

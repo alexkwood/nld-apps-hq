@@ -11,11 +11,6 @@ div#lists-wrapper.sidebar
           li
             a(href='#{listsBase}/list/#{list._id}')= list.title
 
-    form#new-list(action='#{listsBase}/list/new', method='post')
-      h3 Create a new list
-      input(type='text', name='list_name', id='new-list-name')
-      input(type='submit', value='Create')
-
   - if (guestLists && guestLists.length)
     h2 Visited Lists
     div#visited-lists
@@ -23,6 +18,12 @@ div#lists-wrapper.sidebar
         - each list in guestLists
           li
             a(href='#{listsBase}/list/#{list._id}')= list.title
+
+    form#new-list(action='#{listsBase}/list/new', method='post')
+      h3 Create a new list
+      input(type='text', name='list_name', id='new-list-name')
+      input(type='submit', value='Create')
+
 
 
 div#list-wrapper

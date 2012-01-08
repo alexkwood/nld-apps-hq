@@ -27,10 +27,21 @@ html
     - if (typeof list != "undefined")
       script
         // catch the loaded client app
-        $(window).on('loaded-app', function(event, app){
-          // pass back an event w/ list ID (initializes socket)
-          $(window).trigger('watch-list', '#{list._id}').trigger('set-username', '#{username}');
-        });
+        (function($){
+          $(window).on('loaded-app', function(event, app){
+            // pass back an event w/ list ID (initializes socket)
+            $(window).trigger('watch-list', '#{list._id}').trigger('set-username', '#{username}');
+          })
+        })(jQuery);
+        
+    - else
+      script
+        (function($){
+          $(function(){
+            $('#socket-status').hide();   // not needed here
+          });
+        })(jQuery);
+        
     
   body
     != appsHeader
@@ -50,7 +61,7 @@ html
               div.message(class=type)!= message
     
       div#socket-status.sidebar.disconnected
-        | Not connected
+        | Socket not connected
     
       != body
 

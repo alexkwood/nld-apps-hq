@@ -9,16 +9,17 @@
   app.hasConnected = false;
   
   app.msgCount = 0;
-  app.putMsg = function(msg, type) {
+  app.putMsg = function(msg, type, noFade) {
     app.msgCount++;
     var div = $('<div></div>');
     div.addClass('message');
     div.attr('id', 'message-' + app.msgCount);
     if (typeof type != "undefined") div.addClass(type);
 
-    div.text(msg);
+    div.html(msg);
     $('#messages').append(div);
-    fadeMessage(div);
+    
+    if (! noFade) fadeMessage(div);
   };
   
   // start a 15-second fade countdown on a message
@@ -74,6 +75,20 @@
     // socket on same host
     app.socket = io.connect( document.location.origin );
     
+    // how to detect socket connection errors?
+    // - socket.on('error') doesn't catch anything
+    // - try-catch doesn't catch connection failures
+    // ...so use crude timeout for now
+    setTimeout(function(){
+      if (! app.hasConnected) {
+        app.putMsg("There seems to be a problem connecting to the server. \
+          This app uses <a href=\"http://socket.io\">cross-browser sockets</a>, but your browser might not support them, \
+          or the server might not be working. \
+          Please <a href=\"https://github.com/newleafdigital/nld-apps-hq/issues\">report the bug</a>.",
+          'error', true);
+      }
+    }, 5000);
+    
     app.socket.on('connect', function() {
       if (!app.hasConnected) app.putMsg("Connected.");
       else app.putMsg('Re-connected');
@@ -125,7 +140,10 @@
 
         for(var i = 0; i < users.length; i++) {
           var newUser = $('<div class="user">' + users[i] + '</div>');
-          if (app.username && users[i] == app.username) newUser.addClass('current');
+          
+          // mark current username, only once (in case 2 ppl w/ same name)
+          if (app.username && users[i] == app.username && $('#users .current').size()==0) newUser.addClass('current');
+          
           $('#users').append(newUser);
         }
       }
@@ -216,10 +234,10 @@
   
   app.toggleStatusMessage = function(isConnected) {
     if (isConnected) {
-      $('#socket-status').removeClass('disconnected').addClass('connected').text('Connected');
+      $('#socket-status').removeClass('disconnected').addClass('connected').text('Socket connected');
     }
     else {
-      $('#socket-status').removeClass('connected').addClass('disconnected').text('Disconnected');
+      $('#socket-status').removeClass('connected').addClass('disconnected').text('Socket disconnected');
     }
   };
 
