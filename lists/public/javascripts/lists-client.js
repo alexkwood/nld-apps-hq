@@ -43,6 +43,14 @@
     })
     .trigger('loaded-app', app);
     
+    
+    $('a.delete-list').click(function(event) {
+      if (! confirm('Are you sure you want to delete this list?')) {
+        event.preventDefault();
+        return false;
+      }
+    });
+    
   }); // ready
   
 

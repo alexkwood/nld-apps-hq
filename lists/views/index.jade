@@ -13,3 +13,8 @@ div#lists-wrapper
         li
           a(href='/lists/list/#{list._id}')= list.title
           |  (#{list.countItems()} items)
+
+form#new-list(action='/lists/list/new', method='post')
+  h3 Create a new list
+  input(type='text', name='list_name', id='new-list-name')
+  input(type='submit', value='Create')

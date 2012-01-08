@@ -1,7 +1,10 @@
 !!! 5
 html
   head
-    title= listsAppTitle
+    - if (typeof list != "undefined")
+      title #{list.title} - #{listsAppTitle}
+    - else
+      title= listsAppTitle
     
     //-shared
     link(rel='stylesheet', href='/stylesheets/hq.css')

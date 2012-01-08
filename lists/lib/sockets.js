@@ -89,9 +89,6 @@ module.exports = function(app, io) {
   }
   
 
-  // @todo remove this, use DB
-  var listItems = [];
-
   // @todo remove?
   var counter = 0;
 
@@ -158,97 +155,44 @@ module.exports = function(app, io) {
 
     // user adds a new item
     // (item contains 'name' and 'listId')
-    socket.on('add-item', function(item) {
-      // @todo eliminate listItems, go to DB
-      // listItems.push(item.name);
+    socket.on('add-item', function(item) {      
       
-      // run these in a series. error at any point skips to end.
-      async.series([
-          // first find the list
-          function(next) {
-            var series = this;
-            List.findById(item.listId, function(error, list) {
-              // console.log('found by id:', error, list);
-              if (error || !list) return next(new Error("List doesn't exist?"));
-              series.list = list;
-              next();
-            });
-          },
-          // now add the new item
-          function (next) {
-            // tried to use List.update(this.list, { $push ...}), but that doesn't update the doc! - so using JS push.
-            this.list.items.push( item.name );
-            this.list.save(next);
-          },
-          // // check item?
-          // function(next) {
-          //   console.log('check list has new item ', item.name, this.list);
-          //   next();
-          // }
-
-          // success
-          function(next) {
-            socket.emit('message', "Acknowledged your " + item.name);
-            broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " added " + item.name + " to the list.", socket);
-            broadcastToListRoom(item.listId, 'have-items', [ item.name ], null);    // also to sender
-          }
-        ],
-        function(error, results) {
-          // console.log('done with series, results:', results, 'this:', this);
-          if (error) {
-            socket.emit('message', "An error occurred adding your " + item.name + " to the list. (" + error + ")");
-          }
+      List.addItemToList(item.listId, item.name, function(error, list) {        
+        if (error) {
+          socket.emit('message', "An error occurred adding your " + item.name + " to the list. (" + error + ")");
+          return;
         }
-      );
+        
+        // success
+        socket.emit('message', "Acknowledged your " + item.name);
+        broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " added " + item.name + " to the list.", socket);
+        broadcastToListRoom(item.listId, 'have-items', [ item.name ], null);    // also to sender        
+      });
       
-    });
+    }); //add-item
+
+
 
     // user removes an item
     // (item contains 'name' and 'listId')
     socket.on('remove-item', function(item) {
-      // (using same approach as add-item)
-      async.series([
-          function(next) {
-            var series = this;
-            List.findById(item.listId, function(error, list) {
-              if (error || !list) return next(new Error("List doesn't exist?"));
-              series.list = list;
-              next();
-            });
-          },
-          // remove item
-          function (next) {
-            // remove from array
-            var ind = _.indexOf(this.list.items, item.name);
-            if (ind == -1) return next("Can't find item, maybe already removed?");
-            this.list.items.splice(ind, 1);
-            this.list.save(next);
-          },
-          // check item?
-          function(next) {
-            console.log('check list no longer has item ', item.name, this.list);
-            next();
-          },
-          // success
-          function(next) {
-            socket.emit('message', "Removed " + item.name);
-            broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " removed " + item.name + " from the list.", socket);
-            broadcastToListRoom(item.listId, 'item-removed', [ item.name ], null);    // also to sender
-          }
-        ],
-        function(error, results) {
-          // console.log('done with series, results:', results, 'this:', this);
-          if (error) {
-            socket.emit('message', "An error occurred removing " + item.name + " from the list. (" + error + ")");
-          }
+      List.removeItemFromList(item.listId, item.name, function(error, list) {
+        if (error) {
+          socket.emit('message', "An error occurred removing " + item.name + " from the list. (" + error + ")");
+          return;
         }
-      );
-    });
+        
+        socket.emit('message', "Removed " + item.name);
+        broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " removed " + item.name + " from the list.", socket);
+        broadcastToListRoom(item.listId, 'item-removed', [ item.name ], null);    // also to sender
+      });
+      
+    }); //remove-item
 
 
     // user requests all items in the list
     socket.on('get-items', function(listId) {
-      
+
       List.findById(listId, function(error, list) {
         if (error || !list) {
           socket.emit('message', "Error, can't load items for that list! (" + error + ")");

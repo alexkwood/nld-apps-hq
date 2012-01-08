@@ -77,22 +77,6 @@ app.configure('production', function(){
 var ListSchema = require('./lib/model-list')
   , List = app.db.model('List', ListSchema);
 
-/*
-//tmp - create a list on load
-var list = new List({
-  title: 'List ' + (Math.random()*11),
-  created_by: 'someone',
-  items: [
-    'Something ' + (Math.random()*11),
-    'Something ' + (Math.random()*11),
-    'Something ' + (Math.random()*11)
-  ]
-});
-
-console.log('new list:', list);
-list.save();
-*/
-
 
 var sharedDynamicHelpers = {
   listsBase: function(req, res){

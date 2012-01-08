@@ -15,7 +15,7 @@ div#lists-wrapper.sidebar
 
     form#new-list(action='/lists/list/new', method='post')
       h3 Create a new list
-      input(type='text', name='list-name', id='new-list-name')
+      input(type='text', name='list_name', id='new-list-name')
       input(type='submit', value='Create')
 
 div#messages-wrapper
@@ -23,7 +23,7 @@ div#messages-wrapper
   div#messages
 
 div#list-wrapper
-  h2 Shopping List
+  h2= list.title
   div#list
 
 div#new-item-wrapper
@@ -32,3 +32,6 @@ div#new-item-wrapper
     input#item(type='text', size='60')
     input#add(type='submit', value='Add')
 
+//-@todo limit this to list AUTHOR
+div#delete-list
+  a.delete-list(href='/list/#{list._id}/delete') Delete this list
