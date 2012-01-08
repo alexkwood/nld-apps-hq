@@ -1,9 +1,11 @@
 // socket handling for Lists
-// @todo figure out how 'rooms' work in socket.io
 // @todo namespace sockets using .of('/lists') ?
 // @todo escape item names for bad strings
 
 module.exports = function(app, io) {
+
+  var parseCookie = require('express/node_modules/connect').utils.parseCookie;   // simpler way?
+
 
   var _ = require('underscore')
     , List = app.db.model('List')
@@ -12,13 +14,13 @@ module.exports = function(app, io) {
 
   // get the username of a socket
   // @todo refactor this to use sessions, replace 'nickname' with 'username'
-  function getSocketNickname(socket) {
-    if (! _.isUndefined(socket.nickname)) {
-      if (! _.isNull(socket.nickname) && socket.nickname != "") {
-        return socket.nickname;
+  function getSocketUsername(socket) {
+    if (! _.isUndefined(socket.handshake.username)) {
+      if (! _.isEmpty(socket.handshake.username)) {
+        return socket.handshake.username;
       }
     }
-    return 'Someone';  //fallback
+    return '[no name]';
   }
   
   
@@ -55,25 +57,22 @@ module.exports = function(app, io) {
   }
   
 
-  // passes usernames (aka nicknames) to 'have-users' client event
-  // @todo this needs to be _per list_ ... find the _room_ for that list?
+  // find the users viewing a list, return usernames
+  // for 'have-users' client event
   function getListRoomUsernames(listId) {
-    var users = []
+    var usernames = []
       , user = null
       , room = getListRoom(listId);
     
     if (room) {
       // console.log('room for list ', listId, room);
       _.each(room, function(socket) {
-        users.push( getSocketNickname(socket) );
+        usernames.push( getSocketUsername(socket) );
       });   
     }
     
-    //  _.each(io.sockets.sockets, function(socket) {
-    //   users.push( getSocketNickname(socket) );
-    // });
-    console.log('got users:', users);
-    return users;
+    // console.log('got usernames:', usernames);
+    return usernames;
   }
   
   
@@ -85,7 +84,7 @@ module.exports = function(app, io) {
     }
     else {
       io.sockets.in(roomKey).emit(key, value);
-    }    
+    }
   }
   
 
@@ -94,11 +93,100 @@ module.exports = function(app, io) {
 
   // track sockets connected to each list
   // assign as listId : [ sockets ]
+  // @todo eliminate this?
   var listWatchers = {};
+
+
+  // make sure connecting sockets have a valid express/mongo/everyauth session!
+  // (then use that session to pull username)
+  // (session integration w/ help from http://www.danielbaulig.de/socket-ioexpress/)
+  io.set('authorization', function (data, accept) {
+    // console.log('socket auth:', data);
+    
+    // (control flow, allows break at any async point)
+    async.series([
+     function(next) {
+       if (data.headers.cookie) {
+         data.cookie = parseCookie(data.headers.cookie);
+         data.sessionID = data.cookie['connect.sid'];      // [not express.sid]
+         return next();
+       }
+       else {
+         return next(new Error("Missing cookie"));
+       }
+     },
+     
+     function(next) {
+       // load the connect-mongo session store from parent app
+       if (app.parent && app.parent.sessionStore) {
+         var ss = app.parent.sessionStore;
+       }
+       else {
+         return next(new Error("Missing session store!"));
+       }
+
+       ss.get(data.sessionID, function onGetSession(error, session) {
+         console.log('get session from store: ', error, session);
+
+         if (error) return next(new Error("Session error"));
+         else if (!session) return next(new Error("Invalid session"));
+
+         data.session = session;
+         console.log('got session', data.session);
+         
+         next();  // (accept)
+
+       });  //onGetSession       
+     },
+     
+     function(next) {
+       
+       // @todo pull the user info from everyauth for this session!
+       // User model set in auth app, plugged into parentApp
+       var User = app.db.model('User');
+       if (! User) {
+         return next(new Error("Unable to access user list"));
+       }
+       
+       // [does this stop if any condition fails, or throw fatal error?]
+       if (!data.session.auth || !data.session.auth.userId) {
+         return next(new Error("Session missing auth credentials"));
+       }
+       
+       User.findById(data.session.auth.userId, function (error, user) {
+         if (error) return next(new Error("Auth error"));
+         else if (!user) return next(new Error("Invalid user"));
+
+         data.user = user;
+         
+         // visible name (defined in model's methods)
+         data.username = user.displayName();
+
+         console.log('user in socket session found in DB, username:', data.username);
+
+         next();
+       });
+     }
+    ],
+    
+    // series end
+    function(error, results) {
+      if (error) {
+        console.error("Socket auth error:", error);
+        accept('Not authorized', false);   // @todo make sure client JS handles this event!!
+      }
+      else accept(null, true);
+    }
+    );
+  });
+
 
   io.sockets.on('connection', function (socket) {
     // console.log('new socket:', socket);
     console.log("connection #" + (++counter));
+    
+    console.log('A socket with sessionID ' + socket.handshake.sessionID + ' connected, username:', socket.handshake.username);
+
 
     // convention: 'message' types are strings, 'info' are objects', 'todo' are objects
 
@@ -122,14 +210,14 @@ module.exports = function(app, io) {
       broadcastToListRoom(
         listId,
         'message',
-        getSocketNickname(socket) + " is now viewing this list.",
+        getSocketUsername(socket) + " is now viewing this list.",
         socket
       );
       
       broadcastToListRoom(
         listId,
         'have-users',
-        [ getSocketNickname(socket) ],
+        [ getSocketUsername(socket) ],
         socket
       );
     });
@@ -143,7 +231,7 @@ module.exports = function(app, io) {
 
       if (key == 'nickname') {
         socket.nickname = val;
-        var nickname = getSocketNickname(socket);
+        var nickname = getSocketUsername(socket);
 
         socket.emit('message', "Hello " + nickname + "!");
 
@@ -165,7 +253,7 @@ module.exports = function(app, io) {
         
         // success
         socket.emit('message', "Acknowledged your " + item.name);
-        broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " added " + item.name + " to the list.", socket);
+        broadcastToListRoom(item.listId, 'message', getSocketUsername(socket) + " added " + item.name + " to the list.", socket);
         broadcastToListRoom(item.listId, 'have-items', [ item.name ], null);    // also to sender        
       });
       
@@ -183,7 +271,7 @@ module.exports = function(app, io) {
         }
         
         socket.emit('message', "Removed " + item.name);
-        broadcastToListRoom(item.listId, 'message', getSocketNickname(socket) + " removed " + item.name + " from the list.", socket);
+        broadcastToListRoom(item.listId, 'message', getSocketUsername(socket) + " removed " + item.name + " from the list.", socket);
         broadcastToListRoom(item.listId, 'item-removed', [ item.name ], null);    // also to sender
       });
       
@@ -211,7 +299,7 @@ module.exports = function(app, io) {
     
 
     socket.on('disconnect', function() {
-      console.log("user %s disconnected", getSocketNickname(socket));
+      console.log("user %s disconnected", getSocketUsername(socket));
     
       // only broadcast to this socket's rooms
       if (! _.isUndefined(io.roomClients[socket.id])) {
@@ -222,8 +310,8 @@ module.exports = function(app, io) {
           // 1) skip default room '', 2) check inRoom==true (probably redundant)
           if (roomKey != '' && inRoom == true) {
             // note: roomKey here is raw, not just listId (so don't use broadcastToListRoom).
-            io.sockets.in(roomKey).emit('message', getSocketNickname(socket) + ' left.');
-            io.sockets.in(roomKey).emit('user-removed', getSocketNickname(socket));
+            io.sockets.in(roomKey).emit('message', getSocketUsername(socket) + ' left.');
+            io.sockets.in(roomKey).emit('user-removed', getSocketUsername(socket));
           }
         });
       }
