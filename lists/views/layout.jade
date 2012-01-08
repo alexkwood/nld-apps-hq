@@ -49,6 +49,9 @@ html
             - each message,type in listsMessages
               div.message(class=type)!= message
     
+      div#socket-status.sidebar.disconnected
+        | Not connected
+    
       != body
 
     div#footer

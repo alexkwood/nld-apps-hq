@@ -5,6 +5,9 @@
 
   app.username = null;
   
+  // set on first connect, to differentiate re-connects
+  app.hasConnected = false;
+  
   app.msgCount = 0;
   app.putMsg = function(msg, type) {
     app.msgCount++;
@@ -72,8 +75,12 @@
     app.socket = io.connect( document.location.origin );
     
     app.socket.on('connect', function() {
-      //console.log('connect', arguments);
-      app.putMsg("Connected.");
+      if (!app.hasConnected) app.putMsg("Connected.");
+      else app.putMsg('Re-connected');
+
+      app.hasConnected = true;
+      
+      app.toggleStatusMessage(true);
 
       // join room
       app.socket.emit('list:watch', app.listId);
@@ -154,8 +161,10 @@
     });
 
 
+    // disconnect can happen on 1) server/process crash, 2) document unload.
     app.socket.on('disconnect', function() {
-      app.putMsg("Goodbye.");
+      app.putMsg("Disconnected.");
+      app.toggleStatusMessage(false);
     });
 
     app.socket.on('message', function (data) {
@@ -203,6 +212,15 @@
     // toggle no-items message
     if ($('#list .item').size()) $('#no-items').hide();
     else $('#no-items').show();
+  };
+  
+  app.toggleStatusMessage = function(isConnected) {
+    if (isConnected) {
+      $('#socket-status').removeClass('disconnected').addClass('connected').text('Connected');
+    }
+    else {
+      $('#socket-status').removeClass('connected').addClass('disconnected').text('Disconnected');
+    }
   };
 
 })(jQuery);

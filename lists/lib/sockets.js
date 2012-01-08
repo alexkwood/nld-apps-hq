@@ -87,12 +87,6 @@ module.exports = function(app, io) {
 
   global.socketCounter = 0;    // [total]
 
-  // track sockets connected to each list
-  // assign as listId : [ sockets ]
-  // @todo eliminate this?
-  var listWatchers = {};
-
-
   // make sure connecting sockets have a valid express/mongo/everyauth session!
   // (then use that session to pull username)
   // (session integration w/ help from http://www.danielbaulig.de/socket-ioexpress/)

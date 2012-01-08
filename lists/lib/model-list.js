@@ -21,8 +21,8 @@ var List = {
   //  maybe possible w/add-on mongoose-join module, but too complicated for now]
   _creator: { type: Schema.ObjectId, ref: 'User' },
 
-  // @todo fill this in whenever someone other than author loads a list
-  _guests: [ { type: Schema.ObjectId, ref: 'User' } ],    // more joined user IDs
+  // more joined user IDs (filled in when non-creator user accesses)
+  _guests: [ { type: Schema.ObjectId, ref: 'User' } ],
   
   created_time: { type: Date, default: Date.now },
   updated_time: { type: Date, default: Date.now },
@@ -58,7 +58,6 @@ ListSchema.statics.getListsVisitedByUser = function(userId, callback) {
 }
 
 
-// @todo use me?
 ListSchema.methods.countItems = function() {
   try {
     return this.items.length;
