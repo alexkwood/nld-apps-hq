@@ -33,10 +33,6 @@ h1, h2 {
   background: #fff;
   clear: right;
 }
-#messages {
-  border: solid #ccc 1px;
-  padding: 1em;
-}
 #messages .message {
   background: #ccc;
   padding: .5em;

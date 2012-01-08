@@ -4,7 +4,7 @@
   var app = window.app = {};
 
   app.username = '';    // @todo...
-
+  
   app.msgCount = 0;
   app.putMsg = function(msg, type) {
     app.msgCount++;
@@ -15,16 +15,18 @@
 
     div.text(msg);
     $('#messages').append(div);
-
-    // fade out message
-    setTimeout(function() {
-      //console.log('removing div ' + $(div).attr('id'));
-      $(div).slideUp('slow', function() {
-        $(div).remove();
-      });
-    }, 5000);
+    fadeMessage(div);
   };
-
+  
+  // start a 15-second fade countdown on a message
+  var fadeMessage = function(div) {
+    setTimeout(function() {
+      $(div).slideUp('slow', function() {
+        $(div).remove().die();
+      });
+    }, 15000);
+  };
+  
   
   // initialize on doc ready
   $(function() {
@@ -50,6 +52,11 @@
         return false;
       }
     });
+    
+    // apply fades to initial (static html) messages
+    $('#messages .message').each(function(div) {
+      fadeMessage(div);
+    });    
     
   }); // ready
   

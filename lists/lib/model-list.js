@@ -6,7 +6,7 @@ var mongoose = require('mongoose')
   , Promise = mongoose.Promise
   , _ = require('underscore')
   , async = require('async');
-  
+
 var List = {
   // id: ObjectId,     // redundant?
 
