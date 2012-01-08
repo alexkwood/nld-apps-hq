@@ -1,0 +1,9 @@
+h2 Your Lists
+div#lists
+  - if (lists)
+    ol
+      - each list in lists
+        li
+          a(href='/lists/list/#{list._id}')= list.title
+          | 
+          span.item-count (#{list.countItems()} items)

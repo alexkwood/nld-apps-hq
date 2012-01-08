@@ -1,25 +1,6 @@
 
 div#lists-wrapper
-  h2 Your Lists
-  div#lists
-    - if (lists)
-      ol
-        - each list in lists
-          li
-            a(href='/lists/list/#{list._id}')= list.title
-            |  (#{list.countItems()} items)
+  != partial('partials/your-lists')
+  != partial('partials/guest-lists')
 
-
-  - if (guestLists && guestLists.length)
-    h2 Visited Lists
-    div#visited-lists
-      ol
-        - each list in guestLists
-          li
-            a(href='#{listsBase}/list/#{list._id}')= list.title
-
-
-form#new-list(action='/lists/list/new', method='post')
-  h3 Create a new list
-  input(type='text', name='list_name', id='new-list-name')
-  input(type='submit', value='Create')
+!= partial('partials/new-list')

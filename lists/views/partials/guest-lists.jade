@@ -1,0 +1,7 @@
+- if (guestLists && guestLists.length)
+  h2 Visited Lists
+  div#visited-lists
+    ol
+      - each list in guestLists
+        li
+          a(href='#{listsBase}/list/#{list._id}')= list.title
