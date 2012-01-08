@@ -71,14 +71,12 @@
   // triggered on 'watch-list' event below.
   app.watchList = function(listId) {
     app.listId = listId;
-    
-    // socket on same host
-    app.socket = io.connect( document.location.origin );
-    
+
     // how to detect socket connection errors?
     // - socket.on('error') doesn't catch anything
     // - try-catch doesn't catch connection failures
     // ...so use crude timeout for now
+    // but this doesn't differentiate error from authorization failure, not good!
     setTimeout(function(){
       if (! app.hasConnected) {
         app.putMsg("There seems to be a problem connecting to the server. \
@@ -88,6 +86,15 @@
           'error', true);
       }
     }, 5000);
+    
+    // open socket on same host
+    try {
+      app.socket = io.connect( document.location.origin );
+    }
+    catch(e) {
+      // (doesn't do anything)
+      console.log('socket error:', e);
+    }
     
     app.socket.on('connect', function() {
       if (!app.hasConnected) app.putMsg("Connected.");
@@ -163,6 +170,9 @@
           return false;  // break
         }
       });
+      
+      // uncheck all checkboxes. impt if duplicate items in list and non-first item is removed.
+      $('#list').find('input[type="checkbox"]').attr('checked', false);
       
       app.toggleNoItemsMessage();
     });

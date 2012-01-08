@@ -104,14 +104,14 @@ module.exports = function(app) {
   // create a new list
   app.post('/list/new', app.restrictUser, function(req, res) {
     
-    var newListName = req.body.list_name;
+    var newListName = req.body.list_name;     // [seems to escape injections already?]
     if (_.isEmpty(newListName)) {
       req.flash('error', 'Please enter a name for the new list');
       return res.redirect('/');
     }
 
     var list = new List({
-      title: req.body.list_name,
+      title: newListName,
       _creator: req.user          // (validated w/ restrictUser)
     });
     

@@ -3,9 +3,6 @@
  * running as sub-app inside NLD Apps
  */
 
-// @todo show socket status at top
-// @todo if socket doesn't connect, put in big error message
-
 // @todo graceful degradation to non-socket posts? (low priority)
 // @todo more string escaping to prevent injections? ... (socket.io seems to escape well enough for now)
 

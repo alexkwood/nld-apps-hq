@@ -131,7 +131,6 @@ module.exports = function(app, io) {
      
      function(next) {
        
-       // @todo pull the user info from everyauth for this session!
        // User model set in auth app, plugged into parentApp
        var User = app.db.model('User');
        if (! User) {
