@@ -22,6 +22,10 @@ body > #main, section#main {
 body > #main h1, section#main h1 {
   margin: 0;
 }
+body > #logo {
+  float: right;
+  padding: 10px 10px 0 0;
+}
 #apps-home #intro {
   margin: 1em auto;
   /*width: 700px;*/

@@ -1,6 +1,9 @@
 /**
  * interactive list app
  * running as sub-app inside NLD Apps
+ * expanded/refactored from original proof-of-concept @ https://github.com/newleafdigital/interactive-shopping-list
+ *
+ * by Ben Buckman, http://newleafdigital.com
  */
 
 // @todo graceful degradation to non-socket posts? (low priority)
