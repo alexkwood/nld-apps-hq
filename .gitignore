@@ -2,7 +2,7 @@ vimproj
 *.swp
 
 # compiled dynamically from .less
-public/stylesheets/style.css
+public/stylesheets/*.css
 
 log
 */.bin/*

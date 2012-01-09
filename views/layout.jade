@@ -1,21 +1,46 @@
+//- Apps primary layout
 !!! 5
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/hq.css')
     
-    link(rel="shortcut icon", href="/nld_favicon.png", type="image/x-icon")
+    block stylesheets
+      link(rel='stylesheet', href='/stylesheets/nld-apps.css')    
+
+    block icons
+      link(rel="shortcut icon", href="/nld_favicon.png", type="image/x-icon")
     
-    - if (meta_description)
-      meta(name="description", content="#{meta_description}")
-    
+    block meta
+      - if (meta_description)
+        meta(name="description", content="#{meta_description}")
+  
   body
-    != appsHeader
+    block appsTopBar    
+      != partial('includes/header.jade')
 
-    section#main
+    //- #outer-wrapper sets up container for app content
+    div#outer-wrapper.container-fluid
+      block sidebar
+        div.sidebar
+        
+          block appsLogo
+            #apps-logo
+              a(href="http://apps.newleafdigital.com")
+                img(src="/nld-apps-logo.png", width=170, height=87)
+                
+          block promo
+            include includes/promo
 
-      != messages()
+        //-?
+        yield
 
-      != body
+      block appContent
+        section#main.content
 
-    include footer
+          block messages
+            != messages()
+
+          != body
+
+    block footer
+      include includes/footer

@@ -1,28 +1,37 @@
 /** HQ APP STYLESHEET, compiles to CSS **/
 
+// -- bootstrap by Twitter -- //
+@import './bootstrap/lib/bootstrap.less';
+
 body {
+  padding-top: 50px;  /*for .topbar*/
+}
+/*body {
   padding: 0;
   margin: 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
+}*/
 
-body {
-  /*padding: 10px;*/
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
-
+/*
 a {
-  color: #13a7b5; /*#00B7FF;*/
+  color: #13a7b5; //#00B7FF;
+}
+*/
+
+.pull-right.user {
+  .username {
+    color: #fff;
+  }
 }
 
 body > #main,
 section#main {
-  padding: 10px;
-  min-height: 80%;
-  clear: both;
+  //padding: 10px;
+  //min-height: 80%;
+  //clear: both;
   
   h1 {
-    margin: 0;
+  //  margin: 0;
   }
 }
 
@@ -32,16 +41,14 @@ body > #logo {
 }
 
 #apps-home {
+  //.row;  // (only for nesting)
+  
   #intro {
-    margin: 1em auto;
-    /*width: 700px;*/
-    color: #444;
-    text-align: center;
-    border: solid #ccc 1px;
-    padding: 1em;
-    line-height: 1.5em;
-    /*font-weight: bold;*/
-    font-size: 1.2em;
+    .columns(11);
+    .offset(1);
+    
+    line-height: 1.3em;
+    font-size: 1.1em;
   }
   
   #applist {
@@ -63,6 +70,7 @@ body > #logo {
     }
   }
   
+  /*
   #more {
     margin: 1em 0;
     padding-top: 2em;
@@ -73,11 +81,20 @@ body > #logo {
       margin-bottom: .5em;
     }
   }
+  */
   
-  form#paypal-button {
-    display: inline;
-    padding-left: .5em;
+}
+
+.sidebar #promo {
+  margin: 2em 0;    
+  > div {
+    margin-bottom: .5em;
   }
+}
+
+form#paypal-button {
+  display: inline;
+  padding-left: .5em;
 }
 
 header#bar {
@@ -104,6 +121,8 @@ header#bar {
 }
 
 footer {
+  .container-fluid;
+  font-size: .9em;
 }
 
 div.admin {

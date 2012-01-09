@@ -1,21 +1,14 @@
 h1= title
 
 - if (loggedIn)
-    p Hello #{username}
-    div
-      a(href='/logout') Logout  
-
+    //-div.hello Hello #{username}
 - else
     a(href="/auth/facebook") login with facebook
 
 div#apps-home
   div#intro
-    | These apps were built by freelance web developer Ben Buckman of <a href="http://newleafdigital.com">New Leaf Digital</a>,<br/>
-    | using <a href="http://nodejs.org" target="_blank">Node.js</a> and <a href="http://mongodb.org" target="_blank">MongoDB</a>.<br/>
-    | They were created for personal use, and are now hosted for limited public use.<br/>
-    | Login to the apps using your Facebook ID.<br/>
-    | Enjoy!
-
+    include includes/intro.html
+    
   div#applist
     ul
       li
@@ -24,10 +17,3 @@ div#apps-home
       li
         a(href="/lists") Interactive Lists
         div.desc Share a shopping list or to-do list in real-time with your friends.
-
-  div#more
-    div.work Looking for Node.js development? <a href="http://newleafdigital.com/contact">Contact us</a>.
-    div.blog Read our <a href="http://benbuckman.net/tech/tag/nodejs">blog posts about our node.js work</a>.
-    div.linode Apps hosted on <a href="http://www.linode.com/?r=2da15e366bf7e75348254675e13f924459bb0379">Linode</a>. <a href="http://www.linode.com/?r=2da15e366bf7e75348254675e13f924459bb0379">Signup using my referral code.</a>
-    div.donate Like the apps? Donate some money for their continued development.
-      include paypal-button.html

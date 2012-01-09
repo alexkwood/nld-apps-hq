@@ -64,6 +64,10 @@ app.use(express.logger('[HQ] :method :url'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+
+// @todo don't use default layout/body method, allow template inheritance instead
+// app.set('view options', { layout: false });
+
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 
@@ -126,23 +130,6 @@ app.use(function setLocalTitle(req, res, next) {
 app.use(function setDefaultMeta(req, res, next) {
   res.local('meta_description', '');
   next();
-});
-
-app.use(function loadPartials(req, res, next) {
-  //console.warn('in loadPartials');
-  
-  // figure out how this is supposed to work... shouldn't need res.local() too
-  res.partial('header', { /*as:'global'*/ }, function(err, html) {
-    if (err) {
-      console.error('Failed to render header: ', err);
-      res.local('appsHeader', '');
-      return next();    // (returns to loadPartials)
-    }
-
-    //console.warn('rendered header:', html);
-    res.local('appsHeader', html);  // necessary? apparently so
-    next();
-  });
 });
 
 

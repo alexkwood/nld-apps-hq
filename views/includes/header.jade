@@ -1,0 +1,31 @@
+//- adapted from fluid.html example in bootstrap
+
+div.topbar
+  div.topbar-inner
+    div.container-fluid
+      a.brand(href="/") New Leaf Digital Apps
+    
+      //-@todo put .active class on active app link
+      ul.nav
+        li
+          a.flashcards(href="/flashcards") Spanish Flashcards
+        li
+          a.lists(href="/lists") Interactive Lists
+          
+        - if (loggedIn)
+          - if (user.canUser('admin_users'))
+              li.admin-only
+                a.admin(href="/admin/users") Manage Users
+
+  
+      .pull-right.user
+        //- LOCAL TESTING MODE
+        - if (localNoAuth)
+          div.warning In local test mode
+
+        - if (loggedIn)
+            span.username #{username}
+            | 
+            a.logout(href='/logout') Logout  
+        - else if (! localNoAuth)
+            a.login(href="/auth/facebook") Login with Facebook

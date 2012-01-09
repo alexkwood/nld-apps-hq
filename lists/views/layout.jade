@@ -1,3 +1,4 @@
+//- Lists layout
 !!! 5
 html
   head
@@ -5,9 +6,11 @@ html
       title #{list.title} - #{listsAppTitle}
     - else
       title= listsAppTitle
-    
+
+    //-@todo: html5 shim. meta description. apple-touch-icon (x3). ...
+            
     //-shared
-    link(rel='stylesheet', href='/stylesheets/hq.css')
+    link(rel='stylesheet', href='/stylesheets/nld-apps.css')
     
     //-lists (symlinked to root)
     link(rel='stylesheet', href='/stylesheets/lists.css')
@@ -46,11 +49,7 @@ html
   body
     != appsHeader
     
-    div#logo
-      a(href="http://apps.newleafdigital.com")
-        img(src="/nld-apps-logo.png", width=170, height=87)
-  
-    div#main
+    div#main.container-fluid
       h1= listsAppTitle
 
       - if (typeof title != "undefined")
