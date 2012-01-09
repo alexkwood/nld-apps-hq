@@ -9,7 +9,6 @@
 
 /*
 @todo 1/5:
-  - make lists use existing user, no prompt
   - apply canUser() check to each app
   - lists at URLs, etc [see evernote]
   - share functionality for lists
@@ -62,11 +61,11 @@ require(libDir + '/sessionStore')(app, null);
 app.use(express.logger('[HQ] :method :url'));
 
 
-app.set('views', __dirname + '/views');
+app.set('views', app.appRoot + '/views');
 app.set('view engine', 'jade');
 
-// @todo don't use default layout/body method, allow template inheritance instead
-// app.set('view options', { layout: false });
+// don't use default layout/body method, allow template inheritance instead
+app.set('view options', { layout: false });
 
 app.use(express.bodyParser());
 app.use(express.methodOverride());
@@ -85,7 +84,7 @@ app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
 
   app.use(require('connect-less')({
-    src: __dirname + '/public',     // dir w/ .less files
+    src: app.appRoot + '/public',     // dir w/ .less files
     // dst:                            // dir to store css files
     // dstRoot:         // public root, set it if `dstDir` is not your public root
     compress:false, 
@@ -100,10 +99,10 @@ app.configure('production', function(){
   app.use(express.errorHandler()); 
   
   // @todo tweak
-  app.use(require('connect-less')({ src: __dirname + '/public', compress:true, debug:false, force:false }));
+  app.use(require('connect-less')({ src: app.appRoot + '/public', compress:true, debug:false, force:false }));
 });
 
-app.use(express.static(__dirname + '/public'));  // has to be after connect-less
+app.use(express.static(app.appRoot + '/public'));  // has to be after connect-less
 
 
 // load auth sub-app

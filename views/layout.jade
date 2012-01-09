@@ -31,16 +31,17 @@ html
           block promo
             include includes/promo
 
-        //-?
-        yield
-
       block appContent
         section#main.content
 
           block messages
             != messages()
 
-          != body
+          //- using layout:false now, inheritance rather than body
+          //-!= body
+          block body
+          
+          //- yield   ??
 
     block footer
       include includes/footer
