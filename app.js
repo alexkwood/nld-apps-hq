@@ -7,6 +7,7 @@
 // @todo need indexes on mongoose schemas
 // @todo add URL to http://mongoosejs.com/docs/in-the-wild.html
 // @todo add google analytics, w/ var for user?
+// @todo wait 1/2 second between use(app)'s so DB can connect properly? (otherwise need to async mount everything)
 
 /*
 @todo 1/5:

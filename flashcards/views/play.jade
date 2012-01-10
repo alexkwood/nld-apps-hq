@@ -1,8 +1,7 @@
 extends flashcards-layout
 
-append mainContent
-  //- play a random flashcard
 
+append sidebar
   div#kb-legend
     h4 Keyboard Shortcuts
     div
@@ -17,7 +16,10 @@ append mainContent
     div
       span.key R:
       span.does Restart Game
+  
 
+append mainContent
+  //- play a random flashcard
 
   div#play(class="lang-#{langCode}")
 

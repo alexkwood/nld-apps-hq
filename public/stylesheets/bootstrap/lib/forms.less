@@ -5,12 +5,14 @@
 // FORM STYLES
 // -----------
 
-form {
+// [NLD Apps] restricting this to form.styled, b/c some forms (e.g. paypal button) need to stay clean
+
+form.styled {
   margin-bottom: @baseline;
 }
 
 // Groups of fields with labels on top (legends)
-fieldset {
+form.styled fieldset {
   margin-bottom: @baseline;
   padding-top: @baseline;
   legend {
@@ -25,144 +27,147 @@ fieldset {
 }
 
 // Parent element that clears floats and wraps labels and fields together
-form .clearfix {
+form.styled .clearfix {
   margin-bottom: @baseline;
   .clearfix()
 }
 
 // Set font for forms
-label,
-input,
-select,
-textarea {
-  #font > .sans-serif(normal,13px,normal);
-}
+form.styled {
+  label,
+  input,
+  select,
+  textarea {
+    #font > .sans-serif(normal,13px,normal);
+  }
 
-// Float labels left
-label {
-  padding-top: 6px;
-  font-size: @basefont;
-  line-height: @baseline;
-  float: left;
-  width: 130px;
-  text-align: right;
-  color: @grayDark;
-}
+  // Float labels left
+  label {
+    padding-top: 6px;
+    font-size: @basefont;
+    line-height: @baseline;
+    float: left;
+    width: 130px;
+    text-align: right;
+    color: @grayDark;
+  }
 
-// Shift over the inside div to align all label's relevant content
-form .input {
-  margin-left: 150px;
-}
+  // Shift over the inside div to align all label's relevant content
+  .input {
+    margin-left: 150px;
+  }
 
-// Checkboxs and radio buttons
-input[type=checkbox],
-input[type=radio] {
-  cursor: pointer;
-}
+  // Checkboxs and radio buttons
+  input[type=checkbox],
+  input[type=radio] {
+    cursor: pointer;
+  }
 
-// Inputs, Textareas, Selects
-input,
-textarea,
-select,
-.uneditable-input {
-  display: inline-block;
-  width: 210px;
-  height: @baseline;
-  padding: 4px;
-  font-size: @basefont;
-  line-height: @baseline;
-  color: @gray;
-  border: 1px solid #ccc;
-  .border-radius(3px);
-}
+  // Inputs, Textareas, Selects
+  input,
+  textarea,
+  select,
+  .uneditable-input {
+    display: inline-block;
+    width: 210px;
+    height: @baseline;
+    padding: 4px;
+    font-size: @basefont;
+    line-height: @baseline;
+    color: @gray;
+    border: 1px solid #ccc;
+    .border-radius(3px);
+  }
 
-// remove padding from select
-select {
-  padding: initial;
-}
+  // remove padding from select
+  select {
+    padding: initial;
+  }
 
-// mini reset for non-html5 file types
-input[type=checkbox],
-input[type=radio] {
-  width: auto;
-  height: auto;
-  padding: 0;
-  margin: 3px 0;
-  *margin-top: 0; /* IE6-7 */
-  line-height: normal;
-  border: none;
-}
+  // mini reset for non-html5 file types
+  input[type=checkbox],
+  input[type=radio] {
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 3px 0;
+    *margin-top: 0; /* IE6-7 */
+    line-height: normal;
+    border: none;
+  }
 
-input[type=file] {
-  background-color: @white;
-  padding: initial;
-  border: initial;
-  line-height: initial;
-  .box-shadow(none);
-}
+  input[type=file] {
+    background-color: @white;
+    padding: initial;
+    border: initial;
+    line-height: initial;
+    .box-shadow(none);
+  }
 
-input[type=button],
-input[type=reset],
-input[type=submit] {
-  width: auto;
-  height: auto;
-}
+  input[type=button],
+  input[type=reset],
+  input[type=submit] {
+    width: auto;
+    height: auto;
+  }
 
-select,
-input[type=file] {
-  height: @baseline * 1.5; // In IE7, the height of the select element cannot be changed by height, only font-size
-  *height: auto; // Reset for IE7
-  line-height: @baseline * 1.5;
-  *margin-top: 4px; /* For IE7, add top margin to align select with labels */
-}
+  select,
+  input[type=file] {
+    height: @baseline * 1.5; // In IE7, the height of the select element cannot be changed by height, only font-size
+    *height: auto; // Reset for IE7
+    line-height: @baseline * 1.5;
+    *margin-top: 4px; /* For IE7, add top margin to align select with labels */
+  }
 
-// Make multiple select elements height not fixed
-select[multiple] {
-  height: inherit;
-  background-color: @white; // Fixes Chromium bug of unreadable items
-}
+  // Make multiple select elements height not fixed
+  select[multiple] {
+    height: inherit;
+    background-color: @white; // Fixes Chromium bug of unreadable items
+  }
 
-textarea {
-  height: auto;
-}
+  textarea {
+    height: auto;
+  }
 
-// For text that needs to appear as an input but should not be an input
-.uneditable-input {
-  background-color: @white;
-  display: block;
-  border-color: #eee;
-  .box-shadow(inset 0 1px 2px rgba(0,0,0,.025));
-  cursor: not-allowed;
-}
+  // For text that needs to appear as an input but should not be an input
+  .uneditable-input {
+    background-color: @white;
+    display: block;
+    border-color: #eee;
+    .box-shadow(inset 0 1px 2px rgba(0,0,0,.025));
+    cursor: not-allowed;
+  }
 
-// Placeholder text gets special styles; can't be bundled together though for some reason
-:-moz-placeholder {
-  color: @grayLight;
-}
-::-webkit-input-placeholder {
-  color: @grayLight;
-}
+  // Placeholder text gets special styles; can't be bundled together though for some reason
+  :-moz-placeholder {
+    color: @grayLight;
+  }
+  ::-webkit-input-placeholder {
+    color: @grayLight;
+  }
 
-// Focus states
-input,
-textarea {
-  @transition: border linear .2s, box-shadow linear .2s;
-  .transition(@transition);
-  .box-shadow(inset 0 1px 3px rgba(0,0,0,.1));
-}
-input:focus,
-textarea:focus {
-  outline: 0;
-  border-color: rgba(82,168,236,.8);
-  @shadow: inset 0 1px 3px rgba(0,0,0,.1), 0 0 8px rgba(82,168,236,.6);
-  .box-shadow(@shadow);
-}
-input[type=file]:focus,
-input[type=checkbox]:focus,
-select:focus {
-  .box-shadow(none); // override for file inputs
-  outline: 1px dotted #666; // Selet elements don't get box-shadow styles, so instead we do outline
-}
+  // Focus states
+  input,
+  textarea {
+    @transition: border linear .2s, box-shadow linear .2s;
+    .transition(@transition);
+    .box-shadow(inset 0 1px 3px rgba(0,0,0,.1));
+  }
+  input:focus,
+  textarea:focus {
+    outline: 0;
+    border-color: rgba(82,168,236,.8);
+    @shadow: inset 0 1px 3px rgba(0,0,0,.1), 0 0 8px rgba(82,168,236,.6);
+    .box-shadow(@shadow);
+  }
+  input[type=file]:focus,
+  input[type=checkbox]:focus,
+  select:focus {
+    .box-shadow(none); // override for file inputs
+    outline: 1px dotted #666; // Selet elements don't get box-shadow styles, so instead we do outline
+  }
+
+} //form.styled
 
 
 // FORM FIELD FEEDBACK STATES
@@ -195,59 +200,61 @@ select:focus {
   }
 }
 // Error
-form .clearfix.error {
+form.styled .clearfix.error {
   .formFieldState(#b94a48, #ee5f5b, lighten(#ee5f5b, 30%));
 }
 // Warning
-form .clearfix.warning {
+form.styled .clearfix.warning {
   .formFieldState(#c09853, #ccae64, lighten(#CCAE64, 5%));
 }
 // Success
-form .clearfix.success {
+form.styled .clearfix.success {
   .formFieldState(#468847, #57a957, lighten(#57a957, 30%));
 }
 
 
-// Form element sizes
-// TODO v2: remove duplication here and just stick to .input-[size] in light of adding .spanN sizes
-.input-mini,
-input.mini,
-textarea.mini,
-select.mini {
-  width: 60px;
-}
-.input-small,
-input.small,
-textarea.small,
-select.small {
-  width: 90px;
-}
-.input-medium,
-input.medium,
-textarea.medium,
-select.medium {
-  width: 150px;
-}
-.input-large,
-input.large,
-textarea.large,
-select.large {
-  width: 210px;
-}
-.input-xlarge,
-input.xlarge,
-textarea.xlarge,
-select.xlarge {
-  width: 270px;
-}
-.input-xxlarge,
-input.xxlarge,
-textarea.xxlarge,
-select.xxlarge {
-  width: 530px;
-}
-textarea.xxlarge {
-  overflow-y: auto;
+form.styled {
+  // Form element sizes
+  // TODO v2: remove duplication here and just stick to .input-[size] in light of adding .spanN sizes
+  .input-mini,
+  input.mini,
+  textarea.mini,
+  select.mini {
+    width: 60px;
+  }
+  .input-small,
+  input.small,
+  textarea.small,
+  select.small {
+    width: 90px;
+  }
+  .input-medium,
+  input.medium,
+  textarea.medium,
+  select.medium {
+    width: 150px;
+  }
+  .input-large,
+  input.large,
+  textarea.large,
+  select.large {
+    width: 210px;
+  }
+  .input-xlarge,
+  input.xlarge,
+  textarea.xlarge,
+  select.xlarge {
+    width: 270px;
+  }
+  .input-xxlarge,
+  input.xxlarge,
+  textarea.xxlarge,
+  select.xxlarge {
+    width: 530px;
+  }
+  textarea.xxlarge {
+    overflow-y: auto;
+  }
 }
 
 // Grid style input sizes
@@ -258,37 +265,40 @@ textarea.xxlarge {
   width: ((@gridColumnWidth) * @columnSpan) + (@gridGutterWidth * (@columnSpan - 1)) - 10;
   margin-left: 0;
 }
-input,
-textarea {
-  // Default columns
-  &.span1     { .formColumns(1); }
-  &.span2     { .formColumns(2); }
-  &.span3     { .formColumns(3); }
-  &.span4     { .formColumns(4); }
-  &.span5     { .formColumns(5); }
-  &.span6     { .formColumns(6); }
-  &.span7     { .formColumns(7); }
-  &.span8     { .formColumns(8); }
-  &.span9     { .formColumns(9); }
-  &.span10    { .formColumns(10); }
-  &.span11    { .formColumns(11); }
-  &.span12    { .formColumns(12); }
-  &.span13    { .formColumns(13); }
-  &.span14    { .formColumns(14); }
-  &.span15    { .formColumns(15); }
-  &.span16    { .formColumns(16); }
-}
 
-// Disabled and read-only inputs
-input[disabled],
-select[disabled],
-textarea[disabled],
-input[readonly],
-select[readonly],
-textarea[readonly] {
-  background-color: #f5f5f5;
-  border-color: #ddd;
-  cursor: not-allowed;
+form.styled {
+  input,
+  textarea {
+    // Default columns
+    &.span1     { .formColumns(1); }
+    &.span2     { .formColumns(2); }
+    &.span3     { .formColumns(3); }
+    &.span4     { .formColumns(4); }
+    &.span5     { .formColumns(5); }
+    &.span6     { .formColumns(6); }
+    &.span7     { .formColumns(7); }
+    &.span8     { .formColumns(8); }
+    &.span9     { .formColumns(9); }
+    &.span10    { .formColumns(10); }
+    &.span11    { .formColumns(11); }
+    &.span12    { .formColumns(12); }
+    &.span13    { .formColumns(13); }
+    &.span14    { .formColumns(14); }
+    &.span15    { .formColumns(15); }
+    &.span16    { .formColumns(16); }
+  }
+
+  // Disabled and read-only inputs
+  input[disabled],
+  select[disabled],
+  textarea[disabled],
+  input[readonly],
+  select[readonly],
+  textarea[readonly] {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    cursor: not-allowed;
+  }
 }
 
 // Actions (the buttons)
@@ -310,6 +320,7 @@ textarea[readonly] {
   }
 }
 
+
 // Help Text
 // TODO: Do we need to set basefont and baseline here?
 .help-inline,
@@ -330,108 +341,113 @@ textarea[readonly] {
   max-width: 600px;
 }
 
-// Inline Fields (input fields that appear as inline objects
-.inline-inputs {
-  color: @gray;
-  span {
-    padding: 0 2px 0 1px;
-  }
-}
 
-// Allow us to put symbols and text within the input field for a cleaner look
-.input-prepend,
-.input-append {
-  input {
-    .border-radius(0 3px 3px 0);
-  }
-  .add-on {
-    position: relative;
-    background: #f5f5f5;
-    border: 1px solid #ccc;
-    z-index: 2;
-    float: left;
-    display: block;
-    width: auto;
-    min-width: 16px;
-    height: 18px;
-    padding: 4px 4px 4px 5px;
-    margin-right: -1px;
-    font-weight: normal;
-    line-height: 18px;
-    color: @grayLight;
-    text-align: center;
-    text-shadow: 0 1px 0 @white;
-    .border-radius(3px 0 0 3px);
-  }
-  .active {
-    background: lighten(@green, 30);
-    border-color: @green;
-  }
-}
-.input-prepend {
-  .add-on {
-    *margin-top: 1px; /* IE6-7 */
-  }
-}
-.input-append {
-  input {
-    float: left;
-    .border-radius(3px 0 0 3px);
-  }
-  .add-on {
-    .border-radius(0 3px 3px 0);
-    margin-right: 0;
-    margin-left: -1px;
-  }
-}
-
-// Stacked options for forms (radio buttons or checkboxes)
-.inputs-list {
-  margin: 0 0 5px;
-  width: 100%;
-  li {
-    display: block;
-    padding: 0;
-    width: 100%;
-  }
-  label {
-    display: block;
-    float: none;
-    width: auto;
-    padding: 0;
-    margin-left: 20px;
-    line-height: @baseline;
-    text-align: left;
-    white-space: normal;
-    strong {
-      color: @gray;
+form.styled {
+  // Inline Fields (input fields that appear as inline objects
+  .inline-inputs {
+    color: @gray;
+    span {
+      padding: 0 2px 0 1px;
     }
-    small {
-      font-size: @basefont - 2;
+  }
+
+  // Allow us to put symbols and text within the input field for a cleaner look
+  .input-prepend,
+  .input-append {
+    input {
+      .border-radius(0 3px 3px 0);
+    }
+    .add-on {
+      position: relative;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      z-index: 2;
+      float: left;
+      display: block;
+      width: auto;
+      min-width: 16px;
+      height: 18px;
+      padding: 4px 4px 4px 5px;
+      margin-right: -1px;
       font-weight: normal;
+      line-height: 18px;
+      color: @grayLight;
+      text-align: center;
+      text-shadow: 0 1px 0 @white;
+      .border-radius(3px 0 0 3px);
+    }
+    .active {
+      background: lighten(@green, 30);
+      border-color: @green;
     }
   }
+  .input-prepend {
+    .add-on {
+      *margin-top: 1px; /* IE6-7 */
+    }
+  }
+  .input-append {
+    input {
+      float: left;
+      .border-radius(3px 0 0 3px);
+    }
+    .add-on {
+      .border-radius(0 3px 3px 0);
+      margin-right: 0;
+      margin-left: -1px;
+    }
+  }
+
+  // Stacked options for forms (radio buttons or checkboxes)
   .inputs-list {
-    margin-left: 25px;
-    margin-bottom: 10px;
-    padding-top: 0;
+    margin: 0 0 5px;
+    width: 100%;
+    li {
+      display: block;
+      padding: 0;
+      width: 100%;
+    }
+    label {
+      display: block;
+      float: none;
+      width: auto;
+      padding: 0;
+      margin-left: 20px;
+      line-height: @baseline;
+      text-align: left;
+      white-space: normal;
+      strong {
+        color: @gray;
+      }
+      small {
+        font-size: @basefont - 2;
+        font-weight: normal;
+      }
+    }
+    .inputs-list {
+      margin-left: 25px;
+      margin-bottom: 10px;
+      padding-top: 0;
+    }
+    &:first-child {
+      padding-top: 6px;
+    }
+    li + li {
+      padding-top: 2px;
+    }
+    input[type=radio],
+    input[type=checkbox] {
+      margin-bottom: 0;
+      margin-left: -20px;
+      float: left;
+    }
   }
-  &:first-child {
-    padding-top: 6px;
-  }
-  li + li {
-    padding-top: 2px;
-  }
-  input[type=radio],
-  input[type=checkbox] {
-    margin-bottom: 0;
-    margin-left: -20px;
-    float: left;
-  }
-}
+} //form.styled
+
 
 // Stacked forms
-.form-stacked {
+// [newleafdigital] changed from .form-stacked
+form.form-stacked.styled {
   padding-left: 20px;
   fieldset {
     padding-top: @baseline / 2;

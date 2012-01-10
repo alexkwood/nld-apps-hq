@@ -2,13 +2,14 @@
 
 body.app-flashcards {
 
-  //@todo is this in bootstrap? ... [no, but it is in preboot.less]  
+  //@todo is this in bootstrap? ... [no, but it is in preboot.less]
   .rounded-corners (@radius: 10px) {
     -webkit-border-radius: @radius;
     -moz-border-radius: @radius;
     border-radius: @radius;
   }
 
+  // @todo change
   #footer {
     float: left;
     /*width: 100%;*/
@@ -24,11 +25,13 @@ body.app-flashcards {
     margin-top: 0;
   }
 
+  // ?
   .clearlist {
     list-style: none;
     margin: 0;
     padding: 0;
   }
+
 
 
   form#add-word, form#lookup-word {
@@ -44,11 +47,15 @@ body.app-flashcards {
     label {
       float: left;
       width: 100px;
+      margin-right: 1em;
     }
-  
-    input.submit {
-      float: left;
-      clear: both;
+
+    div.field.submit {
+      padding-left: 1em;
+      
+      input {
+        margin-left: 100px;
+      }
     }
   }
 
@@ -70,46 +77,29 @@ body.app-flashcards {
 
 
   ul#nav {
-    .clearlist;
-    margin: 0 0 1em 0;
-  
-    float: left;
-    width: 100%;
-    clear: both;
+    .pills();
   
     li {
-      float: left;
-      display: block;
       min-width: 15%;
-    
-      background-color: #d6d6d6;
-      padding: 5px;
-      margin-right: 1em;
-    
-      //border: solid #666 1px;
-      .rounded-corners(5px);
-    
-      a {
-        color: #000;
-        font-weight: bold;
-        padding: 3px;
-        text-decoration: none;
-        display: block;
+      margin-right: .5em;
       
-        span.details {
-          display: block;
-          font-size: .8em;
-        }
-      }    
+      a {
+        line-height: 1em;
+        font-size: 1.4em;
+      }
+      span.details {
+        display: block;
+        font-size: .8em;
+      }
     }
-    li.active {
-      background-color: #666;
+/*    li.active {
       a {
         color: #fff;
       }
     }
-  
+*/  
 
+/*    
     li.login, li.logout {
       background: #ededed;
 
@@ -117,20 +107,20 @@ body.app-flashcards {
         color: #888;
       }
     }
-  
+*/  
     li.last {}
   
   }
 
 
-  body.home #nav {
+/*  body.home #nav {
     font-size: 3em;
   
     li {
       margin-right: 2em;
     }
   }
-
+*/
 
   ul.words, ul.definitions, ul.compounds {
     float: left;
@@ -150,6 +140,7 @@ body.app-flashcards {
       }
     
       span {
+        color: #000;
         margin: 0 20px 0 0;
         width: 100px;
         min-height: 1em;
@@ -158,7 +149,7 @@ body.app-flashcards {
       }
     
       span.label {
-        color: #999;
+        color: #bbb;
         margin: 0 5px 0 0;
         width: auto;
       }

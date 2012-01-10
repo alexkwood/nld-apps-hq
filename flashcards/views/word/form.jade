@@ -2,7 +2,7 @@ extends ../flashcards-layout
 
 append mainContent
   //- form for adding or editing a word
-  form#add-word(method='post', action='#{fcBase}#{action}')
+  form#add-word.styled(method='post', action='#{fcBase}#{action}')
 
     div.field
       label Spanish
@@ -29,5 +29,5 @@ append mainContent
       
       input(name='new_group', id='new_group')
       
-    div.field
-      input(type='submit', value=word._id ? 'Update' : 'Create')
+    div.field.submit
+      input(type='submit', value=word._id ? 'Save' : 'Add')

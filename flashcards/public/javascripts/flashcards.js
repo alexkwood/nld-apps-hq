@@ -41,7 +41,7 @@ $(function(){
   
   // game keyboard shortcuts
   if ($('body.play').size()) {
-    $('div#kb-legend').show();
+    $('#kb-legend').show();
 
     $(document).keydown(function(event){
         // console.log("keydown:", event.which);

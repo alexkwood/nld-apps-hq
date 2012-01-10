@@ -3,8 +3,7 @@
 extends flashcards-layout
 
 append mainContent
-
-  form#lookup-word(method='post', action='#{fcBase}/lookup')
+  form#lookup-word.styled(method='post', action='#{fcBase}/lookup')
     //-div.field
     //-  label Spanish to English
     //-  input(type='text', name='word_es', id='word_es', value=words.word_es ? words.word_es : '')
@@ -15,7 +14,7 @@ append mainContent
       label English to Spanish
       input(type='text', name='word_en', id='word_en', value=words.word_en ? words.word_en : '')
   
-    div.field
+    div.field.submit
       input(type='submit', value='Lookup')
 
 
