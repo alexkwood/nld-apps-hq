@@ -4,34 +4,19 @@ body.app-lists {
     margin-top: 0;
   }
 
-  #footer {
-    border-top: solid #666 1px;
-    margin-top: .5em;
-    padding-top: .5em;
-    font-size: .8em;
-    line-height: 1.2em;
-  }
-
-  #messages-wrapper, #list-wrapper, #new-item-wrapper {
+  #list-wrapper, #new-item-wrapper {
     width: auto;
     margin-bottom: 2em;
   }
-
-  /*
-  // -- using bootstrap .alert-message instead
-  #messages {
+  .messages {
+    .columns(12);
   }
-  #messages .message {
-    background: #d5f2ff;  //#ccc;
-    padding: .2em .5em;
-    min-height: 1em;
-    margin-bottom: .5em;
+  .messages .alert-message {
+    margin-bottom: .25em;
   }
-
-  #messages .message.error {
-    color: red;
-  }
-  */
+  #breadcrumb {
+    margin-bottom: 1em;
+  }  
 
   #list {
     border-left: solid #ccc 1px;

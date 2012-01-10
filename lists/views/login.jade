@@ -1,9 +1,8 @@
 extends lists-layout
 
 block mainContent
-  div This app is personalized for each user.
+  include partials/intro
 
-  #fb-login.fb_button
-    a.fb_button_medium(href='/auth/facebook')
-     .btn Connect with Facebook to create your own lists!
+  //-div This app is personalized for each user.
 
+  a.btn.large.primary(href='/auth/facebook') Connect with Facebook to create your own lists!

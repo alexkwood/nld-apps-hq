@@ -22,14 +22,14 @@
     if (! noFade) fadeMessage(div);
   };
   
-  // start a 15-second fade countdown on a message
+  // start a 10-second fade countdown on a message
   var fadeMessage = function(div) {
     // console.log('starting fade on', div);
     setTimeout(function() {
       $(div).slideUp('slow', function() {
         $(div).remove().die();
       });
-    }, 15000);
+    }, 10000);
   };
   
   
@@ -232,6 +232,8 @@
         name: itemToRemove,
         listId: app.listId
       });
+      
+      $('#new-item #item').focus();
     });
     
   };  // watchList

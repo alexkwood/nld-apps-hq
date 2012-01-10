@@ -8,7 +8,7 @@ module.exports = function(app){
     // if logged in, redirect to list
     if (app.isLoggedIn(req)) {
       console.log('at ', req.url, 'redirect to /word/list');
-      res.redirect('/word/list');
+      return res.redirect('/word/list');
     }
     
     res.render('flashcards/home', {
@@ -18,4 +18,10 @@ module.exports = function(app){
     });
   });
 
+
+  // consolidated login and home. for legacy.
+  app.get('/login', function(req, res, next) {
+    res.redirect('/');
+  });
+  
 };

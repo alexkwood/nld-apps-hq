@@ -8,6 +8,7 @@
 // @todo add URL to http://mongoosejs.com/docs/in-the-wild.html
 // @todo add google analytics, w/ var for user?
 // @todo wait 1/2 second between use(app)'s so DB can connect properly? (otherwise need to async mount everything)
+// @todo switch console.log to https://github.com/flatiron/winston
 
 /*
 @todo 1/5:
@@ -18,7 +19,7 @@
 
 var express = require('express')
   , _ = require('underscore')
-  , messages = require('express-messages')
+  // , messages = require('express-messages')
 
 
 // this is the PARENT app
@@ -116,17 +117,15 @@ var auth = require('./auth/auth.js');
 // });
 
 
-// test app.name
-//console.warn('parent app is named %s', app.name);
-//console.warn('auth app is named %s', auth.name);
-
 
 // load partials for all routes
 // IMPT: these need to run AFTER loadUser (in auth app, on load), for user to display
+// -- not using anymore --
 // app.use(function setLocalTitle(req, res, next) {
 //   res.local('title', 'NewLeafDigital Apps');
 //   next();
 // });
+
 
 app.use(function setDefaultMeta(req, res, next) {
   res.local('meta_description', '');
@@ -136,8 +135,9 @@ app.use(function setDefaultMeta(req, res, next) {
 
 // set app-level body class
 app.use(function setBodyClass(req, res, next) {
-  res.bodyClass = res.bodyClass || [];    // keep if already created
-  res.bodyClass.push('app-hq');
+  // res.bodyClass = res.bodyClass || [];    // keep if already created
+  // res.bodyClass.push('app-hq');
+  res.bodyClass = [ 'app-hq' ];
   next();
 });
 
@@ -146,6 +146,11 @@ app.use(function setBodyClass(req, res, next) {
 // ** MUST run __after__ auth loads, otherwise INDIVIDUAL ROUTE MIDDLEWARE FROM AUTH TAKE PRECEDENCE OVER GLOBAL MIDDLEWARE HERE!!
 app.use(app.router);
 
+//tmp
+app.use(function(req,res,next){
+  req.flash('test', "A message");
+  next();
+});
 
 
 // MOUNT AUTH APP at sub-path. auto-namespaces paths at sub.
@@ -156,7 +161,7 @@ app.use(auth);
 
 
 var sharedDynamicHelpers = {
-  messages: messages,   // populate w/ req.flash()
+  // messages: messages,   // populate w/ req.flash()
   
   bodyClass: function(req, res) {
     if (_.isUndefined(res.bodyClass)) return '';
@@ -166,6 +171,12 @@ var sharedDynamicHelpers = {
 app.dynamicHelpers(sharedDynamicHelpers);
 // auth.dynamicHelpers(sharedDynamicHelpers);
 
+
+// load messages (not using express-messages here, just plain, w/ .alert-message)
+app.use(function(req, res, next) {
+  res.local('messages', req.flash());
+  next();
+});
 
 
 // load Flashcards app too

@@ -4,7 +4,10 @@
 extends ../layout
 
 block headTitle
-  title= fcAppTitle
+  - if (typeof pageTitle != 'undefined' && pageTitle)
+    title #{pageTitle} - #{fcAppTitle}
+  - else
+    title= fcAppTitle
 
 append scripts
   script(src='#{fcBase}/javascripts/flashcards.js')
@@ -26,7 +29,13 @@ block pageTitle
       |: #{username}
 
 
-//- WHY ISN'T THIS WORKING????
+append messages
+  //- appended to parent app messages [not sure if they inherit]
+  //-- if (typeof fcMessages != "undefined" && fcMessages)
+  include ../includes/messages
+  mixin messages(fcMessages, 'FLASHCARDS')
+
+
 block mainContent
   block fcNav
     include includes/nav
@@ -37,6 +46,5 @@ block mainContent
 
 
 prepend footer
-  | Created by <a href="http://newleafdigital.com">Ben Buckman</a>.
-  | Built with <a href="http://nodejs.org">node.js</a> and <a href="http://expressjs.com/">express.js</a>. 
-  | Project code is on <a href="https://github.com/newleafdigital/nodejs_spanish_flashcards">Github</a>.
+  | Read a <a href="http://benbuckman.net/tech/11/10/exploring-nodejs-frontier">blog post</a> 
+  | about the <a href="https://github.com/newleafdigital/nodejs_spanish_flashcards">original version</a> of this app.

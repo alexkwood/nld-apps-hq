@@ -16,12 +16,3 @@ ul#nav
   li(class=(activeNav=='lookup' ? 'active' : ''))
     a(href='#{fcBase}/lookup') Lookup
       span.details with WordReference API
-
-
-  //-this should be in global nav, not here
-  //-    - if (fcIsLoggedIn)
-  //-      li.logout.last
-  //-        a.logout(href="/logout") Logout
-  //-    - else
-  //-      li.login.last
-  //-        a.login(href="/login") Login

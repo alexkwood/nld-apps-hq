@@ -94,7 +94,8 @@ module.exports = function(app) {
     });
   });
   
-
+  
+  // gets redirected here from restrictUser
   app.get('/login', function(req, res){
     res.render('lists/login', {
       locals: {

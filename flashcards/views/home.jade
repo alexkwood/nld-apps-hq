@@ -1,8 +1,15 @@
 //- Flashcards home
+//- only appears if not logged in. consolidated 'login' to here.
 
 extends flashcards-layout
 
-
 append mainContent
-  div#fc-intro Create your own Spanish Flashcards ...
-  //- @todo continue...
+  div#app-intro
+    ul.concept
+      li Login with Facebook Connect
+      li Create flashcards of English-Spanish word translations
+      li Randomly play your flashcards until you get them all right
+      li Look up new words with the WordReference API
+
+  a.btn.large.primary(href='/auth/facebook') Connect with Facebook to create your own flashcards!
+

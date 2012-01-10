@@ -53,14 +53,18 @@ html
         
           block pageTitle
           
-          //- @todo differentiate hq/sub messages?
           block messages
-            != messages()
-
+            //-- if (typeof messages != "undefined" && messages)
+            include includes/messages
+            mixin messages(messages, 'PARENT')
+          
+          
           //- using layout:false now, inheritance rather than body
           //-!= body
           block mainContent
           
 
-    block footer
-      include includes/footer
+    //- (always have footer element, use prepend to add per-app additions above global)
+    footer
+      block footer
+          !=partial('includes/footer')

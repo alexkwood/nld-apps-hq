@@ -96,7 +96,8 @@ var ListSchema = require('./lib/model-list')
 
 // set app-level body class
 app.use(function setBodyClass(req, res, next) {
-  res.bodyClass = res.bodyClass || [];    // keep if already created ?
+  // res.bodyClass = res.bodyClass || [];    // keep if already created ?
+  res.bodyClass = [];    // drop parent app's
   res.bodyClass.push('app-lists');
   next();
 });

@@ -4,6 +4,8 @@ extends lists-layout
 
 //- override piecemeal
 block mainContent
+  include partials/intro
+
   div#lists-wrapper
     != partial('partials/your-lists')
     != partial('partials/guest-lists')

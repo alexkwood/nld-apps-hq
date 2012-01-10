@@ -4,7 +4,7 @@
 
 var express = require('express')
   , util = require('util')
-  , messages = require('./messages')   // [modified from lib]
+  // , messages = require('./messages')   // [modified from lib] ... not using anymore
   , _ = require('underscore')._
 
 
@@ -98,7 +98,8 @@ app.set('view options', {
 // set app-level body class
 // @todo this is duplicated across apps, consolidate
 app.use(function setAppBodyClass(req, res, next) {
-  res.bodyClass = res.bodyClass || [];    // keep if already created (?)
+  // res.bodyClass = res.bodyClass || [];    // keep if already created ?
+  res.bodyClass = [];    // drop parent app's
   res.bodyClass.push('app-flashcards');
   next();
 });
@@ -133,7 +134,10 @@ var sharedDynamicHelpers = {
     }
 
     // shared?
-  , messages: messages        // from express-messages module, use req.flash() to populate.
+  , fcMessages: function(req, res) {
+      return req.flash();
+    }
+    //[replaces] messages        // from express-messages module, use req.flash() to populate.
 
   // return the app's mount-point so that urls can adjust
   , fcBase: function(req, res){
@@ -241,7 +245,7 @@ app.restrictUser = function(req, res, next) {
   }
   
   req.flash('error', "Please login to do that.");
-  res.redirect('/login');
+  res.redirect('/');
 };
 
 
@@ -257,7 +261,6 @@ app.restrictUser = function(req, res, next) {
 app.use(app.router);
 
 // delegate routers w/ closures
-require('./routes/login.js')(app);
 require('./routes/home.js')(app);
 require('./routes/word.js')(app);
 require('./routes/play.js')(app);

@@ -42,10 +42,7 @@ append scripts
         
 
 
-//- (override parent)
-block sidebar
-  div#socket-status.disconnected
-    | Socket not connected
+//- sidebar keeps promo
 
 //- note: this overrides the whole block, so need to copy/override all sub-blocks too!
 block appContent
@@ -56,13 +53,10 @@ block appContent
       - if (typeof title != "undefined")
         h2= title
 
-    block messages
-      //- moved from index. for individual list, gets populated w/ socket messages. otherwise just from req.flash.
-      div#messages-wrapper
-        div#messages
-          - if (typeof listsMessages != "undefined")
-            - each message,type in listsMessages
-              div.alert-message(class=type)!= message
+    append messages
+      //- appended to parent app messages [not sure if they inherit]
+      include ../includes/messages
+      mixin messages(listsMessages, 'LISTS')
 
     //- using inheritance rather than body
     block mainContent
@@ -70,7 +64,5 @@ block appContent
 
 //-@todo revise
 prepend footer
-  div#footer
-    | A proof of concept using <a href="http://nodejs.org">Node.js</a> with <a href="http://socket.io">Socket.io</a>.
-    | By <a href="http://newleafdigital.com">Ben Buckman, New Leaf Digital</a>.
-    | Code is on <a href="https://github.com/newleafdigital/interactive-shopping-list">Github</a>.
+  | App expanded from Ben's original single-list <a href="https://github.com/newleafdigital/interactive-shopping-list">proof of concept</a>
+  | using <a href="http://nodejs.org">Node.js</a> with <a href="http://socket.io">Socket.io</a>.

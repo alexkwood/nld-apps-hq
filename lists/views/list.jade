@@ -2,7 +2,10 @@
 
 extends lists-layout
 
-append sidebar
+block sidebar
+  div#socket-status.disconnected
+    | Socket not connected
+
   div#users-wrapper
     h2 Currently Viewing
     div#users
@@ -14,6 +17,9 @@ append sidebar
 
 
 block mainContent
+  div#breadcrumb
+    a(href='/lists') &laquo; Back to lists
+
   div#list-wrapper
     h2= list.title
     div.credits Created by #{list._creator.displayName()}
