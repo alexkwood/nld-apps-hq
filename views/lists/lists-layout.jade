@@ -5,9 +5,6 @@
 extends ../layout
 
 
-append comments
-  // these are fc comments
-
 block headTitle
   - if (typeof list != "undefined")
     title #{list.title} - #{listsAppTitle}
@@ -19,7 +16,7 @@ block headTitle
 //-block promo
 
 append scripts
-  //[LISTS SCRIPTS]
+  // Lists
   //- no #{listsBase} on socket.io.js, listening to parent app [will need to change if another socket app is added]
   script(src="/socket.io/socket.io.js")
   script(src="#{listsBase}/javascripts/lists-client.js")
@@ -46,9 +43,9 @@ append scripts
         
 
 
-//-@todo is this working???
-append sidebar
-  div#socket-status.sidebar.disconnected
+//- (override parent)
+block sidebar
+  div#socket-status.disconnected
     | Socket not connected
 
 //- note: this overrides the whole block, so need to copy/override all sub-blocks too!

@@ -10,11 +10,8 @@ html
     
     //-@todo: html5 shim. apple-touch-icon (x3). ...
     
-    block comments
-      // these are parent comments
-    
     block scripts
-      //[PARENT SCRIPTS]
+      // Common
       //- use a local copy when developing locally/offline
       - if (typeof envId != 'undefined' && envId === 'local')
         script(src='#{listsBase}/javascripts/jquery.min.js')

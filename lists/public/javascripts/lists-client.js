@@ -244,10 +244,10 @@
   
   app.toggleStatusMessage = function(isConnected) {
     if (isConnected) {
-      $('#socket-status').removeClass('disconnected').addClass('connected').text('Socket connected');
+      $('#socket-status').removeClass('error').addClass('success').text('Socket connected');
     }
     else {
-      $('#socket-status').removeClass('connected').addClass('disconnected').text('Socket disconnected');
+      $('#socket-status').removeClass('success').addClass('error').text('Socket disconnected');
     }
   };
 
