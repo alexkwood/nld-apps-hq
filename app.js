@@ -177,9 +177,11 @@ var lists = require('./lists/lists.js');
 app.use('/lists', lists);
 
 
+// share loaded dynamic helpers w/ sub-apps
+// (necessary after switching to inherited templates)
 auth.dynamicHelpers(app.dynamicViewHelpers);
-flashcards.dynamicHelpers(app.dynamicViewHelpers);      // apparently necessary after switching to inherited templates??
-lists.dynamicHelpers(app.dynamicViewHelpers);           // apparently necessary after switching to inherited templates??
+flashcards.dynamicHelpers(app.dynamicViewHelpers);
+lists.dynamicHelpers(app.dynamicViewHelpers);
 
 
 /*

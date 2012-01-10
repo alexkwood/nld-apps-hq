@@ -111,7 +111,7 @@ app.use(function setFcBodyClass(req, res, next) {
   
   if (parts.length == 0) {
     res.bodyClass.push('home');
-    return;
+    return next();
   }
   else {        
     // strip the mount point
@@ -119,6 +119,7 @@ app.use(function setFcBodyClass(req, res, next) {
 
     res.bodyClass.push( parts.join('-') );
   }
+  next();
 });
 
 // middleware [use as simple variables, _can't_ pass params into them from templates]
@@ -141,7 +142,7 @@ var sharedDynamicHelpers = {
       return '/' == app.route ? '' : app.route;
     }
   
-    // @todo merge this w/ Auth !todo ^5
+    // @todo merge this w/ Auth
   , fcIsLoggedIn: function(req, res) {
       return app.isLoggedIn(req);
     }
@@ -187,17 +188,15 @@ if (! parentApp) {
   }));
 }
 
-app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-
 
 // per-environment config
-// app.configure('development', function(){
-//   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-// });
-// 
-// app.configure('production', function(){
-//   app.use(express.errorHandler()); 
-// });
+app.configure('development', function(){
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+});
+
+app.configure('production', function(){
+  app.use(express.errorHandler()); 
+});
 
 
 // default active nav
@@ -225,7 +224,7 @@ app.isLoggedIn = function(req) {
 };
 
 
-// for a given req, get the system name.
+// for a given req, get the user's system_name.
 // needed for all Word db queries
 app.username = function(req) {
   if (!_.isUndefined(req.user))
