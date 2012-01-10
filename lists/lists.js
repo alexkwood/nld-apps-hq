@@ -56,13 +56,13 @@ catch(e) {
 
 // parent /views/lists is a symlink to this app's /views
 // app.set('views', parentApp ? parentApp.appRoot + '/views/lists' : app.appRoot + '/views');
-// -- all layouts at root level, otherwise partials in inherited templates don't work!
-app.set('views', parentApp ? parentApp.appRoot + '/views' : app.appRoot + '/views');
+// (all layouts at root level, otherwise partials in inherited templates don't handle relative paths correctly)
+app.set('views', primaryApp.appRoot + '/views');
 
 app.set('view engine', 'jade');
 
 // don't use default layout/body method, allow template inheritance instead
-app.set('view options', { layout: false });
+app.set('view options', { layout: false, compileDebug: true, pretty: true });
 
 
 app.use(express.static(__dirname + '/public'));
@@ -76,7 +76,7 @@ require(libDir + '/sessionStore')(app, parentApp);
 // app.use(express.cookieParser());   // ?
 
 app.use(express.bodyParser());
-// app.use(express.methodOverride());
+// app.use(express.methodOverride());     // (don't need)
 
 
 app.configure('development', function(){
@@ -96,7 +96,7 @@ var ListSchema = require('./lib/model-list')
 
 // set app-level body class
 app.use(function setBodyClass(req, res, next) {
-  res.bodyClass = res.bodyClass || [];    // keep if already created
+  res.bodyClass = res.bodyClass || [];    // keep if already created ?
   res.bodyClass.push('app-lists');
   next();
 });

@@ -1,43 +1,46 @@
-//- play a random flashcard
+extends flashcards-layout
 
-div#kb-legend
-  h4 Keyboard Shortcuts
-  div
-    span.key Enter:
-    span.does Show Answer    
-  div
-    span.key Left Arrow:
-    span.does Got It Right
-  div
-    span.key Right Arrow:
-    span.does Got It Wrong
-  div
-    span.key R:
-    span.does Restart Game
+append mainContent
+  //- play a random flashcard
+
+  div#kb-legend
+    h4 Keyboard Shortcuts
+    div
+      span.key Enter:
+      span.does Show Answer    
+    div
+      span.key Left Arrow:
+      span.does Got It Right
+    div
+      span.key Right Arrow:
+      span.does Got It Wrong
+    div
+      span.key R:
+      span.does Restart Game
 
 
-div#play(class="lang-#{langCode}")
+  div#play(class="lang-#{langCode}")
 
-  - if (gameOver)
-      div.gameover Game over, you win!
+    - if (gameOver)
+        div.gameover Game over, you win!
       
-  - else
-      div.question
-        span.label= language
-        = question
+    - else
+        div.question
+          span.label= language
+          = question
   
-      div#answer
-        ul.words
-          li!= partial('word/word', word)
+        div#answer
+          ul.words
+            li!= partial('word/word', word)
     
-      div#show-wrapper
-        a#show(href='#') Show
+        div#show-wrapper
+          a#show(href='#') Show
 
 
-      a.next-correct(href='#{fcBase}/play/#{word._id}/correct') Got it right
-      a.next-incorrect(href='#{fcBase}/play/#{word._id}/incorrect') Got it wrong
+        a.next-correct(href='#{fcBase}/play/#{word._id}/correct') Got it right
+        a.next-incorrect(href='#{fcBase}/play/#{word._id}/incorrect') Got it wrong
 
-  - if (remaining > 0)
-    div.remaining (#{remaining} words left to get right)
+    - if (remaining > 0)
+      div.remaining (#{remaining} words left to get right)
 
-  a.next-restart(href='#{fcBase}/play/restart') Restart Game
+    a.next-restart(href='#{fcBase}/play/restart') Restart Game

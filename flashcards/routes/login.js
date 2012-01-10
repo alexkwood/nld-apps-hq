@@ -5,7 +5,7 @@ var _ = require('underscore')._;
 module.exports = function(app){
 
   app.get('/login', function(req, res){
-    res.render('login', {
+    res.render('flashcards/login', {
       locals: {
         pageTitle : 'Login'
       }

@@ -10,8 +10,17 @@ html
     
     //-@todo: html5 shim. apple-touch-icon (x3). ...
     
-    //- filler. to override need to use 'block' not 'append', seems like a bug.
+    block comments
+      // these are parent comments
+    
     block scripts
+      //[PARENT SCRIPTS]
+      //- use a local copy when developing locally/offline
+      - if (typeof envId != 'undefined' && envId === 'local')
+        script(src='#{listsBase}/javascripts/jquery.min.js')
+      - else  
+        script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+        
     
     block stylesheets
       link(rel='stylesheet', href='/stylesheets/nld-apps.css')    
@@ -19,6 +28,7 @@ html
     block icons
       link(rel="shortcut icon", href="/nld_favicon.png", type="image/x-icon")
     
+    //-@todo used in all apps?
     block meta
       - if (meta_description)
         meta(name="description", content="#{meta_description}")
@@ -53,7 +63,6 @@ html
           //-!= body
           block mainContent
           
-          //- yield   ??
 
     block footer
       include includes/footer

@@ -84,7 +84,7 @@ module.exports = function(app){
         res.redirect('/word/list');
       }
       else if (count === 0) {    // out of words!
-        res.render('play', {
+        res.render('flashcards/play', {
           pageTitle: 'Play',
           gameOver: true,
           showWordLinks: true,
@@ -106,7 +106,7 @@ module.exports = function(app){
           res.redirect('/word/list');
         }
         
-        res.render('play', {
+        res.render('flashcards/play', {
           pageTitle: 'Play',
           question: word['word_' + lang],     // shown word
           langCode: lang,

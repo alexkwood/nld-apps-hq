@@ -4,8 +4,8 @@ extends layout
 
 block mainContent
   //- (parent block is empty; not sure why append works here but not on other similar empty overrides.)
-  block append pageTitle
-    h1 New Leaf Digital Apps
+  block pageTitle
+    //-(empty)
 
   - if (loggedIn)
       //-div.hello Hello #{username}

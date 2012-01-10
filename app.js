@@ -66,7 +66,7 @@ app.set('views', app.appRoot + '/views');
 app.set('view engine', 'jade');
 
 // don't use default layout/body method, allow template inheritance instead
-app.set('view options', { layout: false });
+app.set('view options', { layout: false, compileDebug: true, pretty: true });
 
 app.use(express.bodyParser());
 app.use(express.methodOverride());
@@ -200,6 +200,7 @@ require('./routes/admin-users')(app, auth.UserSchema);
 
 // error handling
 // -- this caught a mongo error in app.param()
+// @todo make error handling work, 404.jade, etc
 var appErrorHandler = function(err, req, res, next) {
   console.log('*** in app.error handler', require('util').inspect(err));
 

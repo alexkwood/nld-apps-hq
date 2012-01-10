@@ -11,7 +11,7 @@ module.exports = function(app){
       res.redirect('/word/list');
     }
     
-    res.render('home', {
+    res.render('flashcards/home', {
       locals: {
         pageTitle : ''
       }

@@ -8,7 +8,7 @@ var util = require('util');
 module.exports = function(app){
 
   app.get('/lookup', app.restrictUser, function(req, res) {
-    res.render('lookup', {
+    res.render('flashcards/lookup', {
       locals: {
         pageTitle: 'Lookup a word with WordReference API',
         result: null,
@@ -67,7 +67,7 @@ module.exports = function(app){
         body += parsed.raw;
       }
       
-      res.render('lookup', {
+      res.render('flashcards/lookup', {
         locals: {
           pageTitle: 'Lookup: ' + word,
           words: req.body,

@@ -1,0 +1,39 @@
+//- Flashcards layout
+//- piggyback on parent layout, just override blocks piecemeal (see lists-layout.jade)
+
+extends ../layout
+
+block headTitle
+  title= fcAppTitle
+
+append scripts
+  //[FLASHCARDS SCRIPTS]
+  script(src='#{fcBase}/javascripts/flashcards.js')
+    
+  //- allow pages to have their own scripts
+  - if (typeof extraScripts != 'undefined')
+    - extraScripts.forEach(function(script){
+        script(src='#{script}')
+    - })    
+
+
+//- (inside block appContent)
+block pageTitle
+  h1= fcAppTitle
+    - if (fcIsLoggedIn)
+      |: #{username}
+
+block mainContent
+  block fcNav
+    include includes/nav
+    
+  h2= pageTitle || ''
+    
+  //- (use block append in views to append body here)
+
+
+prepend footer
+  div#footer 
+    | Created by <a href="http://newleafdigital.com">Ben Buckman</a>.
+    | Built with <a href="http://nodejs.org">node.js</a> and <a href="http://expressjs.com/">express.js</a>. 
+    | Project code is on <a href="https://github.com/newleafdigital/nodejs_spanish_flashcards">Github</a>.

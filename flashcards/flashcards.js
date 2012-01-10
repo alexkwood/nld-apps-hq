@@ -61,7 +61,7 @@ catch(e) {
 // [removed earlier mongoHandler]
 require(libDir + '/db')(app, parentApp);
 
-// pull a raw DB connection from the mongoose connection
+// pull a raw DB connection from the parent app's mongoose connection
 var LegacyMongoHandler = require('./db/mongodb');
 app.legacyDB = new LegacyMongoHandler(app.db.connection.db);
 console.log('legacy DB name:', app.legacyDB.db.databaseName);
@@ -77,15 +77,49 @@ app.wordLanguages = {
 };
 
 
-app.set('views', __dirname + '/views');
+// app.set('views', __dirname + '/views');
+// (all layouts at root level, otherwise partials in inherited templates don't handle relative paths correctly)
+// -- all res.render()'s now use /flashcards/ explicitly, so app doesn't work anymore standalone
+app.set('views', primaryApp.appRoot + '/views');
+
 app.set('view engine', 'jade');
+app.set('view options', { 
+  layout: false,    // use inheritance (see other apps)
+  compileDebug: true,
+  pretty: true
+});   
 
 
 // default/global view vars [can define functions that accept params from templates]
+// @todo learn what's the difference between app.set() functions and app.helpers() functions?
 app.set('view options', {
   getWordType: require('./models/word').getWordType
 });
 
+
+// set app-level body class
+// @todo this is duplicated across apps, consolidate
+app.use(function setAppBodyClass(req, res, next) {
+  res.bodyClass = res.bodyClass || [];    // keep if already created (?)
+  res.bodyClass.push('app-flashcards');
+  next();
+});
+
+// body class per flashcards url (previously fcBodyClass, now using same res.bodyClass as parent app)
+app.use(function setFcBodyClass(req, res, next) {
+  var parts = _.compact( require('url').parse(req.url).pathname.split('/') );
+  
+  if (parts.length == 0) {
+    res.bodyClass.push('home');
+    return;
+  }
+  else {        
+    // strip the mount point
+    if (parts[0] === app.route.replace(/^\//, '')) parts.shift();
+
+    res.bodyClass.push( parts.join('-') );
+  }
+});
 
 // middleware [use as simple variables, _can't_ pass params into them from templates]
 // namespaced to this app to differentiate from parent app!
@@ -105,19 +139,6 @@ var sharedDynamicHelpers = {
   // return the app's mount-point so that urls can adjust
   , fcBase: function(req, res){
       return '/' == app.route ? '' : app.route;
-    }
-  
-    // generate a body class based on URL
-  , fcBodyClass: function(req, res) {
-      var parts = _.compact( require('url').parse(req.url).pathname.split('/') );
-      
-      if (parts.length == 0) return 'home';
-      else {        
-        // strip the mount point
-        if (parts[0] === app.route.replace(/^\//, '')) parts.shift();
-
-        return parts.join('-');
-      }
     }
   
     // @todo merge this w/ Auth !todo ^5
@@ -154,11 +175,11 @@ primaryApp.dynamicHelpers(sharedDynamicHelpers);
 app.use(express.static(__dirname + '/public'));
 
 app.use(express.bodyParser());
-// app.use(express.methodOverride());    // necessary?
+// app.use(express.methodOverride());    // don't need
 
-// restrict to !parentApp ?
+// (restrict to !parentApp ?)
 if (! parentApp) {
-  app.use(express.cookieParser());    // ?
+  app.use(express.cookieParser());    // needed?
   app.use(express.session({ 
     secret: app.conf.sessionSecret, 
     cookie: {maxAge: 60000*60*24*30},   // 30 days?
@@ -180,6 +201,7 @@ app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 
 
 // default active nav
+// @todo does this still work? (make it work)
 app.use(function setDefaultActiveNav(req, res, next) {
   res.local('activeNav', '');
   next();

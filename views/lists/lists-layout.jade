@@ -5,6 +5,9 @@
 extends ../layout
 
 
+append comments
+  // these are fc comments
+
 block headTitle
   - if (typeof list != "undefined")
     title #{list.title} - #{listsAppTitle}
@@ -15,15 +18,9 @@ block headTitle
 //- nullify ?
 //-block promo
 
-//- can't use append here b/c parent is blank. bug?
-block scripts
-  //- use a local copy when developing locally/offline
-  - if (envId === 'local')
-    script(src='#{listsBase}/javascripts/jquery.min.js');
-  - else  
-    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
-
-  //- no #{listsBase} here, listening to parent app (?)
+append scripts
+  //[LISTS SCRIPTS]
+  //- no #{listsBase} on socket.io.js, listening to parent app [will need to change if another socket app is added]
   script(src="/socket.io/socket.io.js")
   script(src="#{listsBase}/javascripts/lists-client.js")
 
@@ -49,6 +46,11 @@ block scripts
         
 
 
+//-@todo is this working???
+append sidebar
+  div#socket-status.sidebar.disconnected
+    | Socket not connected
+
 //- note: this overrides the whole block, so need to copy/override all sub-blocks too!
 block appContent
   section#main.content
@@ -69,11 +71,6 @@ block appContent
     //- using inheritance rather than body
     block mainContent
 
-
-append sidebar
-  div#socket-status.sidebar.disconnected
-    | Socket not connected
-    
 
 //-@todo revise
 prepend footer

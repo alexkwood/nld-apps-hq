@@ -101,7 +101,7 @@ module.exports = function(app){
       else {
         // console.log('words:', words);
         
-        res.render('word/list', {
+        res.render('flashcards/word/list', {
           pageTitle: pageTitle,
           words: words,
           showWordLinks: true,
@@ -127,7 +127,7 @@ module.exports = function(app){
       function(error, groups){
       if (error) {
         req.flash('error', "Unable to get groups. " + util.inspect(error));
-        res.render('home', { 
+        res.render('flashcards/home', { 
           locals: { 
             pageTitle : '',
             activeNav: 'add'
@@ -136,7 +136,7 @@ module.exports = function(app){
         return;
       }
       
-      res.render('word/form', {
+      res.render('flashcards/word/form', {
         locals: {
           word: word,
           pageTitle: 'Add a Word',
@@ -169,11 +169,11 @@ module.exports = function(app){
       function(error, groups) {
         if (error) {
           req.flash('error', "Unable to get groups. " + util.inspect(error));
-          res.render('home', { locals: { pageTitle : '' } });
+          res.render('flashcards/home', { locals: { pageTitle : '' } });
           return;
         }
       
-        res.render('word/form', {
+        res.render('flashcards/word/form', {
           locals: {
             word: req.word,   // from app.param()
       
@@ -204,7 +204,7 @@ module.exports = function(app){
   // @todo don't restrict these 'permalinks' to user -- but then make showWordLinks dependent on user!
   app.get('/word/:word', app.restrictUser, function(req, res) {
     // 'list' view includes styles, 'word' is a partial.
-    res.render('word/list', {
+    res.render('flashcards/word/list', {
       locals: {
         words: [ req.word ],
         pageTitle: '',
