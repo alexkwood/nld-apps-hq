@@ -133,11 +133,11 @@ var sharedDynamicHelpers = {
       return "My Spanish Flashcards";
     }
 
-    // shared?
-  , fcMessages: function(req, res) {
-      return req.flash();
-    }
-    //[replaces] messages        // from express-messages module, use req.flash() to populate.
+    // (don't need, parent app picks up and puts in layout.jade)
+  // , fcMessages: function(req, res) {
+  //     return req.flash();
+  //   }
+  //   //[replaces] messages        // from express-messages module, use req.flash() to populate.
 
   // return the app's mount-point so that urls can adjust
   , fcBase: function(req, res){

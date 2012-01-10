@@ -25,11 +25,12 @@ module.exports = function(app) {
   
 
 
-  // load messages (not using express-messages here, just plain)
-  app.use(function(req, res, next) {
-    res.local('listsMessages', req.flash());
-    next();
-  });
+  // // load messages (not using express-messages here, just plain)
+  // // -- don't need anymore, parent app puts messages in layout.jade
+  // app.use(function(req, res, next) {
+  //   res.local('listsMessages', req.flash());
+  //   next();
+  // });
 
 
   // when this is invoked, any new app.use() middleware goes AFTER routes run, too late.

@@ -54,9 +54,9 @@ html
           block pageTitle
           
           block messages
-            //-- if (typeof messages != "undefined" && messages)
-            include includes/messages
-            mixin messages(messages, 'PARENT')
+            - if (typeof messages != "undefined" && messages)
+              include includes/messages
+              mixin messages(messages)
           
           
           //- using layout:false now, inheritance rather than body

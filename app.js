@@ -146,12 +146,6 @@ app.use(function setBodyClass(req, res, next) {
 // ** MUST run __after__ auth loads, otherwise INDIVIDUAL ROUTE MIDDLEWARE FROM AUTH TAKE PRECEDENCE OVER GLOBAL MIDDLEWARE HERE!!
 app.use(app.router);
 
-//tmp
-app.use(function(req,res,next){
-  req.flash('test', "A message");
-  next();
-});
-
 
 // MOUNT AUTH APP at sub-path. auto-namespaces paths at sub.
 //app.use('/auth', auth);

@@ -34,32 +34,19 @@ append scripts
       
   - else
     script
-      (function($){
-        $(function(){
-          $('#socket-status').hide();   // not needed here
-        });
-      })(jQuery);
-        
+      $(function(){
+        $('#socket-status').hide();   // not needed here
+      });        
 
 
 //- sidebar keeps promo
 
-//- note: this overrides the whole block, so need to copy/override all sub-blocks too!
-block appContent
-  section#main.content
 
-    block pageTitle
-      h1= listsAppTitle
-      - if (typeof title != "undefined")
-        h2= title
+block pageTitle
+  h1= listsAppTitle
+  - if (typeof title != "undefined")
+    h2= title
 
-    append messages
-      //- appended to parent app messages [not sure if they inherit]
-      include ../includes/messages
-      mixin messages(listsMessages, 'LISTS')
-
-    //- using inheritance rather than body
-    block mainContent
 
 
 //-@todo revise

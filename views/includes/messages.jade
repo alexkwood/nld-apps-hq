@@ -1,10 +1,8 @@
 //- use as mixin for messages
 //- instead of express-messages, styled w/ bootstrap's .alert-message
 
-mixin messages(messages, name)
-  div!= name
-
+mixin messages(messages)
   - if (typeof messages != "undefined" && messages)
     div.messages
       - each message,type in messages
-        div.alert-message(class=type || null)!= message
+        div.alert-message(class=type)!= message

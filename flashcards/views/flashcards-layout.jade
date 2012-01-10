@@ -29,13 +29,6 @@ block pageTitle
       |: #{username}
 
 
-append messages
-  //- appended to parent app messages [not sure if they inherit]
-  //-- if (typeof fcMessages != "undefined" && fcMessages)
-  include ../includes/messages
-  mixin messages(fcMessages, 'FLASHCARDS')
-
-
 block mainContent
   block fcNav
     include includes/nav
