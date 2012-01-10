@@ -1,17 +1,19 @@
 //- common apps header bar
 //- adapted from fluid.html example in bootstrap
 
+- if (typeof activeApp == "undefined") activeApp = null;
+
 div.topbar
   div.topbar-inner
     div.container-fluid
       a.brand(href="/") New Leaf Digital Apps
     
-      //-@todo put .active class on active app link
-      ul.nav
-        li
-          a.flashcards(href="/flashcards") Spanish Flashcards
-        li
+      ul.nav      
+        li(class=(activeApp=="lists" ? "active" : null))
           a.lists(href="/lists") Interactive Lists
+          
+        li(class=(activeApp=="flashcards" ? "active" : null))
+          a.flashcards(href="/flashcards") Spanish Flashcards
           
         - if (loggedIn)
           - if (user.canUser('admin_users'))

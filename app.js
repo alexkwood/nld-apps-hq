@@ -133,11 +133,14 @@ app.use(function setDefaultMeta(req, res, next) {
 });
 
 
-// set app-level body class
-app.use(function setBodyClass(req, res, next) {
+// set app-level body class, etc
+app.use(function setAppInfo(req, res, next) {
   // res.bodyClass = res.bodyClass || [];    // keep if already created
   // res.bodyClass.push('app-hq');
   res.bodyClass = [ 'app-hq' ];
+  
+  res.activeApp = 'hq';
+  
   next();
 });
 
@@ -158,8 +161,12 @@ var sharedDynamicHelpers = {
   // messages: messages,   // populate w/ req.flash()
   
   bodyClass: function(req, res) {
-    if (_.isUndefined(res.bodyClass)) return '';
-    return res.bodyClass.join(' ');
+    return _.isUndefined(res.bodyClass) ? '' : res.bodyClass.join(' ');
+  },
+  
+  // for top nav, which app is active
+  activeApp: function(req, res) {
+    return _.isUndefined(res.activeApp) ? null : res.activeApp;
   }
 };
 app.dynamicHelpers(sharedDynamicHelpers);
@@ -167,10 +174,11 @@ app.dynamicHelpers(sharedDynamicHelpers);
 
 
 // load messages (not using express-messages here, just plain, w/ .alert-message)
-app.use(function(req, res, next) {
+app.use(function getMessages(req, res, next) {
   res.local('messages', req.flash());
   next();
 });
+
 
 
 // load Flashcards app too

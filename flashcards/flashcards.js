@@ -95,12 +95,14 @@ app.set('view options', {
 
 
 
-// set app-level body class
-// @todo this is duplicated across apps, consolidate
-app.use(function setAppBodyClass(req, res, next) {
+// set app-level body class, etc
+app.use(function setAppInfo(req, res, next) {
   // res.bodyClass = res.bodyClass || [];    // keep if already created ?
   res.bodyClass = [];    // drop parent app's
   res.bodyClass.push('app-flashcards');
+  
+  res.activeApp = 'flashcards';
+  
   next();
 });
 
@@ -148,18 +150,6 @@ var sharedDynamicHelpers = {
   , fcIsLoggedIn: function(req, res) {
       return app.isLoggedIn(req);
     }
-    
-    /*
-    // current url relative to mount point (used for nav)
-    // -- is there a built-in way to get this?
-    // -- actually not using anymore
-  , fcUrl: function(req, res) {
-      // [copied from fcBodyClass above]
-      var parts = _.compact( require('url').parse(req.url).pathname.split('/') );
-      if (parts[0] === app.route.replace(/^\//, '')) parts.shift();
-      return parts.join('/');
-    }
-    */ 
 };
 // apply to primary app
 primaryApp.dynamicHelpers(sharedDynamicHelpers);

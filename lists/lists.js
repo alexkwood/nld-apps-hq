@@ -95,10 +95,13 @@ var ListSchema = require('./lib/model-list')
 
 
 // set app-level body class
-app.use(function setBodyClass(req, res, next) {
+app.use(function setAppInfo(req, res, next) {
   // res.bodyClass = res.bodyClass || [];    // keep if already created ?
   res.bodyClass = [];    // drop parent app's
   res.bodyClass.push('app-lists');
+  
+  res.activeApp = 'lists';
+  
   next();
 });
 
@@ -124,7 +127,9 @@ app.dynamicHelpers(sharedDynamicHelpers);   // necessary w/ switch to inherited 
 app.restrictUser = function(req, res, next) {
   if (parentApp && parentApp.isUserLoggedIn(req)) return next();
 
-  req.flash('error', "Please login to do that.");
+  if (req.url !== '/') {    // (message on inside ops but not home)
+    req.flash('error', "Please login to do that.");
+  }
   res.redirect('/login');     // @todo go to root /login not app
 };
 
