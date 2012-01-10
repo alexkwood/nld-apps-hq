@@ -1,3 +1,6 @@
-ul.words
-  - each word in words
-      li!= partial('word/word', word)
+extends ../flashcards-layout
+
+append mainContent
+  ul.words
+    - each word in words
+      li!= partial('word', word)

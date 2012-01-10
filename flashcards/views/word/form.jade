@@ -1,31 +1,33 @@
-//- form for adding or editing a word
+extends ../flashcards-layout
 
-form#add-word(method='post', action='#{fcBase}#{action}')
+append mainContent
+  //- form for adding or editing a word
+  form#add-word(method='post', action='#{fcBase}#{action}')
 
-  div.field
-    label Spanish
-    input(type='text', name='word_es', id='word_es', value=word.word_es)
+    div.field
+      label Spanish
+      input(type='text', name='word_es', id='word_es', value=word.word_es)
 
-  div.field
-    label English
-    input(type='text', name='word_en', id='word_en', value=word.word_en)
+    div.field
+      label English
+      input(type='text', name='word_en', id='word_en', value=word.word_en)
   
-  div.field
-    label Type
-    select(name='type')
-      option(value='') -
-      - each type in types
-        option(value=type.key, selected=type.selected)= type.value
+    div.field
+      label Type
+      select(name='type')
+        option(value='') -
+        - each type in types
+          option(value=type.key, selected=type.selected)= type.value
 
-  div.field
-    label Special Group
-    select(name='group', id='group')
-      option(value='')
-      - each group in groups
-        option(value=group.key, selected=group.selected)!= group.value
-      option(value='new') -new-
+    div.field
+      label Special Group
+      select(name='group', id='group')
+        option(value='')
+        - each group in groups
+          option(value=group.key, selected=group.selected)!= group.value
+        option(value='new') -new-
       
-    input(name='new_group', id='new_group')
+      input(name='new_group', id='new_group')
       
-  div.field
-    input(type='submit', value=word._id ? 'Update' : 'Create')
+    div.field
+      input(type='submit', value=word._id ? 'Update' : 'Create')
