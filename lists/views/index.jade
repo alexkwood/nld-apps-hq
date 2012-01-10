@@ -1,6 +1,11 @@
+//- Lists index
 
-div#lists-wrapper
-  != partial('partials/your-lists')
-  != partial('partials/guest-lists')
+extends lists-layout
 
-!= partial('partials/new-list')
+//- override piecemeal
+block mainContent
+  div#lists-wrapper
+    != partial('partials/your-lists')
+    != partial('partials/guest-lists')
+
+  != partial('partials/new-list')

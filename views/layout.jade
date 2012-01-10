@@ -2,7 +2,12 @@
 !!! 5
 html
   head
-    title= title
+    block headTitle
+      title= title
+    
+    //-@todo: html5 shim. apple-touch-icon (x3). ...
+    
+    block scripts
     
     block stylesheets
       link(rel='stylesheet', href='/stylesheets/nld-apps.css')    
@@ -14,7 +19,7 @@ html
       - if (meta_description)
         meta(name="description", content="#{meta_description}")
   
-  body
+  body(class=bodyClass)
     block appsTopBar    
       != partial('includes/header.jade')
 
@@ -33,13 +38,16 @@ html
 
       block appContent
         section#main.content
+        
+          block pageTitle
 
+          //- @todo differentiate hq/sub messages?
           block messages
             != messages()
 
           //- using layout:false now, inheritance rather than body
           //-!= body
-          block body
+          block mainContent
           
           //- yield   ??
 

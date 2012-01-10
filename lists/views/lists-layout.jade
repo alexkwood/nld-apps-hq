@@ -1,0 +1,83 @@
+//- Lists layout
+//- piggyback on parent layout, just override blocks piecemeal
+
+extends ../layout
+
+//-block appsTopBar    
+//-  != partial('../includes/header.jade')
+  
+block headTitle
+  - if (typeof list != "undefined")
+    title #{list.title} - #{listsAppTitle}
+  - else
+    title= listsAppTitle
+
+
+//- nullify ?
+block promo
+
+append scripts
+  //- use a local copy when developing locally/offline
+  - if (envId === 'local')
+    script(src='#{listsBase}/javascripts/jquery.min.js');
+  - else  
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
+
+  //- no #{listsBase} here, listening to parent app (?)
+  script(src="/socket.io/socket.io.js")
+  script(src="#{listsBase}/javascripts/lists-client.js")
+
+  //-pass current list Id to JS
+  //-@todo extend this layout template only for lists.jade?
+  - if (typeof list != "undefined")
+    script
+      // catch the loaded client app
+      (function($){
+        $(window).on('loaded-app', function(event, app){
+          // pass back an event w/ list ID (initializes socket)
+          $(window).trigger('watch-list', '#{list._id}').trigger('set-username', '#{username}');
+        })
+      })(jQuery);
+      
+  - else
+    script
+      (function($){
+        $(function(){
+          $('#socket-status').hide();   // not needed here
+        });
+      })(jQuery);
+        
+
+
+block appContent
+  section#main.content
+
+  //- @todo use bootstrap message styles
+  block messages
+    //- moved from index. for individual list, gets populated w/ socket messages. otherwise just from req.flash.
+    div#messages-wrapper
+      div#messages
+        - if (typeof listsMessages != "undefined")
+          - each message,type in listsMessages
+            div.message(class=type)!= message
+
+  block pageTitle
+    h1= listsAppTitle
+    - if (typeof title != "undefined")
+      h2= title
+
+  //- using inheritance rather than body
+  block mainContent
+
+
+append sidebar
+  div#socket-status.sidebar.disconnected
+    | Socket not connected
+    
+
+//-@todo revise
+prepend footer
+  div#footer
+    | A proof of concept using <a href="http://nodejs.org">Node.js</a> with <a href="http://socket.io">Socket.io</a>.
+    | By <a href="http://newleafdigital.com">Ben Buckman, New Leaf Digital</a>.
+    | Code is on <a href="https://github.com/newleafdigital/interactive-shopping-list">Github</a>.

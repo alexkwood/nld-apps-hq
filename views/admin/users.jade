@@ -1,41 +1,47 @@
 //- this page is loaded for 2 pages: /admin/users (w/access check), /admin/users/loginas (for local test mode)
 //- needs to handle both, don't assume one or the other
 
-h2 User Admin
+extends ../layout
 
-div.admin
+//-@todo need body class
 
-  //- LOCAL TESTING MODE
-  - if (localNoAuth)
-    div.warning In Local Testing Mode!
+block pageTitle
+  h1 User Admin
+
+
+block mainContent
+  div.admin
+
+    //- LOCAL TESTING MODE
+    - if (localNoAuth)
+      div.warning In Local Testing Mode!
   
-  table#users
-    tr
-      th
-      th ID
-      th Full Name
-      th System Name
-      th Role
-      th Joined
-      
-      - if (localNoAuth)
-        th Login As
-      
-    - var count = 0
-    - each user in users
+    table#users
       tr
-        td.count!= ++count
-        td.id!= user._id
-        td.name!= user.displayName()
-        td.system_name!= user.system_name
-        td.role!= user.role
-        td.joined!= user.joined
-        
+        th
+        th ID
+        th Full Name
+        th System Name
+        th Role
+        th Joined
+      
         - if (localNoAuth)
-          td.loginAs
-            a(href="/admin/users/loginas/#{user._id}") Login As
+          th Login As
+      
+      - var count = 0
+      - each user in users
+        tr
+          td.count!= ++count
+          td.id!= user._id
+          td.name!= user.displayName()
+          td.system_name!= user.system_name
+          td.role!= user.role
+          td.joined!= user.joined
+        
+          - if (localNoAuth)
+            td.loginAs
+              a(href="/admin/users/loginas/#{user._id}") Login As
 
 
-  div.admin-links
-    a(href="/admin/users/resave") Re-save users 
-
+    div.admin-links
+      a(href="/admin/users/resave") Re-save users 

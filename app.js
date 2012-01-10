@@ -132,6 +132,14 @@ app.use(function setDefaultMeta(req, res, next) {
 });
 
 
+// set app-level body class
+app.use(function setBodyClass(req, res, next) {
+  res.bodyClass = res.bodyClass || [];    // keep if already created
+  res.bodyClass.push('app-hq');
+  next();
+});
+
+
 // load parent app's routes now. 
 // ** MUST run __after__ auth loads, otherwise INDIVIDUAL ROUTE MIDDLEWARE FROM AUTH TAKE PRECEDENCE OVER GLOBAL MIDDLEWARE HERE!!
 app.use(app.router);
@@ -146,7 +154,12 @@ app.use(auth);
 
 
 var sharedDynamicHelpers = {
-  messages: messages   // populate w/ req.flash()
+  messages: messages,   // populate w/ req.flash()
+  
+  bodyClass: function(req, res) {
+    if (_.isUndefined(res.bodyClass)) return '';
+    return res.bodyClass.join(' ');
+  }
 };
 app.dynamicHelpers(sharedDynamicHelpers);
 auth.dynamicHelpers(sharedDynamicHelpers);
@@ -155,12 +168,14 @@ auth.dynamicHelpers(sharedDynamicHelpers);
 
 // load Flashcards app too
 var flashcards = require('./flashcards/flashcards.js');
+flashcards.dynamicHelpers(sharedDynamicHelpers);
 app.use('/flashcards', flashcards);
 // console.log('MOUNTED FLASHCARDS!');
 
 
 // load Interactive Lists app
 var lists = require('./lists/lists.js');
+lists.dynamicHelpers(sharedDynamicHelpers);
 app.use('/lists', lists);
 
 

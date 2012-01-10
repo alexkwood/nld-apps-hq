@@ -8,6 +8,7 @@
 
 // @todo graceful degradation to non-socket posts? (low priority)
 // @todo more string escaping to prevent injections? ... (socket.io seems to escape well enough for now)
+// @todo can take out 'if (parentApp)' conditions, can now assume parentApp exists
 
 var util = require('util')
   , express = require('express')
@@ -52,8 +53,14 @@ catch(e) {
 }
 
 
-app.set('views', __dirname + '/views');
+// parent /views/lists is a symlink to this app's /views
+app.set('views', parentApp ? parentApp.appRoot + '/views/lists' : app.appRoot + '/views');
+
 app.set('view engine', 'jade');
+
+// don't use default layout/body method, allow template inheritance instead
+app.set('view options', { layout: false });
+
 
 app.use(express.static(__dirname + '/public'));
 
@@ -84,6 +91,14 @@ var ListSchema = require('./lib/model-list')
   , List = app.db.model('List', ListSchema);
 
 
+// set app-level body class
+app.use(function setBodyClass(req, res, next) {
+  res.bodyClass = res.bodyClass || [];    // keep if already created
+  res.bodyClass.push('app-lists');
+  next();
+});
+
+
 var sharedDynamicHelpers = {
   listsBase: function(req, res){
     return '/' == app.route ? '' : app.route;
@@ -97,7 +112,8 @@ var sharedDynamicHelpers = {
     return 'Real-time Shared Lists';
   }
 };
-primaryApp.dynamicHelpers(sharedDynamicHelpers);
+// primaryApp.dynamicHelpers(sharedDynamicHelpers);
+app.dynamicHelpers(sharedDynamicHelpers);   // necessary w/ switch to inherited templates ...?
 
 
 // route middleware to authenticate user.

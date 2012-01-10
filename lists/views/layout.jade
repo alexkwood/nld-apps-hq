@@ -1,13 +1,11 @@
 //- Lists layout
-!!! 5
-html
-  head
-    - if (typeof list != "undefined")
-      title #{list.title} - #{listsAppTitle}
-    - else
-      title= listsAppTitle
+//- piggyback on parent layout, just override blocks piecemeal
 
-    //-@todo: html5 shim. meta description. apple-touch-icon (x3). ...
+block headTitle
+  - if (typeof list != "undefined")
+    title #{list.title} - #{listsAppTitle}
+  - else
+    title= listsAppTitle
             
     //-shared
     link(rel='stylesheet', href='/stylesheets/nld-apps.css')
