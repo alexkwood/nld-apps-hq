@@ -86,15 +86,13 @@ app.set('view engine', 'jade');
 app.set('view options', { 
   layout: false,    // use inheritance (see other apps)
   compileDebug: true,
-  pretty: true
+  pretty: true,
+
+  // helper function
+  // @todo learn what's the difference between app.set() functions and app.helpers() functions?
+  getWordType: require('./models/word').getWordType  
 });   
 
-
-// default/global view vars [can define functions that accept params from templates]
-// @todo learn what's the difference between app.set() functions and app.helpers() functions?
-app.set('view options', {
-  getWordType: require('./models/word').getWordType
-});
 
 
 // set app-level body class
