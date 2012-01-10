@@ -9,6 +9,7 @@
 // @todo graceful degradation to non-socket posts? (low priority)
 // @todo more string escaping to prevent injections? ... (socket.io seems to escape well enough for now)
 // @todo can take out 'if (parentApp)' conditions, can now assume parentApp exists
+// @todo put in a catch-all POST handler w/ an error saying posts shouldn't work, socket must be broken!
 
 var util = require('util')
   , express = require('express')
@@ -54,7 +55,9 @@ catch(e) {
 
 
 // parent /views/lists is a symlink to this app's /views
-app.set('views', parentApp ? parentApp.appRoot + '/views/lists' : app.appRoot + '/views');
+// app.set('views', parentApp ? parentApp.appRoot + '/views/lists' : app.appRoot + '/views');
+// -- all layouts at root level, otherwise partials in inherited templates don't work!
+app.set('views', parentApp ? parentApp.appRoot + '/views' : app.appRoot + '/views');
 
 app.set('view engine', 'jade');
 

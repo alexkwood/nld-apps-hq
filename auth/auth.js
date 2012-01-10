@@ -41,6 +41,9 @@ var parentApp = function() {
 // use parent lib for common stuff
 var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
 
+// pointer to top app
+var primaryApp = parentApp ? parentApp : app;
+
 /*
 app.mounted(function(parent) {
   console.warn('CAUGHT %s app mounted by %s', app.name, parent.name);
@@ -383,22 +386,27 @@ if (parentApp) parentApp.requireUserCan = app.requireUserCan;
 // make dynamic and static helpers (for views) available to this app and parent app.
 function applySharedHelpers(app) {
   // static [per app]
-  app.helpers({
-    
+  // IMPT: w/ switch to inherited templates, switched this from app to primaryApp
+  // primaryApp.helpers({
+  //   // -- moved localNoAuth to dynamicHelpers. hard to share static helpers among sibling apps! [buried in settings alongside other stuff.] --
+  //   // -- @todo suggest in express issues: make app.helpers should be as easy to share as dynamic helpers (app.dynamicViewHelpers)
+  // });
+  
+  
+  
+  // dynamic [per req/res]
+  app.dynamicHelpers({
+
     // pass localNoAuth mode to views
-    localNoAuth: function() {
+    // [was in static helpers; added req,res here]
+    localNoAuth: function(req, res) {
       try {
         if (app.conf.localNoAuth) return true;
       } catch(e) {
         console.log('caught error in localNoAuth', e);
       }
       return false;
-    }    
-  });
-  
-  
-  // dynamic [per req/res]
-  app.dynamicHelpers({
+    },
     
     // replaces everyauth.loggedIn - for local mode, and for consistency
     loggedIn: function(req, res) {
@@ -433,6 +441,8 @@ function applySharedHelpers(app) {
   });
 }
 applySharedHelpers(app);
+
+// [NOTE: after switching to inherited templates, this no longer works on other subapps (e.g. lists/views/index.jade)!]
 if (parentApp) applySharedHelpers(parentApp);
 
 

@@ -1,3 +1,6 @@
+// IMPT: w/ inherited templates, have to make views relative to root for extended layouts (w/partials) to work.
+// (this makes app no longer function stand-alone)
+
 module.exports = function(app) {
 
   require('express-mongoose');
@@ -68,7 +71,7 @@ module.exports = function(app) {
 
   // view an individual list
   app.get('/list/:listId', app.restrictUser, function(req, res) {
-    res.render('list', {
+    res.render('lists/list', {
       // title: req.list.title,
       lists: List.getListsCreatedByUser(req.user._id),
       guestLists: List.getListsVisitedByUser(req.user._id),
@@ -93,7 +96,7 @@ module.exports = function(app) {
   
 
   app.get('/login', function(req, res){
-    res.render('login', {
+    res.render('lists/login', {
       locals: {
         title : 'Login'
       }
@@ -130,7 +133,7 @@ module.exports = function(app) {
   
   // list of lists
   app.get('/', app.restrictUser, function(req, res){
-    res.render('index', {
+    res.render('lists/index', {
       lists: List.getListsCreatedByUser(req.user._id),
       guestLists: List.getListsVisitedByUser(req.user._id)
     });

@@ -12,7 +12,7 @@
   app.putMsg = function(msg, type, noFade) {
     app.msgCount++;
     var div = $('<div></div>');
-    div.addClass('message');
+    div.addClass('alert-message');
     div.attr('id', 'message-' + app.msgCount);
     if (typeof type != "undefined") div.addClass(type);
 

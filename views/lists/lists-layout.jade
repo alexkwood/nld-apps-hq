@@ -1,11 +1,10 @@
 //- Lists layout
 //- piggyback on parent layout, just override blocks piecemeal
 
+//- [had to reshuffle the whole views structure to make this work! otherwise partials fail]
 extends ../layout
 
-//-block appsTopBar    
-//-  != partial('../includes/header.jade')
-  
+
 block headTitle
   - if (typeof list != "undefined")
     title #{list.title} - #{listsAppTitle}
@@ -14,9 +13,10 @@ block headTitle
 
 
 //- nullify ?
-block promo
+//-block promo
 
-append scripts
+//- can't use append here b/c parent is blank. bug?
+block scripts
   //- use a local copy when developing locally/offline
   - if (envId === 'local')
     script(src='#{listsBase}/javascripts/jquery.min.js');
@@ -49,25 +49,25 @@ append scripts
         
 
 
+//- note: this overrides the whole block, so need to copy/override all sub-blocks too!
 block appContent
   section#main.content
 
-  //- @todo use bootstrap message styles
-  block messages
-    //- moved from index. for individual list, gets populated w/ socket messages. otherwise just from req.flash.
-    div#messages-wrapper
-      div#messages
-        - if (typeof listsMessages != "undefined")
-          - each message,type in listsMessages
-            div.message(class=type)!= message
+    block pageTitle
+      h1= listsAppTitle
+      - if (typeof title != "undefined")
+        h2= title
 
-  block pageTitle
-    h1= listsAppTitle
-    - if (typeof title != "undefined")
-      h2= title
+    block messages
+      //- moved from index. for individual list, gets populated w/ socket messages. otherwise just from req.flash.
+      div#messages-wrapper
+        div#messages
+          - if (typeof listsMessages != "undefined")
+            - each message,type in listsMessages
+              div.alert-message(class=type)!= message
 
-  //- using inheritance rather than body
-  block mainContent
+    //- using inheritance rather than body
+    block mainContent
 
 
 append sidebar

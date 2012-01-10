@@ -3,10 +3,14 @@
 html
   head
     block headTitle
-      title= title
+      - if (typeof title != 'undefined')
+        title= title
+      - else
+        title New Leaf Digital Apps
     
     //-@todo: html5 shim. apple-touch-icon (x3). ...
     
+    //- filler. to override need to use 'block' not 'append', seems like a bug.
     block scripts
     
     block stylesheets
@@ -19,15 +23,15 @@ html
       - if (meta_description)
         meta(name="description", content="#{meta_description}")
   
+  
   body(class=bodyClass)
     block appsTopBar    
       != partial('includes/header.jade')
 
     //- #outer-wrapper sets up container for app content
     div#outer-wrapper.container-fluid
-      block sidebar
-        div.sidebar
-        
+      div.sidebar
+        block sidebar
           block appsLogo
             #apps-logo
               a(href="http://apps.newleafdigital.com")
@@ -40,7 +44,7 @@ html
         section#main.content
         
           block pageTitle
-
+          
           //- @todo differentiate hq/sub messages?
           block messages
             != messages()

@@ -1,4 +1,4 @@
-body.lists-app {
+body.app-lists {
   
   h1 {
     margin-top: 0;
@@ -17,9 +17,10 @@ body.lists-app {
     margin-bottom: 2em;
   }
 
+  /*
+  // -- using bootstrap .alert-message instead
   #messages {
   }
-
   #messages .message {
     background: #d5f2ff;  //#ccc;
     padding: .2em .5em;
@@ -30,6 +31,7 @@ body.lists-app {
   #messages .message.error {
     color: red;
   }
+  */
 
   #list {
     border-left: solid #ccc 1px;
@@ -58,8 +60,18 @@ body.lists-app {
       //padding: 1em;
     }
   }
-  #item {}
-  #add {}
+  .item {
+    label {
+      padding-left: .5em;
+    }
+  }
+  
+  
+  input[type="button"],
+  input[type="submit"],
+  input#add {
+    .btn;
+  }
 
   #users .current {
     font-weight: bold;
@@ -92,4 +104,8 @@ body.lists-app {
     background: #ffaaaa;
   }
   
+  
+  a.delete-list {
+    .btn;
+  }
 }

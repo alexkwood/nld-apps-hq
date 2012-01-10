@@ -6,6 +6,7 @@
 // @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed!!
 // @todo need indexes on mongoose schemas
 // @todo add URL to http://mongoosejs.com/docs/in-the-wild.html
+// @todo add google analytics, w/ var for user?
 
 /*
 @todo 1/5:
@@ -121,10 +122,10 @@ var auth = require('./auth/auth.js');
 
 // load partials for all routes
 // IMPT: these need to run AFTER loadUser (in auth app, on load), for user to display
-app.use(function setLocalTitle(req, res, next) {
-  res.local('title', 'NewLeafDigital Apps');
-  next();
-});
+// app.use(function setLocalTitle(req, res, next) {
+//   res.local('title', 'NewLeafDigital Apps');
+//   next();
+// });
 
 app.use(function setDefaultMeta(req, res, next) {
   res.local('meta_description', '');
@@ -162,21 +163,23 @@ var sharedDynamicHelpers = {
   }
 };
 app.dynamicHelpers(sharedDynamicHelpers);
-auth.dynamicHelpers(sharedDynamicHelpers);
+// auth.dynamicHelpers(sharedDynamicHelpers);
 
 
 
 // load Flashcards app too
 var flashcards = require('./flashcards/flashcards.js');
-flashcards.dynamicHelpers(sharedDynamicHelpers);
 app.use('/flashcards', flashcards);
-// console.log('MOUNTED FLASHCARDS!');
 
 
 // load Interactive Lists app
 var lists = require('./lists/lists.js');
-lists.dynamicHelpers(sharedDynamicHelpers);
 app.use('/lists', lists);
+
+
+auth.dynamicHelpers(app.dynamicViewHelpers);
+flashcards.dynamicHelpers(app.dynamicViewHelpers);      // apparently necessary after switching to inherited templates??
+lists.dynamicHelpers(app.dynamicViewHelpers);           // apparently necessary after switching to inherited templates??
 
 
 /*
