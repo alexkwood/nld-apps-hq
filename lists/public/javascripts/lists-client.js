@@ -17,7 +17,7 @@
     if (typeof type != "undefined") div.addClass(type);
 
     div.html(msg);
-    $('#messages').append(div);
+    $('.messages').append(div);
     
     if (! noFade) fadeMessage(div);
   };
