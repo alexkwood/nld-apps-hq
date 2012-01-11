@@ -171,21 +171,36 @@ module.exports.getGroups = function(db, query, callback) {
 // Indexes for the Words collection. should be ensureIndex'd once on app load.
 // (the divide between db handler and model is poorly split here)
 // - takes a db handler, load the collection and ensure indexes.
-// - callback for ensureCollection doesn't seem to work, just remove. only loads once on app load so flow control isn't that impt.
 module.exports.ensureIndexes = function(db, callback) {
-  // @todo ARE THESE EVEN WORKING? THEY DON'T SEEM TO BE.
-
-  // -- filler: this doesn't work, but w/o it ensureIndex fails. [seems to have been fixed in not-yet-released version.]
-  var next = function(error, result) { console.log('-- ensureIndex done.', error, result); };
-  
-  db.getCollection(collectionName, function(error, collection) {
-    collection.ensureIndex('user', next);  //impt
-    collection.ensureIndex({ word_en: 1 }, next);  // useful?
-    collection.ensureIndex({ word_es: 1 }, next);  // useful?
-    collection.ensureIndex('group', next);  // not really impt
-    collection.ensureIndex('type', next);   // not really impt
-  });
-  
-  if (callback) callback(); // (sync doesn't matter)
+  // console.log("Ensuring Word indexes ...");
+  var async = require('async');  
+  async.series([
+    function(next) {
+      db.getCollection(collectionName, function(error, collection) {
+        this.collection = collection;
+        next(error);
+      });
+    },
+    function(next, p) {
+      this.collection.ensureIndex('user', next);  //impt
+    },
+    function(next, p) {
+      this.collection.ensureIndex({ word_en: 1 }, next);  // useful?
+    },
+    function(next, p) {
+      this.collection.ensureIndex({ word_es: 1 }, next);  // useful?
+    },
+    function(next) {
+      this.collection.ensureIndex('group', next);  // not really impt
+    },
+    function(next) {
+      this.collection.ensureIndex('type', next);   // not really impt
+    }
+  ],
+    function(error) {
+      console.log("Done ensuring Word indexes. error?", error);
+      if (callback) callback(error);
+    }
+  );  //async
 };
 
