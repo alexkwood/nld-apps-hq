@@ -1,7 +1,7 @@
-- if (googleAnalyticsId)
+- if (conf.googleAnalyticsId)
   script
     var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', '#{googleAnalyticsId}']);
+    _gaq.push(['_setAccount', '#{conf.googleAnalyticsId}']);
     if ('#{username}' != '') _gaq.push(['_setCustomVar', 1, 'username', '#{username}', 1]);
     _gaq.push(['_trackPageview']);
     (function() {

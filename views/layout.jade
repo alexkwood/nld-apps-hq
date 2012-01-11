@@ -33,10 +33,12 @@ html
         meta(name="description", content="#{meta_description}")
   
     block analytics
-      //- if (envId === 'production')
-      != partial('includes/analytics')
+      - if (envId === 'production')
+        != partial('includes/analytics')
   
   body(class=bodyClass)
+    != partial('includes/fb-head.jade')
+    
     block appsTopBar    
       != partial('includes/header.jade')
 
@@ -48,6 +50,9 @@ html
             #apps-logo
               a(href="http://apps.newleafdigital.com")
                 img(src="/nld-apps-logo.png", width=170, height=87)
+          
+          block fbFriends
+            include includes/fb-friends
           
           block promo
             include includes/promo

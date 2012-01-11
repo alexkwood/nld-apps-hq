@@ -35,3 +35,8 @@ block mainContent
   - if (userIsListCreator)
     div#delete-list
       a.delete-list(href='#{listsBase}/list/#{list._id}/delete') Delete this list
+      
+  div#share-list
+    // FB Send widget
+    label Share this list:
+    div.fb-send(data-href="#{fullUrl}", data-font="lucida grande")

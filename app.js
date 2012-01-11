@@ -7,8 +7,6 @@
 
 // -- @todo for launch --
 // @todo need indexes on mongoose schemas
-// @todo add google analytics, w/ var for user?
-// @todo share functionality for lists
 // @todo FC: where did keyboard shortcuts go?
 // @todo remove confs from git, reset API keys!
 // @todo authenticate the server's mongoDB
@@ -180,10 +178,17 @@ var sharedDynamicHelpers = {
     return _.isUndefined(res.activeApp) ? null : res.activeApp;
   },
   
-  // tried this as a static helper, but then whole function got passed to sub-apps as JS string!
-  // (also tried to render partial via res.partial() to a 'local', but didn't work)
-  googleAnalyticsId: function(req, res) {
-    return _.isUndefined(app.conf.googleAnalyticsId) ? null : app.conf.googleAnalyticsId;
+  // expose conf to views.
+  // - was originally just googleAnalyticsId.
+  // -- tried that as a static helper, but then whole function got passed to sub-apps as JS string!
+  // -- (also tried to render partial via res.partial() to a 'local', but didn't work)
+  conf: function(req, res) {
+    return app.conf;
+  },
+  
+  fullUrl: function(req, res) {
+    // (is there a built-in way?)
+    return 'http://' + req.headers.host + req.originalUrl;
   }
 };
 app.dynamicHelpers(sharedDynamicHelpers);
