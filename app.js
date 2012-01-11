@@ -1,20 +1,12 @@
 /*
  New Leaf Digital Apps, by Ben Buckman, http://newleafdigital.com
  @see readme.md for more info
+
+== HQ app: central layer on top of auth and sub-apps ==
 */
 
-// HQ app. central layer on top of auth and sub-apps.
-
-// -- @todo for launch --
-// @todo write README.md
-// @todo need indexes on mongoose schemas
-// @todo remove confs from git, reset API keys!
-// @todo authenticate the server's mongoDB
-// -----
-
-// @todo update package.json? (modules are in repo anyway and shared w/ symlinks, so not critical)
-// @todo flashcards: fix ensureIndex's
 // @todo make error handlers work
+// @todo update package.json? (modules are in repo anyway and shared w/ symlinks, so not critical)
 // @todo dynamic helpers are shared, duplicates loading; switch to middleware or other approach?
 // @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated? (using symlinks for now)
