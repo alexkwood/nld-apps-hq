@@ -14,7 +14,8 @@ var mongoose = require('mongoose')
 var UserSchemaRaw = /*module.exports.UserSchemaRaw =*/ {
   role: {
     type: String,
-    default: roles.defaultRole
+    default: roles.defaultRole,
+    index: true
   },
 
   joined: {
@@ -24,7 +25,8 @@ var UserSchemaRaw = /*module.exports.UserSchemaRaw =*/ {
 
   // username used as foreign key in other apps
   system_name: {
-    type: String
+    type: String,
+    index: true
   }
 };
 

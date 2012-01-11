@@ -66,6 +66,9 @@ var LegacyMongoHandler = require('./db/mongodb');
 app.legacyDB = new LegacyMongoHandler(app.db.connection.db);
 console.log('legacy DB name:', app.legacyDB.db.databaseName);
 
+// ensure indexes on the Word quasi-model
+require('./models/word').ensureIndexes(app.legacyDB);
+
 // same w/ sessionStore
 require(libDir + '/sessionStore')(app, parentApp);
 

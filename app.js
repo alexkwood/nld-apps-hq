@@ -6,17 +6,20 @@
 // HQ app. central layer on top of auth and sub-apps.
 
 // -- @todo for launch --
+// @todo write README.md
 // @todo need indexes on mongoose schemas
-// @todo FC: where did keyboard shortcuts go?
 // @todo remove confs from git, reset API keys!
 // @todo authenticate the server's mongoDB
 // -----
 
+// @todo update package.json? (modules are in repo anyway and shared w/ symlinks, so not critical)
+// @todo flashcards: fix ensureIndex's
+// @todo make error handlers work
+// @todo dynamic helpers are shared, duplicates loading; switch to middleware or other approach?
+// @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated? (using symlinks for now)
 // @todo DB is now loaded in auth module, not parent. ok?
-// @todo make error handlers work
-// @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed
-// @todo wait 1/2 second between use(app)'s to avoid mongodb error/race condition? (otherwise need to async mount everything)
+// @todo wait 1/2 second between use(app)'s to avoid mongodb error/race condition? (otherwise need to async mount apps)
 // @todo switch console.log to https://github.com/flatiron/winston
 // @todo apply canUser() check to each app
 

@@ -1,15 +1,15 @@
 /* simple mongodb handler for Flashcards
+  used by word.js "model", goes into app.LegacyMongoHandler
    -- it's really a GENERIC mongo handler, which begs the question, 
       is it necessary at all? shouldn't all this be part of the mongo module?
 
    add functions to prototype -- need to instantiate a controller to use.
    
-   convention for 'callback' -- takes error (null on success) + results
+   convention for 'callback' -- standard error,results
    
    REFACTORED: THIS NOW GETS A DB CONNECTION FROM _MONGOOSE_.
-   (BUT STILL NOT USING MONGOOSE FOR MODELING IN THIS APP)
-   
-   @TODO refactor this to actually use Mongoose models!
+   (BUT STILL NOT USING MONGOOSE FOR MODELING IN THIS APP)   
+   @TODO *** refactor this to actually use Mongoose models! ***
 */
 
 var _ = require('underscore')._;

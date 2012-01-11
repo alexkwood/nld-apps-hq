@@ -1,5 +1,6 @@
 /* model for 'word' entities
-   use the generic db model
+   uses the generic db model
+   [@todo refactor to Mongoose]
 */
 
 var _ = require('underscore')._;
@@ -84,7 +85,7 @@ Word.prototype.save = function(db, callback) {
 
 // word-related handlers not specific to an INDIVIDUAL word.
 
-// @todo make all these functions MAP to model
+// @todo make all these functions MAP to model ... [or really just refactor all this w/ mongoose]
 
 // take an array of word objects from the DB or elsewhere, and map them to the model object.
 // meant to be a helper function for other getters here that retrieve multiple words.
@@ -165,3 +166,26 @@ module.exports.getWordType = function(type) {
 module.exports.getGroups = function(db, query, callback) {
   db.distinct(collectionName, 'group', query, callback);
 };
+
+
+// Indexes for the Words collection. should be ensureIndex'd once on app load.
+// (the divide between db handler and model is poorly split here)
+// - takes a db handler, load the collection and ensure indexes.
+// - callback for ensureCollection doesn't seem to work, just remove. only loads once on app load so flow control isn't that impt.
+module.exports.ensureIndexes = function(db, callback) {
+  // @todo ARE THESE EVEN WORKING? THEY DON'T SEEM TO BE.
+
+  // -- filler: this doesn't work, but w/o it ensureIndex fails. [seems to have been fixed in not-yet-released version.]
+  var next = function(error, result) { console.log('-- ensureIndex done.', error, result); };
+  
+  db.getCollection(collectionName, function(error, collection) {
+    collection.ensureIndex('user', next);  //impt
+    collection.ensureIndex({ word_en: 1 }, next);  // useful?
+    collection.ensureIndex({ word_es: 1 }, next);  // useful?
+    collection.ensureIndex('group', next);  // not really impt
+    collection.ensureIndex('type', next);   // not really impt
+  });
+  
+  if (callback) callback(); // (sync doesn't matter)
+};
+

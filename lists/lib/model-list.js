@@ -8,9 +8,9 @@ var mongoose = require('mongoose')
   , async = require('async');
 
 var List = {
-  // id: ObjectId,     // redundant?
+  // (_id:ObjectID is implicit)
 
-  title: String,
+  title: { type: String, index: true },
 
   // [old]
   // created_by: String,         // username
@@ -19,10 +19,10 @@ var List = {
   // using standard mongoose dbref.
   // [would have been nicer to maintain join on the readable system_name, 
   //  maybe possible w/add-on mongoose-join module, but too complicated for now]
-  _creator: { type: Schema.ObjectId, ref: 'User' },
+  _creator: { type: Schema.ObjectId, ref: 'User', index: true },
 
   // more joined user IDs (filled in when non-creator user accesses)
-  _guests: [ { type: Schema.ObjectId, ref: 'User' } ],
+  _guests: [ { type: Schema.ObjectId, ref: 'User' } ],    // index? (how do indexed arrays work?)
   
   created_time: { type: Date, default: Date.now },
   updated_time: { type: Date, default: Date.now },
