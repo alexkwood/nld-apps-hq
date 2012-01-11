@@ -26,7 +26,7 @@ module.exports = function(envId) {
       conf.dbHost = 'localhost';
       conf.dbName = 'nld_apps_dev';
 
-      conf.localNoAuth = false;    
+      conf.localNoAuth = false;
   }
 
   // Common

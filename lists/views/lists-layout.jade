@@ -30,12 +30,6 @@ append scripts
           $(window).trigger('watch-list', '#{list._id}').trigger('set-username', '#{username}');
         })
       })(jQuery);
-      
-  - else
-    script
-      $(function(){
-        $('#socket-status').hide();   // not needed here
-      });        
 
 
 //- sidebar keeps promo

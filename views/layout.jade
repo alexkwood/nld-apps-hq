@@ -1,4 +1,8 @@
 //- Apps primary layout
+//- all other templates 'extend' this one. (not using standard layout/body rendering)
+
+- if (typeof envId == 'undefined') envId = null;
+
 !!! 5
 html
   head
@@ -10,7 +14,7 @@ html
     
     block scripts
       //- use a local copy when developing locally/offline
-      - if (typeof envId != 'undefined' && envId === 'local')
+      - if (envId === 'local')
         script(src='#{listsBase}/javascripts/jquery.min.js')
       - else  
         script(src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
@@ -28,6 +32,9 @@ html
       - if (meta_description)
         meta(name="description", content="#{meta_description}")
   
+    block analytics
+      //- if (envId === 'production')
+      != partial('includes/analytics')
   
   body(class=bodyClass)
     block appsTopBar    

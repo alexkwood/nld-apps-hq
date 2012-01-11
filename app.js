@@ -10,6 +10,8 @@
 // @todo add google analytics, w/ var for user?
 // @todo share functionality for lists
 // @todo FC: where did keyboard shortcuts go?
+// @todo remove confs from git, reset API keys!
+// @todo authenticate the server's mongoDB
 // -----
 
 // @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated? (using symlinks for now)
@@ -147,6 +149,13 @@ app.use(function setAppInfo(req, res, next) {
 });
 
 
+// load messages (not using express-messages here, just plain, w/ .alert-message)
+app.use(function getMessages(req, res, next) {
+  res.local('messages', req.flash());
+  next();
+});
+
+
 // load parent app's routes now. 
 // ** MUST run __after__ auth loads, otherwise INDIVIDUAL ROUTE MIDDLEWARE FROM AUTH TAKE PRECEDENCE OVER GLOBAL MIDDLEWARE HERE!!
 app.use(app.router);
@@ -169,18 +178,22 @@ var sharedDynamicHelpers = {
   // for top nav, which app is active
   activeApp: function(req, res) {
     return _.isUndefined(res.activeApp) ? null : res.activeApp;
+  },
+  
+  // tried this as a static helper, but then whole function got passed to sub-apps as JS string!
+  // (also tried to render partial via res.partial() to a 'local', but didn't work)
+  googleAnalyticsId: function(req, res) {
+    return _.isUndefined(app.conf.googleAnalyticsId) ? null : app.conf.googleAnalyticsId;
   }
 };
 app.dynamicHelpers(sharedDynamicHelpers);
 // auth.dynamicHelpers(sharedDynamicHelpers);
 
 
-// load messages (not using express-messages here, just plain, w/ .alert-message)
-app.use(function getMessages(req, res, next) {
-  res.local('messages', req.flash());
-  next();
-});
-
+// static helpers - make static vars available to views
+// app.sharedStaticHelpers = {
+// };
+// app.helpers(app.sharedStaticHelpers);
 
 
 // load Flashcards app too
@@ -198,6 +211,13 @@ app.use('/lists', lists);
 auth.dynamicHelpers(app.dynamicViewHelpers);
 flashcards.dynamicHelpers(app.dynamicViewHelpers);
 lists.dynamicHelpers(app.dynamicViewHelpers);
+
+// auth.dynamicHelpers(app.sharedStaticHelpers);
+// flashcards.dynamicHelpers(app.sharedStaticHelpers);
+// lists.dynamicHelpers(app.sharedStaticHelpers);
+
+
+
 
 
 /*
