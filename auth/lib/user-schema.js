@@ -39,7 +39,7 @@ UserSchema.methods.canUser = function(doWhat) {
 };
 
 // get displayed username (FB Full Name)
-// @todo convert this to a getter?
+// @todo convert this to a 'getter'?
 UserSchema.methods.displayName = function() {
   try {
     if (!_.isUndefined(this.fb.name.full)) {

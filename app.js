@@ -1,21 +1,24 @@
+/*
+ New Leaf Digital Apps, by Ben Buckman, http://newleafdigital.com
+ @see readme.md for more info
+*/
+
 // HQ app. central layer on top of auth and sub-apps.
 
-// @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated?
+// -- @todo for launch --
+// @todo need indexes on mongoose schemas
+// @todo add google analytics, w/ var for user?
+// @todo share functionality for lists
+// @todo FC: where did keyboard shortcuts go?
+// -----
+
+// @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated? (using symlinks for now)
 // @todo DB is now loaded in auth module, not parent. ok?
 // @todo make error handlers work
-// @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed!!
-// @todo need indexes on mongoose schemas
-// @todo add URL to http://mongoosejs.com/docs/in-the-wild.html
-// @todo add google analytics, w/ var for user?
-// @todo wait 1/2 second between use(app)'s so DB can connect properly? (otherwise need to async mount everything)
+// @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed
+// @todo wait 1/2 second between use(app)'s to avoid mongodb error/race condition? (otherwise need to async mount everything)
 // @todo switch console.log to https://github.com/flatiron/winston
-
-/*
-@todo 1/5:
-  - apply canUser() check to each app
-  - lists at URLs, etc [see evernote]
-  - share functionality for lists
-*/
+// @todo apply canUser() check to each app
 
 var express = require('express')
   , _ = require('underscore')
@@ -101,7 +104,6 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler()); 
   
-  // @todo tweak
   app.use(require('connect-less')({ src: app.appRoot + '/public', compress:true, debug:false, force:false }));
 });
 
@@ -127,7 +129,7 @@ var auth = require('./auth/auth.js');
 // });
 
 
-app.use(function setDefaultMeta(req, res, next) {
+app.use(function setPlaceholderMeta(req, res, next) {
   res.local('meta_description', '');
   next();
 });
@@ -215,6 +217,7 @@ require('./routes/admin-users')(app, auth.UserSchema);
 
 
 // error handling
+// [NOT WORKING YET]
 // -- this caught a mongo error in app.param()
 // @todo make error handling work, 404.jade, etc
 var appErrorHandler = function(err, req, res, next) {

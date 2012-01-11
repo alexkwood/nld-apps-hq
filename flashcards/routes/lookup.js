@@ -13,7 +13,7 @@ module.exports = function(app){
         pageTitle: 'Lookup a word with WordReference API',
         result: null,
         words: {},
-        activeNav: 'lookup'
+        fcActiveNav: 'lookup'
       }
     });
   });
@@ -74,7 +74,7 @@ module.exports = function(app){
           result: body,
           definitions: definitions,
           compounds: compounds,
-          activeNav: 'lookup'
+          fcActiveNav: 'lookup'
         }
       });
     });

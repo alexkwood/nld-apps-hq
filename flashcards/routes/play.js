@@ -93,7 +93,7 @@ module.exports = function(app){
           language: null,
           word: null,
           remaining: count,
-          activeNav: 'play'
+          fcActiveNav: 'play'
         });
       }
       else {
@@ -115,7 +115,7 @@ module.exports = function(app){
           gameOver: false,
           showWordLinks: true, //false
           remaining: count,
-          activeNav: 'play'
+          fcActiveNav: 'play'
         });
       }
     }); //getRandom

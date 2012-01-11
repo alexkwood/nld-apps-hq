@@ -20,8 +20,7 @@ append scripts
   script(src="/socket.io/socket.io.js")
   script(src="#{listsBase}/javascripts/lists-client.js")
 
-  //-pass current list Id to JS
-  //-@todo extend this layout template only for lists.jade?
+  // pass current list Id to JS (uses events as hooks)
   - if (typeof list != "undefined")
     script
       // catch the loaded client app
@@ -48,8 +47,6 @@ block pageTitle
     h2= title
 
 
-
-//-@todo revise
 prepend footer
   | App expanded from Ben's original single-list <a href="https://github.com/newleafdigital/interactive-shopping-list">proof of concept</a>
   | using <a href="http://nodejs.org">Node.js</a> with <a href="http://socket.io">Socket.io</a>.

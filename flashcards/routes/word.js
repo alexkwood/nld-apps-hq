@@ -105,7 +105,7 @@ module.exports = function(app){
           pageTitle: pageTitle,
           words: words,
           showWordLinks: true,
-          activeNav: 'list'
+          fcActiveNav: 'list'
         });
       }
     });
@@ -130,7 +130,7 @@ module.exports = function(app){
         res.render('flashcards/home', { 
           locals: { 
             pageTitle : '',
-            activeNav: 'add'
+            fcActiveNav: 'add'
           }
         });
         return;
@@ -153,7 +153,7 @@ module.exports = function(app){
           
           groups: groups,
           
-          activeNav: 'add'
+          fcActiveNav: 'add'
         }
       });
     });
@@ -192,7 +192,7 @@ module.exports = function(app){
           
             groups: groups,
             
-            activeNav: 'list'
+            fcActiveNav: 'list'
           }
         });
       

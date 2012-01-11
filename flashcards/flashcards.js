@@ -191,10 +191,9 @@ app.configure('production', function(){
 });
 
 
-// default active nav
-// @todo does this still work? (make it work)
-app.use(function setDefaultActiveNav(req, res, next) {
-  res.local('activeNav', '');
+// default FC active nav
+app.use(function setDefaultFcActiveNav(req, res, next) {
+  res.local('fcActiveNav', '');
   next();
 })
 
@@ -239,11 +238,13 @@ app.restrictUser = function(req, res, next) {
 };
 
 
-// tmp
-// app.use(function fcLogUrl(req, res, next) {
-//   console.log('--- at url:', req.url);
-//   next();
-// });
+// meta description for flashcards pages
+app.use(function setFcMetaDesc(req, res, next) {
+  res.local('meta_description', 'Spanish Flashcards app by New Leaf Digital, built in node.js. '
+    + 'Create your own flashcards of English-Spanish translations, randomly play all the cards until you remember them, '
+    + 'and look up words with the WordReference API.');
+  next();
+});
 
 
 // Routes

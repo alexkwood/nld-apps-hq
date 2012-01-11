@@ -174,11 +174,10 @@ var User = app.db.model('User', app.UserSchema);
 
 app.use(express.logger('[Auth] :method :url')); 
 
-// @todo are these necessary w/ parentApp??
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.bodyParser());
-app.use(express.methodOverride());
+app.use(express.methodOverride());      // (probably redundant)
 
 app.use(express.cookieParser());
 

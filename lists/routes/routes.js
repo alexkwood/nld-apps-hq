@@ -32,6 +32,13 @@ module.exports = function(app) {
   //   next();
   // });
 
+  // meta description for lists pages
+  app.use(function setListsMetaDesc(req, res, next) {
+    res.local('meta_description', 'Shared Real-Time Lists app by New Leaf Digital, built in node.js. '
+      + 'Create to-do lists, shopping lists, or any other kinds of list, share with friends, and view changes in real time.');
+    next();
+  });
+
 
   // when this is invoked, any new app.use() middleware goes AFTER routes run, too late.
   // (probably redundant to load at all)

@@ -8,8 +8,6 @@ html
       - else
         title New Leaf Digital Apps
     
-    //-@todo: html5 shim. apple-touch-icon (x3). ...
-    
     block scripts
       //- use a local copy when developing locally/offline
       - if (typeof envId != 'undefined' && envId === 'local')
@@ -26,7 +24,6 @@ html
     block icons
       link(rel="shortcut icon", href="/nld_favicon.png", type="image/x-icon")
     
-    //-@todo used in all apps?
     block meta
       - if (meta_description)
         meta(name="description", content="#{meta_description}")
