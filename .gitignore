@@ -15,3 +15,5 @@ config.log
 
 *node_modules/*/build
 *node_modules/*/out
+
+conf.js
