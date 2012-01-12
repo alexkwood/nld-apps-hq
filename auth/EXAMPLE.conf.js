@@ -8,14 +8,14 @@ module.exports = function(envId) {
 
   switch (envId) {
     case 'production':
-      fbAppId = '12345678901234567890';
-      fbAppSecret = '123456789012345678901234567890';
+      conf.fbAppId = '12345678901234567890';
+      conf.fbAppSecret = '123456789012345678901234567890';
       break;
     
     // server
     case 'development': default:
-      fbAppId = '12345678901234567890';
-      fbAppSecret = '123456789012345678901234567890';
+      conf.fbAppId = '12345678901234567890';
+      conf.fbAppSecret = '123456789012345678901234567890';
       break;
   }
 
