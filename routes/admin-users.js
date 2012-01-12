@@ -71,7 +71,7 @@ module.exports = function(app) {
           });
 
           console.log('re-saved ' + countSaved + ' users');
-          req.flash('Re-saved ' + countSaved + ' users');
+          req.flash('info', 'Re-saved ' + countSaved + ' users');
 
           res.redirect('/admin/users');
         });

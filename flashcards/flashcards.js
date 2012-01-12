@@ -50,6 +50,9 @@ try {
       _.extend(app.conf, parentApp.conf);
     }
   }
+
+  // and pass back up
+  parentApp.conf = app.conf;
 }
 catch(e) {
   console.error("Missing conf.js!");

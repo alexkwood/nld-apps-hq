@@ -7,12 +7,10 @@ block mainContent
   block pageTitle
     //-(empty)
 
-  - if (loggedIn)
-      //-div.hello Hello #{username}
-  - else
-      a.btn.large.primary(href="/auth/facebook") login with facebook connect
-
   div#apps-home
+    - if (loggedIn)
+      div.hello Hello #{username}!
+
     div#intro
       include includes/intro.html
     
@@ -25,3 +23,8 @@ block mainContent
           a(href="/flashcards") Spanish Flashcards
           div.desc Make flashcards of English-Spanish translations, 
             | and look up words using the <a href="http://wordreference.com" target="_blank">WordReference</a> API.
+            
+      - if (! loggedIn)
+        a.btn.large.primary(href="/auth/facebook") Login with Facebook Connect
+
+

@@ -47,6 +47,9 @@ if (parentApp) {
 try {
   app.conf = {};    // copy other apps' method if needed
   if (parentApp) if (!_.isUndefined(parentApp.conf)) _.extend(app.conf, parentApp.conf);
+
+  // and pass back up
+  parentApp.conf = app.conf;
 }
 catch(e) {
   console.error("Missing conf.js!");

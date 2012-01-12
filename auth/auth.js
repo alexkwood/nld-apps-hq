@@ -53,8 +53,7 @@ app.mounted(function(parent) {
 
 // configuration
 app.envId = require(libDir + '/env-id')(app);
-app.conf = require('./conf.js')(app.envId);
-
+app.conf = require(app.appRoot + '/conf.js')(app.envId);
 
 // merge w/ parent conf.
 // we want the PARENT to trump the child, since the parent needs to control sessions, etc!
@@ -62,8 +61,9 @@ if (parentApp) {
   if (!_.isUndefined(parentApp.conf)) {
     _.extend(app.conf, parentApp.conf);
   }
+  // and pass back up
+  parentApp.conf = app.conf;
 }
-
 
 // populate DB fresh or from parent
 require(libDir + '/db')(app, parentApp);
@@ -89,7 +89,8 @@ app.UserSchema.plugin(mongooseAuth, {
   everymodule: {
     everyauth: {
       User:function () {
-        return mongoose.model('User');    // attach the _model_
+        //return mongoose.model('User');    // attach the _model_
+        return app.db.model('User');
       }  
     }
   },
@@ -98,7 +99,7 @@ app.UserSchema.plugin(mongooseAuth, {
     everyauth: {
 
       // [refactoring all this as keys in everyauth obj, rather than chained functions]
-      myHostname: app.conf.hostName,  // otherwise oauth doesn't work
+      myHostname: 'http://' + app.conf.hostName,  // otherwise oauth doesn't work
       appId: app.conf.fbAppId,
       appSecret: app.conf.fbAppSecret,
       scope: 'email',   // minimal
@@ -470,6 +471,9 @@ app.get('/logout', function (req, res) {
   if (req.session) {
     req.session.destroy(function () {});
   }
+
+  req.flash('info', 'You are logged out. (Note that this does not de-authorize the app in Facebook.)');
+
   res.redirect('/');
   res.end(); //?
 });

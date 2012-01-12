@@ -20,7 +20,12 @@ body {
 //- @todo use body class instead
 #apps-home {
   /*.row;*/  // (only for nesting)
-  
+ 
+  .hello {
+    font-size: 1.2em;
+    margin: 0 0 1em 25px;
+  }
+
   #intro {
     .columns(11);
     .offset(1);
@@ -86,8 +91,14 @@ header#bar {
   div.user { float: right; }
 }
 
+#outer-wrapper {
+  .container-fluid;
+  .clearfix;
+}
+
 footer {
   .container-fluid;
+  .clearfix;
   font-size: .9em;
   color: #888;
   padding: .5em;
@@ -127,6 +138,22 @@ div.admin {
 
 .topbar .warning {
   color: red;
+}
+
+
+// undo position:absolute, why is that there?
+#outer-wrapper > .sidebar {
+  position: relative;
+  float: right;
+  right: auto;
+  top: auto;
+}
+
+
+div#fb-friends {
+  border-bottom: solid #eee 1px;
+  padding-bottom: 1em;
+  margin-bottom: .5em;
 }
 
 
