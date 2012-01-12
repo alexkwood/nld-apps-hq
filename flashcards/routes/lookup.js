@@ -19,7 +19,7 @@ module.exports = function(app){
   });
 
   app.post('/lookup', app.restrictUser, function(req, res) {
-    var wr = new WordReference(app.config.wordreference_api_key);     // @todo handle missing key
+    var wr = new WordReference(app.conf.wordreference_api_key);     // @todo handle missing key
 
     var body = ''
       , dictionary 
