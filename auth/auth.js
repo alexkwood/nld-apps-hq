@@ -454,12 +454,15 @@ app.use(app.router);  //(redundant now)
 // Routes
 
 // do we need check if parent app has a route at same path, don't load this if so? ... appears not, parent route overrides. (good)
-app.get('/', app.requireUser, function (req, res) {
-  //console.warn('rendering AUTH index');
-  res.render('auth/app', {
-    title: 'Auth',
+// ... now it's not overriding anymore. so restrict.
+if (! parentApp) {
+  app.get('/', app.requireUser, function (req, res) {
+    //console.warn('rendering AUTH index');
+    res.render('auth/app', {
+      pageTitle: 'Auth',
+    });
   });
-});
+}
 
 
 // [don't need to check if logged in to logout]
@@ -486,6 +489,7 @@ app.get('/login', function (req, res) {
   }
   else {
     res.render('auth/login', {
+      pageTitle: 'Login'
     });
   }
 });
