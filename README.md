@@ -2,6 +2,7 @@
 Built in a node.js+mongoDB stack by freelance web developer Ben Buckman
 
 **Hosted at [apps.newleafdigital.com](http://apps.newleafdigital.com).**
+
 Code on GitHub: [nld-apps-hq](https://github.com/newleafdigital/nld-apps-hq)
 
 
@@ -10,6 +11,13 @@ Code on GitHub: [nld-apps-hq](https://github.com/newleafdigital/nld-apps-hq)
 Ben Buckman is the founder of [New Leaf Digital](http://newleafdigital.com), a development shop specializing in the [Drupal](http://drupal.org) CMS/framework and now [Node.js](http://nodejs.org).
 
 If you are looking for Node.js work, please [contact us](http://newleafdigital.com/contact).
+
+
+# The Apps
+
+- **Spanish Flashcards**: Create flashcards of English-Spanish word translations. Randomly play your flashcards until you get them all right. Look up new words with the WordReference API.
+
+- **Interactive Lists**: Create to-do lists, shopping lists, or any other kinds of list. Share your lists with your friends. As you add and remove items from the list, everyone else sees it immediately in real-time.
 
 
 # Evolution of the apps
@@ -24,12 +32,15 @@ To bring the 4 apps (primary/HQ, auth, flashcards, lists) together, there were a
 Along the way I refactored constantly and hit brick walls dozens of times. I rebuilt Lists to handle multiple users and shared lists, added [Bootstrap](http://twitter.github.com/bootstrap/) for aesthetics, tied everything to auth, and refactored all the [Jade](https://github.com/visionmedia/jade) views to share a common layout.
 
 
-(Thanks to Brandon Hall's [boilerplate](https://github.com/brandonhall/node-social-auth-boilerplate) for helping me with that.)
+## Thanks
+
+Thanks to everyone who wrote all the underlying node.js code and modules! It's an incredibly exciting community.
+Special thanks to Brandon Hall's [boilerplate](https://github.com/brandonhall/node-social-auth-boilerplate) for helping me get started with everyauth, which made the rest possible.
 
 
 ## License
 
-I am making this code available as a demonstration of production Node.js code, and for others to learn, but not for others to copy and host as-is. This project is therefore licensed under a [**Attribution-NonCommercial-NoDerivs license**](http://creativecommons.org/licenses/by-nc-nd/3.0). Within the terms of that license, feel free to learn from my code, and suggest improvements.
+I am making this code available as a demonstration of production Node.js code, and for others to learn, but not for others to copy and host as-is. This project is therefore licensed under a [**Creative Commons Attribution-NonCommercial-NoDerivs license**](http://creativecommons.org/licenses/by-nc-nd/3.0). Within the terms of that license, feel free to learn from my code, and suggest improvements.
 
 
 ## Enjoy!

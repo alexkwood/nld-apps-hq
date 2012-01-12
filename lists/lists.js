@@ -119,7 +119,7 @@ var sharedDynamicHelpers = {
   }
   
 , listsAppTitle: function(req, res) {
-    return 'Real-time Shared Lists';
+    return 'Interactive Lists';
   }
 };
 // primaryApp.dynamicHelpers(sharedDynamicHelpers);
