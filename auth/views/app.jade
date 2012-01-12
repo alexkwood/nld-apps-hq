@@ -1,13 +1,14 @@
-h1= title
-p Welcome to #{title}
+extends ../layout
 
-- if (loggedIn)
-    p Hello #{username}
-    div
-      a(href='/logout') Logout  
+block mainContent
+  h1= title
+  p Welcome to #{title}
 
-- else
-    a(href="/auth/facebook") login with facebook
+  - if (loggedIn)
+      p Hello #{username}
+      div
+        a(href='/logout') Logout  
 
-
+  - else
+      a(href="/auth/facebook") login with facebook
 

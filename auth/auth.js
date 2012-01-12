@@ -176,6 +176,9 @@ app.use(express.logger('[Auth] :method :url'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+app.set('view options', { layout: false, compileDebug: true, pretty: true });
+
+
 app.use(express.bodyParser());
 app.use(express.methodOverride());      // (probably redundant)
 
@@ -199,8 +202,8 @@ if (! app.conf.localNoAuth) {
 
 
 // only use local stylesheets etc if no parent.
-// can there be >1 static dir? mounted under?
-if (!parentApp) app.use(express.static(__dirname + '/public'));
+// == not needed ==
+// if (!parentApp) app.use(express.static(__dirname + '/public'));
 
 // view helpers
 // needs to run after modeling/plugin above.
