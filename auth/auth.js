@@ -174,7 +174,7 @@ var User = app.db.model('User', app.UserSchema);
 
 app.use(express.logger('[Auth] :method :url')); 
 
-app.set('views', __dirname + '/views');
+app.set('views', primaryApp.appRoot + '/views');
 app.set('view engine', 'jade');
 app.set('view options', { layout: false, compileDebug: true, pretty: true });
 
