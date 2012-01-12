@@ -23,7 +23,7 @@ append mainContent
               li!= partial('word/word', word)
     
           div#show-wrapper
-            a#show(href='#') Show
+            a#show.btn.large(href='#') Show
 
 
           a.next-correct(href='#{fcBase}/play/#{word._id}/correct') Got it right
@@ -32,7 +32,7 @@ append mainContent
       - if (remaining > 0)
         div.remaining (#{remaining} words left to get right)
 
-      a.next-restart(href='#{fcBase}/play/restart') Restart Game
+      a.next-restart.large(href='#{fcBase}/play/restart') Restart Game
 
 
     div#kb-legend.span3

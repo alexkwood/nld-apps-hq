@@ -39,4 +39,5 @@ block mainContent
   div#share-list
     // FB Send widget
     label Share this list:
-    div.fb-send(data-href="#{fullUrl}", data-font="lucida grande")
+    a.permalink(href=fullUrl) permalink
+    div.fb-send(data-href="#{fullUrl}", data-font="lucida grande", data-colorscheme="dark")

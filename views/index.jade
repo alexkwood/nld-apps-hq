@@ -25,6 +25,10 @@ block mainContent
             | and look up words using the <a href="http://wordreference.com" target="_blank">WordReference</a> API.
             
       - if (! loggedIn)
-        a.btn.large.primary(href="/auth/facebook") Login with Facebook Connect
+        - if (conf.localNoAuth === true)
+          | (local)
+          a(href='/admin/users/loginas') Login As
+        - else
+          a.btn.large.primary(href="/auth/facebook") Login with Facebook Connect
 
 

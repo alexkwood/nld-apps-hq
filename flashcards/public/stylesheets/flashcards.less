@@ -194,26 +194,10 @@ body.app-flashcards {
 
     div#show-wrapper {
       margin: 2em 0 3em 0;
-      //float: left;
-      //clear: both;
       .clearfix;
-      //width: 100%;
     }
     a#show {
-      //display: block;
-      //float: left;
       .clearfix;
-
-      font-size: 2em;
-    
-      border: solid #ccc 4px;
-      .rounded-corners(20px);
-
-      background: #111;
-      color: #fff;
-    
-      padding: 10px 40px;
-      text-decoration: none;
     }
   
     div.remaining {
@@ -224,7 +208,7 @@ body.app-flashcards {
       color: #666;
     }
     
-    a.next-correct, a.next-incorrect {
+    a.next-correct, a.next-incorrect, a.next-restart {
       display: block;
       float: left;
       font-size: 1.5em;
@@ -232,25 +216,18 @@ body.app-flashcards {
       padding: 30px 100px;
       margin-right: 30px;
       text-decoration: none;
-      .rounded-corners(20px);
+      .rounded-corners(8px);
     }
     a.next-correct {
-      background-color: green;
+      .btn.success;
     }
     a.next-incorrect {
-      background-color: red;
+      .btn.danger;
     }
 
     a.next-restart {
-      .rounded-corners(10px);
-      display: block;
-      float: left;
+      .btn;
       clear: both;
-      margin-top: 2em;
-      background: #000;
-      color: #fff;
-      padding: 10px;
-      text-decoration: none;
     }
 
     div.gameover {
