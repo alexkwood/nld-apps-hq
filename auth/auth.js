@@ -500,11 +500,11 @@ app.get('/admin', app.requireUserCan('admin_users'),
 // WHY AREN'T ANY OF THESE ERROR HANDLERS WORKING???
 
 app.error(function(err, req, res, next) {
-  console.log('*** in auth app.error handler');
+  console.log('*** in auth app.error handler', err);
   res.end('HORRIBLE FAIL.');
 });
 app.use(function(err, req, res, next) {
-  console.log('*** in auth app.error handler');
+  console.log('*** in auth app.use handler', err);
   res.end('HORRIBLE FAIL.');
 });
 
