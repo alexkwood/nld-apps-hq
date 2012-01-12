@@ -17,3 +17,4 @@ config.log
 *node_modules/*/out
 
 conf.js
+forever.sh
