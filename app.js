@@ -263,7 +263,7 @@ auth.use(appErrorHandler);
 
 
 if (! module.parent) {
-  app.listen(app.conf.port);
+  app.listen(app.conf.port, app.conf.hostname);
 
   try {
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

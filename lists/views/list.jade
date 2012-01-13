@@ -31,13 +31,14 @@ block mainContent
     form#new-item
       input#item(type='text', size='60')
       input#add(type='submit', value='Add')
-
-  - if (userIsListCreator)
-    div#delete-list
-      a.delete-list(href='#{listsBase}/list/#{list._id}/delete') Delete this list
       
   div#share-list
     // FB Send widget
     label Share this list:
     a.permalink(href=fullUrl) permalink
     div.fb-send(data-href="#{fullUrl}", data-font="lucida grande", data-colorscheme="dark")
+
+  - if (userIsListCreator)
+    div#delete-list
+      a.delete-list.btn.danger(href='#{listsBase}/list/#{list._id}/delete') Delete this list
+
