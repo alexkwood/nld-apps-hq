@@ -23,7 +23,7 @@ div.group
 
 - if (typeof showWordLinks != 'undefined' && showWordLinks == true)
   div.links
-    a.perma(href='#{fcBase}/word/#{word._id}') link
+    a.perma(href='#{fcBase}/word/#{word._id}') permalink
     - if (fcIsLoggedIn)
       a.edit(href='#{fcBase}/word/#{word._id}/edit') edit
       a.delete(href='#{fcBase}/word/#{word._id}/delete') delete
