@@ -21,8 +21,8 @@ block mainContent
     a(href='/lists') &laquo; Back to lists
 
   div#list-wrapper
-    h2= list.title
-    div.credits Created by #{list._creator.displayName()}
+    h2= currentList.title
+    div.credits Created by #{currentList._creator.displayName()}
     div#list
       div#no-items There are no items in the list.
 
@@ -40,5 +40,5 @@ block mainContent
 
   - if (userIsListCreator)
     div#delete-list
-      a.delete-list.btn.danger(href='#{listsBase}/list/#{list._id}/delete') Delete this list
+      a.delete-list.btn.danger(href='#{listsBase}/list/#{currentList._id}/delete') Delete this list
 

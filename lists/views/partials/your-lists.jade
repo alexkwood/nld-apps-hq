@@ -1,9 +1,16 @@
 h2 Your Lists
 div#lists
-  - if (lists)
+  - if (yourLists && yourLists.length)
     ol
-      - each list in lists
-        li
-          a(href='/lists/list/#{list._id}')= list.title
-          | 
-          span.item-count (#{list.countItems()} items)
+      - each list in yourLists
+        li        
+          a(href='#{listsBase}/list/#{list._id}')
+            - if (typeof currentList != "undefined" && currentList._id && currentList._id.toString() == list._id.toString())
+              strong= list.title
+            - else
+              span= list.title
+              | 
+              span.item-count (#{list.countItems()} items)
+            
+  - else
+    div You don't have any lists yet.

@@ -3,9 +3,12 @@
 
 module.exports = function(app) {
 
-  require('express-mongoose');
+  // require('express-mongoose');          // NOT USING ANYMORE
+  
   var List = app.db.model('List')
-    , _ = require('underscore');
+    , _ = require('underscore')
+    , async = require('async')    // instead of express-mongoose
+    ;
 
 
   // middleware to ensure user is the creator of a list
@@ -45,6 +48,17 @@ module.exports = function(app) {
   app.use(app.router);
   
 
+  // gets redirected here from restrictUser
+  app.get('/login', function(req, res){
+    res.render('lists/login', {
+      locals: {
+        title : 'Login'
+      }
+    });
+  });
+  
+
+
   // given a :listId object in a route, load the list into request
   app.param('listId', app.restrictUser, function(req, res, next, listId) {
     req.list = List.findById(listId)
@@ -76,18 +90,45 @@ module.exports = function(app) {
     });
   });
   
+  
+  // HELPER: load user's lists (own and guest)
+  // needed for /list/:listId and /, consolidating.
+  // previously loaded w/ express-mongoose in each route.
+  function getAllUserLists(req, res, next) {
+    console.log(' -- in getAllUserLists --');
+    async.series([
+      function(seriesNext) {
+        List.getListsCreatedByUser(req.user._id, (req.list ? req.list._id : null), function(error, yourLists) {
+          res.local('yourLists', error ? [] : yourLists);
+          seriesNext();
+        });
+      },
+      function(seriesNext) {
+        List.getListsVisitedByUser(req.user._id, (req.list ? req.list._id : null), function(error, guestLists) {
+          res.local('guestLists', error ? [] : guestLists);
+          seriesNext();
+        });
+      },
+      function(seriesNext) {
+        next();
+      }
+    ]); //series    
+  }
+  
 
   // view an individual list
-  app.get('/list/:listId', app.restrictUser, function(req, res) {
+  app.get('/list/:listId', app.restrictUser, getAllUserLists, function(req, res) {
     res.render('lists/list', {
       // title: req.list.title,
-      lists: List.getListsCreatedByUser(req.user._id),
-      guestLists: List.getListsVisitedByUser(req.user._id),
       
-      list: req.list,
+      // [previous from express-mongoose -- now using middleware above]
+      //yourLists: List.getListsCreatedByUser(req.user._id, req.list._id),
+      //guestLists: List.getListsVisitedByUser(req.user._id, req.list._id),
+
+      currentList: req.list,
       userIsListCreator: req.list.isCreator(req.user._id)
     });
-  });
+  }); //.get
 
 
   // delete an individual list
@@ -99,16 +140,6 @@ module.exports = function(app) {
         // @todo allow html (e.g. <em>) to work in req.flash
       
       res.redirect('/');
-    });
-  });
-  
-  
-  // gets redirected here from restrictUser
-  app.get('/login', function(req, res){
-    res.render('lists/login', {
-      locals: {
-        title : 'Login'
-      }
     });
   });
   
@@ -141,10 +172,11 @@ module.exports = function(app) {
   
   
   // list of lists
-  app.get('/', app.restrictUser, function(req, res){
+  app.get('/', app.restrictUser, getAllUserLists, function(req, res){
     res.render('lists/index', {
-      lists: List.getListsCreatedByUser(req.user._id),
-      guestLists: List.getListsVisitedByUser(req.user._id)
+      // [see comment above]
+      // yourLists: List.getListsCreatedByUser(req.user._id, null),
+      // guestLists: List.getListsVisitedByUser(req.user._id, null)
     });
   });
   
