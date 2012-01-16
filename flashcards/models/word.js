@@ -129,6 +129,14 @@ module.exports.getWords = function(db, query, callback) {
   });
 };
 
+
+module.exports.countWords = function(db, query, callback) {
+  db.getCollection(collectionName, function(error, collection) {
+    if (error) return callback(error);
+    collection.find(query).count(callback);
+  });
+};
+
 // -- should this be part of Word object or separate export?
 module.exports.remove = function(db, id, callback) {
   db.remove(collectionName, id, callback);

@@ -1,6 +1,10 @@
 extends ../flashcards-layout
 
 append mainContent
-  ul.words
-    - each word in words
-      li!= partial('word', word)
+  - if (userWordCount == 0)
+    div.no-words You don't have any words yet!
+    
+  - else
+      ul.words
+        - each word in words
+          li!= partial('word', word)

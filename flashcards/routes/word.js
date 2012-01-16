@@ -42,6 +42,7 @@ module.exports = function(app){
     });
   };
   
+  
 
   // process :word param when passed
   // [how does connectDb middleware work here?]
@@ -80,7 +81,8 @@ module.exports = function(app){
   
 
 
-  app.get('/word/list', app.restrictUser, function(req, res) {    
+  // List of user's words
+  app.get('/word/list', app.restrictUser, app.countWordsByCurrentUser, function(req, res) {    
     var query = {};
     var pageTitle = 'List';
     
@@ -96,7 +98,7 @@ module.exports = function(app){
     WordHandler.getWords(app.legacyDB, query, function(error, words) {
       if (error) {
         req.flash('error', "Error: " + util.inspect(error));
-        res.redirect('back');
+        return res.redirect('back');
       }
       else {
         // console.log('words:', words);
