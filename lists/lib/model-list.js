@@ -33,29 +33,74 @@ var List = {
 var ListSchema = module.exports = new Schema(List);
 
 
-// get all lists for a query [helper, for express-mongoose]
+// get all lists for a query (helper)
 ListSchema.statics.getLists = function(query, callback) {
-  var promise = new Promise;
-  if (callback) promise.addBack(callback);
-
-  this.find(query, promise.resolve.bind(promise));
-  return promise;
+  // == for express-mongoose ==
+  // var promise = new Promise;
+  // if (callback) promise.addBack(callback);
+  // this.find(query, promise.resolve.bind(promise));
+  // return promise;
+  
+  // == regular (using async instead) ==
+  // @see https://github.com/LearnBoost/express-mongoose/issues/7
+  this.find(query, callback);
 };
 
 // get lists created by a given user (ID)
 // (for express-mongoose)
-ListSchema.statics.getListsCreatedByUser = function(userId, callback) {
-  return this.getLists({ _creator: userId }, callback);
+ListSchema.statics.getListsCreatedByUser = function(userId, listIdAtTop, callback) {
+  return this.getLists(     // [don't really need return, not using promises anymore]
+    { 
+      _creator: userId
+    },
+    function(error, lists) {
+      // if 'listIdAtTop' specified, find & move that ID to the top
+      if (!error && lists && listIdAtTop) lists = sortListsWithTopId(lists, listIdAtTop);
+  
+      if (typeof callback == 'function') callback(error, lists);
+      else console.warn('getListsCreatedByUser has no callback');
+    }
+  );
 }
 
 // get lists where a given user (ID) is a guest but not the author
 // (for express-mongoose)
-ListSchema.statics.getListsVisitedByUser = function(userId, callback) {
+ListSchema.statics.getListsVisitedByUser = function(userId, listIdAtTop, callback) {
   return this.getLists({
-    _creator: { '$ne': userId },
-    _guests: userId     // (no $has operator, just equals)
-  }, callback);
+      _creator: { '$ne': userId },
+      _guests: userId     // (no $has operator, just equals)
+    }, 
+    function(error, lists) {
+      // if 'listIdAtTop' specified, find & move that ID to the top
+      if (!error && lists && listIdAtTop) lists = sortListsWithTopId(lists, listIdAtTop);
+    
+      if (typeof callback == 'function') callback(error, lists);
+      else console.warn('getListsVisitedByUser has no callback');
+    }
+  );
 }
+
+
+
+// helper function: given an array of Lists, sort them so a particular ID is at the top
+// (sync)
+var sortListsWithTopId = function(lists, listIdAtTop) {
+  if (lists.length && listIdAtTop) {
+    // console.log("** Need to sort lists", lists, "with ", listIdAtTop, " at the top.", typeof lists);
+    
+    // return sort -1 to top item, otherwise same ind
+    lists = _.sortBy(lists, function(list, ind) {
+      if (list._id && list._id.toString() == listIdAtTop.toString()) {
+        // console.log('** found top item!', list._id);
+        return -1;
+      }
+      else return ind;
+    });
+    // console.log('sorted?', lists);
+  }  
+  return lists;
+}
+
 
 
 ListSchema.methods.countItems = function() {

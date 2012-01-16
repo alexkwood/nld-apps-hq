@@ -6,8 +6,8 @@ extends ../layout
 
 
 block headTitle
-  - if (typeof list != "undefined")
-    title #{list.title} - #{listsAppTitle}
+  - if (typeof currentList != "undefined")
+    title #{currentList.title} - #{listsAppTitle}
   - else
     title= listsAppTitle
 
@@ -25,13 +25,13 @@ append scripts
   script(src="#{listsBase}/javascripts/lists-client.js")
 
   // pass current list Id to JS (uses events as hooks)
-  - if (typeof list != "undefined")
+  - if (typeof currentList != "undefined")
     script
       // catch the loaded client app
       (function($){
         $(window).on('loaded-app', function(event, app){
           // pass back an event w/ list ID (initializes socket)
-          $(window).trigger('watch-list', '#{list._id}').trigger('set-username', '#{username}');
+          $(window).trigger('watch-list', '#{currentList._id}').trigger('set-username', '#{username}');
         })
       })(jQuery);
 

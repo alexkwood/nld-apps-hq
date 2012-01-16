@@ -36,6 +36,8 @@ module.exports = function(app){
     next();
   });
 
+
+
   // mark a word as successfully played.
   app.get('/play/:wordId/correct', app.restrictUser, function(req, res) {
     app.logPlayedWord(req, req.wordId);
@@ -45,11 +47,13 @@ module.exports = function(app){
   });
   
   
+  
   // doesn't do anything special
   app.get('/play/:wordId/incorrect', app.restrictUser, function(req, res) {
     // onto next word
     res.redirect('/play');
   });
+
 
   
   // reset the played words
@@ -62,8 +66,28 @@ module.exports = function(app){
   });
 
 
+
   // play the next word
-  app.get('/play', app.restrictUser, function(req, res) {
+  app.get('/play', app.restrictUser, app.countWordsByCurrentUser, function(req, res) {
+
+    // defaults
+    res.locals({
+      pageTitle: 'Play',
+      showWordLinks: true,
+      gameOver: false,
+      fcActiveNav: 'play',
+      question: null,
+      langCode: null,
+      language: null,
+      word: null,
+    });
+
+    // if the user has no words, don't lookup or show 'game over'
+    if (res._locals.userWordCount === 0) {
+      return res.render('flashcards/play', {
+        // remaining: 0,
+      });
+    }
 
     // word shown can be in either language
     var langCodes = _.keys(app.wordLanguages);    
@@ -71,7 +95,7 @@ module.exports = function(app){
 
     // get a random modeled word, skip words already played successfully.
 
-    var query = { 
+    var query = {
       '_id' : { '$nin' : app.getPlayedWords(req) },   // (objIDs)
       'user': app.username(req)
     };
@@ -81,33 +105,25 @@ module.exports = function(app){
         req.flash('error', "Error: " + util.inspect(error));
 
         // console.log('at ', req.url, 'redirect to /word/list');
-        res.redirect('/word/list');
+        return res.redirect('/word/list');
       }
       else if (count === 0) {    // out of words!
-        res.render('flashcards/play', {
-          pageTitle: 'Play',
+        return res.render('flashcards/play', {
           gameOver: true,
-          showWordLinks: true,
-          question: null,
-          langCode: null,
-          language: null,
-          word: null,
           remaining: count,
-          fcActiveNav: 'play'
         });
       }
-      else {
+      else {    // still has words to play
         // console.log('random word:', word);
         
         if (_.isUndefined(word['word_' + lang])) {
           req.flash('error', "Error: Missing " + app.wordLanguages[lang] + " word.");
 
           // console.log('at ', req.url, 'redirect to /word/list');
-          res.redirect('/word/list');
+          return res.redirect('/word/list');
         }
         
-        res.render('flashcards/play', {
-          pageTitle: 'Play',
+        return res.render('flashcards/play', {
           question: word['word_' + lang],     // shown word
           langCode: lang,
           language: app.wordLanguages[lang].toLowerCase(),
@@ -115,7 +131,6 @@ module.exports = function(app){
           gameOver: false,
           showWordLinks: true, //false
           remaining: count,
-          fcActiveNav: 'play'
         });
       }
     }); //getRandom

@@ -244,6 +244,24 @@ app.restrictUser = function(req, res, next) {
 };
 
 
+// route middleware to count a user's total flashcards.
+// make sure to run after app.restrictUser.
+app.countWordsByCurrentUser = function(req, res, next) {
+  var WordHandler = require('./models/word.js');
+  WordHandler.countWords(
+    app.legacyDB,
+    { 'user': app.username(req) },
+    function(error, count) {
+      if (!error) {
+        res.local('userWordCount', count);
+      }
+      next(error);    // ??
+    }
+  );
+};
+
+
+
 // meta description for flashcards pages
 app.use(function setFcMetaDesc(req, res, next) {
   res.local('meta_description', 'Spanish Flashcards app by New Leaf Digital, built in node.js. '
