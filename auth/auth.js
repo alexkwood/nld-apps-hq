@@ -282,10 +282,20 @@ app.loadUser = function loadUser(req, res, next) {
         if (!err && user) {
           req.user = user;
           // console.log('user in session found in DB, set to req.user');  //: ', req.user);
+
           
-          // res.local('user', user);
-          
-          // console.log('CONTINUE from loadUser (1)');
+          // this seems like a decent global place to check redirectAfterLogin
+          if (req.session.redirectAfterLogin) {
+            var redirectTo = req.session.redirectAfterLogin;
+            console.log("REDIRECTING AFTER LOGIN TO ", redirectTo);
+            
+            // clear from session so on next request it doesn't repeat
+            delete req.session.redirectAfterLogin;
+            
+            return res.redirect(redirectTo);
+          }
+          //else console.log("no redirectAfterLogin");
+
           next();
         }
         else {
@@ -307,15 +317,11 @@ app.loadUser = function loadUser(req, res, next) {
 if (parentApp) parentApp.loadUser = app.loadUser;
 
 
+
 // make sure loadUser runs on every request
 // if mounted, set only on parent app, otherwise dup
-if (parentApp) {
-  //console.warn('APPLYING loadUser middleware to parent app.');
-  parentApp.use( parentApp.loadUser );
-  //console.log('parent stack after:', parentApp.stack);
-}
-app.use( app.loadUser ); 
-//console.warn('APPLIED loadUser middleware to auth app.');
+if (parentApp) parentApp.use( parentApp.loadUser );
+app.use( app.loadUser );   // is this necessary?
 
 
 
@@ -344,9 +350,13 @@ app.requireUser = function requireUser(req, res, next) {
   if (app.isUserLoggedIn(req)) return next();
   
   console.log('no req.user._id found, go to /login');
-  // console.log('session:', req.session);
+
+  // remember the point at which user needed to login, to redirect after.
+  req.session.redirectAfterLogin = req.originalUrl ? req.originalUrl : req.url;
+  console.log('Storing login point: ', req.session.redirectAfterLogin);
+  
+  
   return res.redirect('/login');
-  // res.end() //?
 };
 if (parentApp) parentApp.requireUser = app.requireUser;
 

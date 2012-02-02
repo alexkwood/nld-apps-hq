@@ -43,7 +43,7 @@ module.exports = function(app) {
   );
 
 
-  // for local test mode
+  // for local test mode, without everyauth/FB
   app.get('/admin/users/loginas/:loginas_uid?',
     function inLocalTestMode(req, res, next) {
       if (app.conf.localNoAuth) return next();
@@ -57,10 +57,16 @@ module.exports = function(app) {
       if (!_.isEmpty(uid)) {
         console.log('requested to login as:', uid);
 
+        // keep some session vars
+        var redirectAfterLogin = (req.session && req.session.redirectAfterLogin) ? req.session.redirectAfterLogin : null;
+
         // start fresh session
         req.session.regenerate(function () {
           // hack in, not sure what else goes in 'auth' here
           req.session.auth = { userId: uid };  // picked up by loadUser()
+          
+          if (redirectAfterLogin) req.session.redirectAfterLogin = redirectAfterLogin;
+          
           console.log('clean session w/ userId? ', req.session);
           return res.redirect('/');
         });

@@ -238,7 +238,13 @@ app.restrictUser = function(req, res, next) {
   if (app.isLoggedIn(req)) {
     return next();
   }
-  
+ 
+  // remember the point at which user needed to login, to redirect after.
+  // (duplicated from auth.requireUser)
+  req.session.redirectAfterLogin = req.originalUrl ? req.originalUrl : req.url;
+  console.log('Storing flashcards login point: ', req.session.redirectAfterLogin);
+
+
   req.flash('error', "Please login to do that.");
   res.redirect('/');
 };

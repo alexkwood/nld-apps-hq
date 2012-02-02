@@ -134,7 +134,12 @@ app.restrictUser = function(req, res, next) {
   if (req.url !== '/') {    // (message on inside ops but not home)
     req.flash('error', "Please login to do that.");
   }
-  res.redirect('/login');     // @todo go to root /login not app
+
+  // delegate
+  if (parentApp) parentApp.requireUser(req, res, next);
+  else res.end("Missing parent app");
+
+  //res.redirect('/login');     // @todo go to root /login not app
 };
 
 
