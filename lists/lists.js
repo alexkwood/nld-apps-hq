@@ -128,6 +128,7 @@ app.dynamicHelpers(sharedDynamicHelpers);   // necessary w/ switch to inherited 
 
 // route middleware to authenticate user.
 app.restrictUser = function(req, res, next) {
+  console.log('-- in lists.restrictUser');
   if (parentApp && parentApp.isUserLoggedIn(req)) return next();
 
   if (req.url !== '/') {    // (message on inside ops but not home)

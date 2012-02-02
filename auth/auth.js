@@ -342,7 +342,7 @@ if (parentApp) parentApp.isUserLoggedIn = app.isUserLoggedIn;
 // for pages that need login. split from loadUser(), run after.
 app.requireUser = function requireUser(req, res, next) {
   if (app.isUserLoggedIn(req)) return next();
- 
+  
   console.log('no req.user._id found, go to /login');
   // console.log('session:', req.session);
   return res.redirect('/login');
@@ -489,7 +489,7 @@ app.get('/login', function (req, res) {
 
   // LOCAL TESTING MODE - login as any user
   if (app.conf.localNoAuth) {
-    res.redirect('/admin/users/loginas');
+    res.redirect('/admin/users');
   }
   else {
     res.render('auth/login', {

@@ -11,10 +11,16 @@ module.exports = function(app) {
   var User = app.db.model('User');
   
   
-  app.get('/admin/users', app.requireUserCan('admin_users'),
+  app.get('/admin/users',
+    function(req, res, next) {
+      if (app.conf.localNoAuth && app.conf.localNoAuth === true) {
+        console.log('** special exception for localNoAuth at admin/users');
+        return next();
+      }
+      app.requireUserCan('admin_users')(req, res, next);
+    },  
   
-    function(req, res) {
-      
+    function(req, res) {      
       async.series([
         function(next) {
           User.getUsersExtended(function(error, users) {
@@ -37,7 +43,7 @@ module.exports = function(app) {
   );
 
 
-
+  // for local test mode
   app.get('/admin/users/loginas/:loginas_uid?',
     function inLocalTestMode(req, res, next) {
       if (app.conf.localNoAuth) return next();

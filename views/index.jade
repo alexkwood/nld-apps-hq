@@ -27,7 +27,7 @@ block mainContent
       - if (! loggedIn)
         - if (conf.localNoAuth === true)
           | (local)
-          a(href='/admin/users/loginas') Login As
+          a(href='/admin/users') Login As
         - else
           a.btn.large.primary(href="/auth/facebook") Login with Facebook Connect
 
