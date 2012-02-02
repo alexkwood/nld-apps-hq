@@ -13,5 +13,5 @@
     "jade" : "> 0",
     "pkginfo" : "> 0",
   },
-  "engine": "node 0.6.5"
+  "engines": { "node": ">= 0.6.5" }
 }
