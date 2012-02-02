@@ -3,28 +3,41 @@
 // ==== USING SIMPLE TEMPLATES ====
 module.exports = function(app) {
 
-  //var mongoose = require('mongoose');
-
   var _ = require('underscore');
   
-  require('express-mongoose');
+  // require('express-mongoose');   // - not using anymore
+  var async = require('async');     // - using instead
   
-  //console.log('model in db?', app.db.model('User'));
   var User = app.db.model('User');
-  //console.log('model in mongoose?', mongoose.model('User'));
-  //var User = mongoose.model('User', app.UserSchema);
-  //console.log('modeled:', User);
-
+  
+  
   app.get('/admin/users', app.requireUserCan('admin_users'),
-      function(req, res) {
-        res.render('admin/users', {
-          title: 'User Admin',
-          users: User.getUsers()
-        });
-      }
+  
+    function(req, res) {
+      
+      async.series([
+        function(next) {
+          User.getUsersExtended(function(error, users) {
+            if (error) return res.end("[Error] " + error);     // @todo handle more gracefully
+            
+            res.local('users', users);
+            next();
+          });
+        },
+        
+        function(next) {
+          res.render('admin/users', {
+            title: 'User Admin'
+          });
+
+          // next();   // unnecessary
+        }
+      ]);
+    }
   );
 
-  ///////  
+
+
   app.get('/admin/users/loginas/:loginas_uid?',
     function inLocalTestMode(req, res, next) {
       if (app.conf.localNoAuth) return next();
@@ -32,7 +45,6 @@ module.exports = function(app) {
     },
     
     function(req, res) {
-      
       // login as user?
       // (was in app.param but want to validate auth first!)
       var uid = req.param('loginas_uid');
@@ -44,28 +56,26 @@ module.exports = function(app) {
           // hack in, not sure what else goes in 'auth' here
           req.session.auth = { userId: uid };  // picked up by loadUser()
           console.log('clean session w/ userId? ', req.session);
-          return res.redirect('/');     
+          return res.redirect('/');
         });
       }
-      
-      // same page as admin/users, w/ toggles in view
-      res.render('admin/users', {
-        title: 'Login As User',
-        users: User.getUsers()
-      });
+      else {
+        res.redirect('/admin/users');
+      }
     }
   );
-  ///////
   
 
+  /*
   // for schema changes
   app.get('/admin/users/resave', app.requireUserCan('admin_users'),
       function(req, res) {
-        User.getUsers(function(err, users) {
+        
+        User.getUsers(function(error, users) {
           var countSaved = 0;
           
           users.forEach(function(user) {
-            console.log('saving user ', user._id);
+            // console.log('saving user ', user._id);
             user.save();
             countSaved++;
           });
@@ -78,7 +88,9 @@ module.exports = function(app) {
 
       }
   );
+  */
 };
+
 
 /*
 // === USING MONGOOSE-ADMIN (doesn't work very well, and very complex) ===

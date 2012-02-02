@@ -53,14 +53,101 @@ UserSchema.methods.displayName = function() {
 };
 
 
-// for express-mongoose
+// get all users.
+// return a query object. @see https://github.com/LearnBoost/express-mongoose/issues/7#issuecomment-3519023
 UserSchema.statics.getUsers = function(callback) {
-  var promise = new Promise;
-  if (callback) promise.addBack(callback);
-
-  this.find({}, promise.resolve.bind(promise));
-  return promise;
+  return this.find({}, callback);
 };
+
+
+// get users + other async info
+UserSchema.statics.getUsersExtended = function(callback) {
+  var schema = this
+    , series;
+
+  async.series([
+    function _getUsers(next) {
+      series = this;
+      schema.getUsers(function(error, users) {
+        series.users = users;
+        next(error);
+      });
+    },
+    
+    function _addAssets(next) {
+      async.forEach(this.users,
+        function(user, nextUser) {
+          user.countUserAssets(function(error, assets) {
+            // [confirmed test: this will NOT save to DB if user obj is saved. mongoose only saves modeled elements. (good)]
+            user.assets = assets;
+            nextUser(error);
+          });
+        },
+        next
+      );
+    }
+  ],
+  
+  function _done(error) {
+    callback(error, this.users);
+  }
+  );
+};
+  
+
+
+// count a user's assets in other apps.
+UserSchema.methods.countUserAssets = function(callback) {
+
+  // need to reach up to parent app for global app.db
+  // @todo this seems very sloppy, make it smoother
+  if (!module.parent || !module.parent.exports || !module.parent.exports.db) {
+    return callback(new Error("Missing parent DB reference"));
+  }
+
+  var user = this
+    , db = module.parent.exports.db;
+  
+  // get the List mongoose schema
+  var List = db.model('List');
+  if (! List) return callback(new Error("Missing List model"));
+
+  
+  async.parallel({      // [order doesn't matter]
+  
+    'lists_created' : function _countCreatedLists(next) {
+      List.countListsCreatedByUser(user._id, next);
+    },
+    
+    'lists_visited': function _countVisitedLists(next) {
+      List.countListsVisitedByUser(user._id, next);
+    },
+    
+    'flashcards': function _countFlashcards(next) {
+      
+      // flashcards model is primitive, not mongoose. THIS IS VERY MESSY!!!
+      // this is duplicating a DB handler that already exists in flashcards.js,
+      // but there's no clean way coded to reach across the apps.
+      try {
+        var LegacyMongoHandler = require('../../flashcards/db/mongodb')
+          , flashcardsDB = new LegacyMongoHandler(db.connection.db) 
+          , FlashcardsModel = require('../../flashcards/models/word');
+      }
+      catch(e) {
+        return next(new Error("Missing Flashcards model"));
+      }      
+      
+      // user here is the system_name, not _id
+      FlashcardsModel.countWords(flashcardsDB, { 'user': user.system_name }, next);
+    }
+    
+  },
+  function(error, assets) {
+    callback(error, assets);
+  }
+  );
+};
+
 
 
 // set system name when saving

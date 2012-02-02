@@ -210,9 +210,9 @@ app.isLoggedIn = function(req) {
     if (parentApp.isUserLoggedIn(req)) {
       return true;
     }
-    else {
-      console.warn('not logged in for isLoggedIn');
-    }
+    //else {
+      //console.warn('not logged in for isLoggedIn');
+    //}
   }
   else {
     console.warn('No parent app for isLoggedIn!!');

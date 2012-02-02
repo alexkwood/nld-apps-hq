@@ -34,51 +34,49 @@ var ListSchema = module.exports = new Schema(List);
 
 
 // get all lists for a query (helper)
-ListSchema.statics.getLists = function(query, callback) {
-  // == for express-mongoose ==
-  // var promise = new Promise;
-  // if (callback) promise.addBack(callback);
-  // this.find(query, promise.resolve.bind(promise));
-  // return promise;
-  
-  // == regular (using async instead) ==
-  // @see https://github.com/LearnBoost/express-mongoose/issues/7
-  this.find(query, callback);
+// return the query obj and/or run callback
+ListSchema.statics.getLists = function(query, listIdAtTop, callback) {
+  return this.find(query, 
+    function(error, lists) {
+      // if 'listIdAtTop' specified, find & move that ID to the top
+      if (!error && lists && listIdAtTop) lists = sortListsWithTopId(lists, listIdAtTop);
+
+      if (typeof callback == 'function') callback(error, lists);
+      // else console.warn('getLists has no callback');
+    }
+  );
 };
 
+
 // get lists created by a given user (ID)
-// (for express-mongoose)
+// return the query obj and/or run callback
 ListSchema.statics.getListsCreatedByUser = function(userId, listIdAtTop, callback) {
-  return this.getLists(     // [don't really need return, not using promises anymore]
-    { 
-      _creator: userId
-    },
-    function(error, lists) {
-      // if 'listIdAtTop' specified, find & move that ID to the top
-      if (!error && lists && listIdAtTop) lists = sortListsWithTopId(lists, listIdAtTop);
-  
-      if (typeof callback == 'function') callback(error, lists);
-      else console.warn('getListsCreatedByUser has no callback');
-    }
-  );
-}
+  var query = { _creator: userId };
+  return this.getLists(query, listIdAtTop, callback);
+};
 
 // get lists where a given user (ID) is a guest but not the author
-// (for express-mongoose)
+// return the query obj and/or run callback
 ListSchema.statics.getListsVisitedByUser = function(userId, listIdAtTop, callback) {
-  return this.getLists({
-      _creator: { '$ne': userId },
-      _guests: userId     // (no $has operator, just equals)
-    }, 
-    function(error, lists) {
-      // if 'listIdAtTop' specified, find & move that ID to the top
-      if (!error && lists && listIdAtTop) lists = sortListsWithTopId(lists, listIdAtTop);
-    
-      if (typeof callback == 'function') callback(error, lists);
-      else console.warn('getListsVisitedByUser has no callback');
-    }
-  );
-}
+  var query = {
+    _creator: { '$ne': userId },
+    _guests: userId     // (no $has operator, just equals)
+  };
+  return this.getLists(query, listIdAtTop, callback);
+};
+
+
+// counts: for admin/users
+// uses query obj returned from getLists
+ListSchema.statics.countListsCreatedByUser = function(userId, callback) {
+  var query = this.getListsCreatedByUser(userId, null);
+  return query.count(callback);
+};
+
+ListSchema.statics.countListsVisitedByUser = function(userId, callback) {
+  var query = this.getListsVisitedByUser(userId, null);
+  return query.count(callback);
+};
 
 
 
@@ -214,4 +212,4 @@ ListSchema.methods.isCreatorOrGuest = function(userId) {
     // console.log("Mismatch", guest, '('+typeof guest+')', userId, '('+typeof userId+')');
     return false; //(iterator)
   });
-}
+};

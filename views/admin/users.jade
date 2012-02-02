@@ -22,24 +22,37 @@ block mainContent
         th System Name
         th Role
         th Joined
+        th Assets
       
         - if (localNoAuth)
           th Login As
       
       - var count = 0
-      - each user in users
-        tr
-          td.count!= ++count
-          td.id!= user._id
-          td.name!= user.displayName()
-          td.system_name!= user.system_name
-          td.role!= user.role
-          td.joined!= user.joined
+      - if (typeof users != "undefined" && typeof users.length != "undefined")
+        - each user in users
+          tr
+            td.count!= ++count
+            td.id!= user._id
+            td.name!= user.displayName()
+            td.system_name!= user.system_name
+            td.role!= user.role
+            td.joined!= user.joined
+          
+            td.assets
+              - if (typeof user.assets == 'undefined')
+                | [Missing]
+              - else
+                ul
+                  - each count,asset in user.assets
+                    li #{asset}: #{count}
         
-          - if (localNoAuth)
-            td.loginAs
-              a(href="/admin/users/loginas/#{user._id}") Login As
+            - if (localNoAuth)
+              td.loginAs
+                a(href="/admin/users/loginas/#{user._id}") Login As
+                
+      - else
+        div.error Missing users!
 
 
-    div.admin-links
-      a(href="/admin/users/resave") Re-save users 
+    //-div.admin-links
+    //-  a(href="/admin/users/resave") Re-save users 
