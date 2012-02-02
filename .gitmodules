@@ -6,3 +6,6 @@
  	url = git@github.com:newleafdigital/mongoose-admin.git
 	branch = refactor	 
 
+[submodule "logtail"]
+	path = logtail
+	url = git://github.com/newleafdigital/logtail-nodejs.git
