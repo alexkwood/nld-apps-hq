@@ -11,15 +11,33 @@ module.exports = function(app) {
   var User = app.db.model('User');
   
   
-  app.get('/admin/users',
-    function(req, res, next) {
-      if (app.conf.localNoAuth && app.conf.localNoAuth === true) {
+  // use different middleware depending on mode
+/*  var adminUserRequireUser = function() {
+    if (app.conf.localNoAuth && app.conf.localNoAuth === true) {
+      return function(req, res, next) {
         console.log('** special exception for localNoAuth at admin/users');
         return next();
-      }
-      app.requireUserCan('admin_users')(req, res, next);
-    },  
+      };
+    }
+    else {
+      return app.requireUserCan('admin_users');   // array of middleware
+    }
+  }();  */
   
+  
+  app.get('/admin/users',
+
+    // use different middleware depending on mode
+    function _specialMiddleware() {
+      if (app.conf.localNoAuth && app.conf.localNoAuth === true) {
+        return function(req, res, next) {
+          console.log('** special exception for localNoAuth at admin/users');
+          return next();
+        };
+      }
+      return app.requireUserCan('admin_users');   // array of middleware
+    }(),
+    
     function(req, res) {      
       async.series([
         function(next) {
