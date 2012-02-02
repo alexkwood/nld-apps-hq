@@ -55,7 +55,7 @@ module.exports = function(app){
         // add links to definitions
         _.forEach(parsed.definitions, function(definition){
           var type = _.isUndefined(definition.type) ? definition.POS : definition.type;  // use converted/consistent type codes
-          definition.addWordUrl = '/word/add?'
+          definition.addWordUrl = app.route + '/word/add?'
             + (dictionary == 'esen' ? 
                 'word_es=' + word + '&word_en=' + definition.term + '&type=' + type + '&'
               : 'word_en=' + word + '&word_es=' + definition.term + '&type=' + type + '&'
