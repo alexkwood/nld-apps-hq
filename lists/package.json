@@ -4,8 +4,8 @@
   "description": "Socket-based interactive shopping list app",
   "author": "Ben Buckman - NewLeafDigital.com",
   "dependencies": {
-    "socket.io": ">= 0",
-    "socket.io-client": ">= 0",
+    "socket.io": ">= 0.9.5",
+    "socket.io-client": ">= 0.9.5",
   },
-  "engine": "node 0.6.5"
+  "engines": { "node": ">= 0.6.5" }
 }
