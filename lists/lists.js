@@ -71,7 +71,7 @@ app.set('view options', { layout: false, compileDebug: true, pretty: true });
 app.use(express.static(__dirname + '/public'));
 
 // DB
-require(libDir + '/db')(app, parentApp);
+require(libDir + '/db')(app, parentApp, function(){});
 
 // sessions
 require(libDir + '/sessionStore')(app, parentApp);

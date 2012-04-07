@@ -77,6 +77,7 @@ UserSchema.statics.getUsersExtended = function(callback) {
     function _addAssets(next) {
       async.forEach(this.users,
         function(user, nextUser) {
+          
           user.countUserAssets(function(error, assets) {
             // [confirmed test: this will NOT save to DB if user obj is saved. mongoose only saves modeled elements. (good)]
             user.assets = assets;
@@ -97,19 +98,19 @@ UserSchema.statics.getUsersExtended = function(callback) {
 
 
 // count a user's assets in other apps.
+// app should get the top app w/ db connection.
 UserSchema.methods.countUserAssets = function(callback) {
-
-  // need to reach up to parent app for global app.db
-  // @todo this seems very sloppy, make it smoother
-  if (!module.parent || !module.parent.exports || !module.parent.exports.db) {
-    return callback(new Error("Missing parent DB reference"));
+  try {
+    var user = this
+      , db = mongoose.connection.db;    // [interesting scope here...]
   }
-
-  var user = this
-    , db = module.parent.exports.db;
+  catch(e) {
+    console.error("Missing DB in countUserAssets");
+    return callback(new Error("Missing DB in countUserAssets"));
+  }
   
   // get the List mongoose schema
-  var List = db.model('List');
+  var List = mongoose.model('List');
   if (! List) return callback(new Error("Missing List model"));
 
   
@@ -130,7 +131,7 @@ UserSchema.methods.countUserAssets = function(callback) {
       // but there's no clean way coded to reach across the apps.
       try {
         var LegacyMongoHandler = require('../../flashcards/db/mongodb')
-          , flashcardsDB = new LegacyMongoHandler(db.connection.db) 
+          , flashcardsDB = new LegacyMongoHandler(db) 
           , FlashcardsModel = require('../../flashcards/models/word');
       }
       catch(e) {

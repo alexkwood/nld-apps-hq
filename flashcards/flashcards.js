@@ -62,7 +62,7 @@ catch(e) {
 
 // populate DB fresh or from parent
 // [removed earlier mongoHandler]
-require(libDir + '/db')(app, parentApp);
+require(libDir + '/db')(app, parentApp, function(){});
 
 // pull a raw DB connection from the parent app's mongoose connection
 var LegacyMongoHandler = require('./db/mongodb');
