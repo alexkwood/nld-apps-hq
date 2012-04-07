@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Socket-based interactive shopping list app",
   "author": "Ben Buckman - NewLeafDigital.com",
+  "private": true,
   "dependencies": {
     "socket.io": ">= 0.9.5",
     "socket.io-client": ">= 0.9.5",

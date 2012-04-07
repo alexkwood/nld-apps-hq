@@ -2,6 +2,7 @@
   "name": "newleafdigital-apps-hq",
   "version": "0.0.1",
   "author": "Ben Buckman - NewLeafDigital.com",
+  "private": true,
   "dependencies": {
     "jade": ">= 0.22",
     "connect-less" : "> 0",
