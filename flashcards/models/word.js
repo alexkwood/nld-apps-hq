@@ -147,12 +147,13 @@ module.exports.remove = function(db, id, callback) {
 // used by getWordType() on word object.
 var getWordTypes = module.exports.getWordTypes = function() {
   return {
-    'n': 'noun',
-    'v': 'verb',
     'adj': 'adjective',
     'adv': 'adverb',
-    'pro': 'pronoun',
-    'phrase' : 'phrase'
+    'n': 'noun',
+    'v': 'verb',
+    'phrase' : 'phrase',
+    'prepos' : 'preposition',
+    'pro': 'pronoun'
   };
 };
 
