@@ -1,15 +1,11 @@
 {
-    "name": "application-name"
+    "name": "nld-apps-auth"
   , "version": "0.0.1"
   , "private": true
+  , "author": "Ben Buckman - NewLeafDigital.com"
   , "dependencies": {
-      "express": "2.5.1"
-    , "jade": ">= 0.0.1"
-    , "mongoose": "> 0"
-    , "mongoose-auth": "> 0"
+      "mongoose-auth": ">= 0.0.12"
     , "everyauth": "> 0"
-    , "underscore": "> 0"
-    , "connect-mongodb": "> 0"
     , "seq": "> 0"
   }
 }
