@@ -5,7 +5,7 @@
   , "author": "Ben Buckman - NewLeafDigital.com"
   , "dependencies": {
       "mongoose-auth": ">= 0.0.12"
-    , "everyauth": "> 0"
+    , "everyauth": ">= 0.2.32"
     , "seq": "> 0"
   }
 }
