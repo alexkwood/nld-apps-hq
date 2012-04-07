@@ -2,6 +2,6 @@
     "name": "spanish-flashcards"
   , "version": "0.0.1"
   , "private": true
-  , "dependencies": {
-  }
+  , "dependencies": {  },
+  "engines": { "node": ">= 0.6.5" }
 }
