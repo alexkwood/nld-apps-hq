@@ -5,23 +5,13 @@
 == HQ app: central layer on top of auth and sub-apps ==
 */
 
-// @todo make error handlers work
-// @todo dynamic helpers are shared, duplicates loading; switch to middleware or other approach?
-// @todo every dynamic helper runs on every single request, so make sure any that do DB ops only run when needed
-// @todo figure out how to share modules between apps. want to require.paths.push(), but deprecated? (using symlinks for now)
-// @todo wait 1/2 second between use(app)'s to avoid mongodb error/race condition? (otherwise need to async mount apps)
-// @todo switch console.log to https://github.com/flatiron/winston
-// @todo apply canUser() check to each app
-
-
 var express = require('express')
   , _ = require('underscore')
   // , messages = require('express-messages')
-
+  ;
 
 // this is the PARENT app
 var app = module.exports = express.createServer();
-
 
 
 // name for logging/scope checking
@@ -29,7 +19,9 @@ app.name = 'HQ';
 
 // override console.log
 var Log = require('./lib/console-log')('[' + app.name + ']');
-console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
+console.log = Log.log;
+console.warn = Log.warn;
+console.error = Log.error;
 
 
 app.appRoot = __dirname;
@@ -44,7 +36,7 @@ try {
 catch(e) {
   console.error("Missing conf.js. Exiting. (" + e + ")");
   process.exit(1);
-};
+}
 console.log('conf:', app.conf);
 
 // run early so middleware doesn't screw w/favicon
@@ -53,7 +45,6 @@ app.use(express.favicon(app.appRoot + '/public/nld_favicon.png'));
 
 // populate DB [fresh] -- using lib in auth submod
 // using a callback here to avoid a race condition w/ connect-mongodb. [see https://github.com/masylum/connect-mongodb/issues/42]
-// putting ALL THE REST in this callback!!
 require(libDir + '/db')(app, null, function(error){
   console.log('In parent app DB connection callback');
   
@@ -88,6 +79,7 @@ require(libDir + '/db')(app, null, function(error){
   app.configure('development', function(){
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
 
+    // LessCSS
     app.use(require('connect-less')({
       src: app.appRoot + '/public',     // dir w/ .less files
       // dst:                            // dir to store css files
@@ -139,8 +131,8 @@ require(libDir + '/db')(app, null, function(error){
     app.use(function setAppInfo(req, res, next) {
       // res.bodyClass = res.bodyClass || [];    // keep if already created
       // res.bodyClass.push('app-hq');
-      res.bodyClass = [ 'app-hq' ];
 
+      res.bodyClass = [ 'app-hq' ];
       res.activeApp = 'hq';
 
       next();
@@ -161,8 +153,7 @@ require(libDir + '/db')(app, null, function(error){
 
     // MOUNT AUTH APP at sub-path. auto-namespaces paths at sub.
     //app.use('/auth', auth);
-    // -- change: auth paths should be global, make sure apps don't overlap.
-    // console.warn('MOUNTING auth app');
+    // --CHANGED: auth paths should be global, make sure apps don't overlap.
     app.use(auth);
 
 
@@ -202,13 +193,13 @@ require(libDir + '/db')(app, null, function(error){
 
 
     // load Flashcards app too
-    // - this async too?
+    // (async / doesn't wait)
     var flashcards = require('./flashcards/flashcards.js');
     app.use('/flashcards', flashcards);
 
 
     // load Interactive Lists app
-    // - this async too?
+    // (async / doesn't wait)
     var lists = require('./lists/lists.js');
     app.use('/lists', lists);
 
@@ -224,9 +215,6 @@ require(libDir + '/db')(app, null, function(error){
     // lists.dynamicHelpers(app.sharedStaticHelpers);
 
 
-
-
-
     /*
     // test another sub-app for inheritance testing
     var fakeApp = express.createServer();
@@ -238,11 +226,11 @@ require(libDir + '/db')(app, null, function(error){
     // Routes
     require('./routes/index')(app);
 
-    // tmp
-    if (_.isUndefined(auth.UserSchema)) {
-      console.error("AUTH MISSING USER SCHEMA");
-    }
-    // ---
+    // // tmp
+    // if (_.isUndefined(auth.UserSchema)) {
+    //   console.error("AUTH MISSING USER SCHEMA");
+    // }
+
 
     // user admin
     require('./routes/admin-users')(app, auth.UserSchema);

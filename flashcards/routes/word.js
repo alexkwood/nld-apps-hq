@@ -204,7 +204,7 @@ module.exports = function(app){
 
   // after all the fixed /word/X, assume X is an ID.
   // @todo don't restrict these 'permalinks' to user -- but then make showWordLinks dependent on user!
-  app.get('/word/:word', app.restrictUser, function(req, res) {
+  app.get('/word/:word', app.restrictUser, app.countWordsByCurrentUser, function(req, res) {
     // 'list' view includes styles, 'word' is a partial.
     res.render('flashcards/word/list', {
       locals: {

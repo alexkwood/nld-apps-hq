@@ -26,13 +26,15 @@ var defaultRole = module.exports.defaultRole = 'user';
 // given a role (key), check perm
 var canRole = module.exports.canRole = function(role, doWhat) {
   try {
+    // @todo consolidate
     if (! _.isUndefined(roles[role]))
       if (! _.isUndefined(roles[role][doWhat]))
         if (roles[role][doWhat] === true) {
           // console.log('canRole %s CAN %s', role, doWhat);
           return true;
         }
-    }
+        
+  }
   catch(e) {
     console.error('error caught in canRole: ', e);
   }

@@ -1,22 +1,20 @@
 // Spanish Flashcards app -- learning node.js & express.js with mongodb
 
-// @todo allow res.redirect(/logout) to go to parent logout
-
 var express = require('express')
   , util = require('util')
   // , messages = require('./messages')   // [modified from lib] ... not using anymore
   , _ = require('underscore')._
-
+  ;
 
 var app = module.exports = express.createServer();
 app.name = 'Flashcards';
 
 app.appRoot = __dirname;
 
-var parentApp = function() {
+var parentApp = (function() {
   if (module.parent && module.parent.exports) return module.parent.exports;
   return null;
-}();
+}());
 
 // pointer to top app
 var primaryApp = parentApp ? parentApp : app;
@@ -34,7 +32,9 @@ var libDir = parentApp ? parentApp.appRoot + '/lib' : app.appRoot + '/lib';
 if (parentApp) {
   // override console.log
   var Log = require(libDir + '/console-log')('[' + app.name + ']');
-  console.log = Log.log, console.warn = Log.warn, console.error = Log.error;
+  console.log = Log.log;
+  console.warn = Log.warn;
+  console.error = Log.error;
 }
 
 
@@ -116,7 +116,7 @@ app.use(function setAppInfo(req, res, next) {
 app.use(function setFcBodyClass(req, res, next) {
   var parts = _.compact( require('url').parse(req.url).pathname.split('/') );
   
-  if (parts.length == 0) {
+  if (parts.length === 0) {
     res.bodyClass.push('home');
     return next();
   }
@@ -201,7 +201,7 @@ app.configure('production', function(){
 app.use(function setDefaultFcActiveNav(req, res, next) {
   res.local('fcActiveNav', '');
   next();
-})
+});
 
 
 // for a given req, check if user is logged in [used in multiple places]
@@ -229,7 +229,7 @@ app.username = function(req) {
       return req.user.system_name;
   
   return null;
-}
+};
 
 
 // route middleware to authenticate user.
@@ -270,9 +270,9 @@ app.countWordsByCurrentUser = function(req, res, next) {
 
 // meta description for flashcards pages
 app.use(function setFcMetaDesc(req, res, next) {
-  res.local('meta_description', 'Spanish Flashcards app by New Leaf Digital, built in node.js. '
-    + 'Create your own flashcards of English-Spanish translations, randomly play all the cards until you remember them, '
-    + 'and look up words with the WordReference API.');
+  res.local('meta_description', 'Spanish Flashcards app by New Leaf Digital, built in node.js. ' +
+      'Create your own flashcards of English-Spanish translations, randomly play all the cards until you remember them, ' +
+      'and look up words with the WordReference API.');
   next();
 });
 
